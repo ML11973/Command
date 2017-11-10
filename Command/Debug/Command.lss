@@ -1,0 +1,2627 @@
+
+Command.elf:     file format elf32-avr32
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .reset        00002004  80000000  80000000  00000400  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .rela.got     00000000  80002004  80002004  00002404  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  2 .text         00000b7c  80002004  80002004  00002404  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .exception    00000200  80002c00  80002c00  00003000  2**9
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  4 .rodata       000000e8  80002e00  80002e00  00003200  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  5 .balign       00000004  00000004  80002ee8  00003404  2**0
+                  ALLOC
+  6 .bss          000000e0  00000008  80002ee8  00003408  2**2
+                  ALLOC
+  7 .comment      00000030  00000000  00000000  000032e8  2**0
+                  CONTENTS, READONLY
+  8 .debug_aranges 00000758  00000000  00000000  00003318  2**3
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_pubnames 000012fb  00000000  00000000  00003a70  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_info   0000a6c8  00000000  00000000  00004d6b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_abbrev 000013f0  00000000  00000000  0000f433  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_line   000058d4  00000000  00000000  00010823  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 13 .debug_frame  000010c0  00000000  00000000  000160f8  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 14 .debug_str    0000238a  00000000  00000000  000171b8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 15 .debug_loc    00002461  00000000  00000000  00019542  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 16 .debug_macinfo 008d0630  00000000  00000000  0001b9a3  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 17 .stack        00001000  0000f000  0000f000  00000400  2**0
+                  ALLOC
+ 18 .debug_ranges 000006d8  00000000  00000000  008ebfd8  2**3
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .reset:
+
+80000000 <_trampoline>:
+
+  .global _trampoline
+  .type _trampoline, @function
+_trampoline:
+  // Jump to program start.
+  rjmp    program_start
+80000000:	e0 8f 10 00 	bral	80002000 <program_start>
+	...
+
+80002000 <program_start>:
+
+  .org  PROGRAM_START_OFFSET
+program_start:
+  // Jump to the C runtime startup routine.
+  lda.w   pc, _stext
+80002000:	fe cf f6 88 	sub	pc,pc,-2424
+
+Disassembly of section .text:
+
+80002004 <freq_start>:
+80002004:	d4 01       	pushm	lr
+80002006:	e0 6a 24 00 	mov	r10,9216
+
+
+
+void freq_start (uint16_t freq){
+	// Writes value to RC such that interrupt occurs at 2*freq Hz
+	tc_write_rc(&AVR32_TC, TC0_CHANNEL, (F_OSC0/4)*freq);
+8000200a:	f8 0a 02 4a 	mul	r10,r12,r10
+8000200e:	e2 1a fc 00 	andl	r10,0xfc00,COH
+80002012:	30 0b       	mov	r11,0
+80002014:	fe 7c 38 00 	mov	r12,-51200
+80002018:	f0 1f 00 04 	mcall	80002028 <freq_start+0x24>
+	// Starts timer0
+	tc_start(&AVR32_TC, TC0_CHANNEL);
+8000201c:	30 0b       	mov	r11,0
+8000201e:	fe 7c 38 00 	mov	r12,-51200
+80002022:	f0 1f 00 03 	mcall	8000202c <freq_start+0x28>
+}
+80002026:	d8 02       	popm	pc
+80002028:	80 00       	ld.sh	r0,r0[0x0]
+8000202a:	27 2c       	sub	r12,114
+8000202c:	80 00       	ld.sh	r0,r0[0x0]
+8000202e:	27 1a       	sub	r10,113
+
+80002030 <audio_set_output>:
+ * Channel B corresponds to the left speaker 
+ *
+ * Created 06.11.17 MLN
+ * Last modified 08.11.17 MLN
+ */
+void audio_set_output (uint16_t inputA, uint16_t inputB){
+80002030:	eb cd 40 c0 	pushm	r6-r7,lr
+80002034:	18 96       	mov	r6,r12
+80002036:	16 97       	mov	r7,r11
+	// First we update DA0-9 parallel inputs
+	
+	// Output is masked to only affect PB0-9 in case of input error
+	uint32_t output = inputA & AUDIOOUTPUTMASK;
+	// PB0-9 driven low
+	gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
+80002038:	e0 6b 03 ff 	mov	r11,1023
+8000203c:	30 1c       	mov	r12,1
+8000203e:	f0 1f 00 1f 	mcall	800020b8 <audio_set_output+0x88>
+	// PB0-9 assigned output value
+	gpio_set_group_high(PORTB, output);
+80002042:	f7 d6 c0 0a 	bfextu	r11,r6,0x0,0xa
+80002046:	30 1c       	mov	r12,1
+80002048:	f0 1f 00 1d 	mcall	800020bc <audio_set_output+0x8c>
+	output = inputB & AUDIOOUTPUTMASK;
+	
+	
+	
+	// Then we enable the DAC by setting active-low clear and power-down
+	gpio_set_gpio_pin(DAC_PD_PIN);
+8000204c:	32 ac       	mov	r12,42
+8000204e:	f0 1f 00 1d 	mcall	800020c0 <audio_set_output+0x90>
+	gpio_set_gpio_pin(DAC_CLR_PIN);
+80002052:	32 fc       	mov	r12,47
+80002054:	f0 1f 00 1b 	mcall	800020c0 <audio_set_output+0x90>
+	
+	
+	// Then we load the data in DAC channel A
+	
+	// Selecting chip
+	gpio_clr_gpio_pin(DAC_CS_PIN);
+80002058:	32 cc       	mov	r12,44
+8000205a:	f0 1f 00 1b 	mcall	800020c4 <audio_set_output+0x94>
+	gpio_clr_gpio_pin(DAC_WR_PIN);
+8000205e:	32 dc       	mov	r12,45
+80002060:	f0 1f 00 19 	mcall	800020c4 <audio_set_output+0x94>
+	// Selecting channel A
+	gpio_set_gpio_pin(DAC_A0_PIN);
+80002064:	32 bc       	mov	r12,43
+80002066:	f0 1f 00 17 	mcall	800020c0 <audio_set_output+0x90>
+	// Loading data in Channel A
+	gpio_clr_gpio_pin(DAC_LDAC_PIN);
+8000206a:	32 ec       	mov	r12,46
+8000206c:	f0 1f 00 16 	mcall	800020c4 <audio_set_output+0x94>
+	// De-selecting chip
+	gpio_set_gpio_pin(DAC_WR_PIN);
+80002070:	32 dc       	mov	r12,45
+80002072:	f0 1f 00 14 	mcall	800020c0 <audio_set_output+0x90>
+	gpio_set_gpio_pin(DAC_CS_PIN);
+80002076:	32 cc       	mov	r12,44
+80002078:	f0 1f 00 12 	mcall	800020c0 <audio_set_output+0x90>
+	
+	
+	// We update the parallel input
+	
+	// PB0-9 driven low
+	gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
+8000207c:	e0 6b 03 ff 	mov	r11,1023
+80002080:	30 1c       	mov	r12,1
+80002082:	f0 1f 00 0e 	mcall	800020b8 <audio_set_output+0x88>
+	// PB0-9 assigned output value
+	gpio_set_group_high(PORTB, output);
+80002086:	f7 d7 c0 0a 	bfextu	r11,r7,0x0,0xa
+8000208a:	30 1c       	mov	r12,1
+8000208c:	f0 1f 00 0c 	mcall	800020bc <audio_set_output+0x8c>
+	
+	
+	// We load input in channel B
+	
+	// Selecting channel B
+	gpio_clr_gpio_pin(DAC_A0_PIN);
+80002090:	32 bc       	mov	r12,43
+80002092:	f0 1f 00 0d 	mcall	800020c4 <audio_set_output+0x94>
+	// Selecting chip
+	gpio_clr_gpio_pin(DAC_CS_PIN);
+80002096:	32 cc       	mov	r12,44
+80002098:	f0 1f 00 0b 	mcall	800020c4 <audio_set_output+0x94>
+	gpio_clr_gpio_pin(DAC_WR_PIN);
+8000209c:	32 dc       	mov	r12,45
+8000209e:	f0 1f 00 0a 	mcall	800020c4 <audio_set_output+0x94>
+	// Data is loaded in channel B
+	// De-selecting chip
+	gpio_set_gpio_pin(DAC_WR_PIN);
+800020a2:	32 dc       	mov	r12,45
+800020a4:	f0 1f 00 07 	mcall	800020c0 <audio_set_output+0x90>
+	gpio_set_gpio_pin(DAC_CS_PIN);
+800020a8:	32 cc       	mov	r12,44
+800020aa:	f0 1f 00 06 	mcall	800020c0 <audio_set_output+0x90>
+	
+	
+	
+	// Final refresh
+	gpio_set_gpio_pin(DAC_LDAC_PIN);
+800020ae:	32 ec       	mov	r12,46
+800020b0:	f0 1f 00 04 	mcall	800020c0 <audio_set_output+0x90>
+}
+800020b4:	e3 cd 80 c0 	ldm	sp++,r6-r7,pc
+800020b8:	80 00       	ld.sh	r0,r0[0x0]
+800020ba:	22 e8       	sub	r8,46
+800020bc:	80 00       	ld.sh	r0,r0[0x0]
+800020be:	22 c0       	sub	r0,44
+800020c0:	80 00       	ld.sh	r0,r0[0x0]
+800020c2:	22 a4       	sub	r4,42
+800020c4:	80 00       	ld.sh	r0,r0[0x0]
+800020c6:	22 cc       	sub	r12,44
+
+800020c8 <tc0_irq>:
+	audio_set_output(audioR, audioL);
+}
+
+
+
+__attribute__((__interrupt__)) void tc0_irq( void ){
+800020c8:	d4 01       	pushm	lr
+	if (audioR == 0 || audioL == 0)
+800020ca:	49 18       	lddpc	r8,8000210c <tc0_irq+0x44>
+800020cc:	90 09       	ld.sh	r9,r8[0x0]
+800020ce:	30 08       	mov	r8,0
+800020d0:	f0 09 19 00 	cp.h	r9,r8
+800020d4:	c0 70       	breq	800020e2 <tc0_irq+0x1a>
+800020d6:	48 f8       	lddpc	r8,80002110 <tc0_irq+0x48>
+800020d8:	90 09       	ld.sh	r9,r8[0x0]
+800020da:	30 08       	mov	r8,0
+800020dc:	f0 09 19 00 	cp.h	r9,r8
+800020e0:	c0 81       	brne	800020f0 <tc0_irq+0x28>
+	{
+		audioR = AUDIOMAXINPUT;
+800020e2:	e0 68 03 ff 	mov	r8,1023
+800020e6:	48 a9       	lddpc	r9,8000210c <tc0_irq+0x44>
+800020e8:	b2 08       	st.h	r9[0x0],r8
+		audioL = AUDIOMAXINPUT;
+800020ea:	48 a9       	lddpc	r9,80002110 <tc0_irq+0x48>
+800020ec:	b2 08       	st.h	r9[0x0],r8
+}
+
+
+
+__attribute__((__interrupt__)) void tc0_irq( void ){
+	if (audioR == 0 || audioL == 0)
+800020ee:	c0 68       	rjmp	800020fa <tc0_irq+0x32>
+		audioR = AUDIOMAXINPUT;
+		audioL = AUDIOMAXINPUT;
+	}
+	else
+	{
+		audioR = 0;
+800020f0:	30 08       	mov	r8,0
+800020f2:	48 79       	lddpc	r9,8000210c <tc0_irq+0x44>
+800020f4:	b2 08       	st.h	r9[0x0],r8
+		audioL = 0;
+800020f6:	48 79       	lddpc	r9,80002110 <tc0_irq+0x48>
+800020f8:	b2 08       	st.h	r9[0x0],r8
+	}
+	audio_set_output(audioR, audioL);
+800020fa:	48 68       	lddpc	r8,80002110 <tc0_irq+0x48>
+800020fc:	90 8b       	ld.uh	r11,r8[0x0]
+800020fe:	48 48       	lddpc	r8,8000210c <tc0_irq+0x44>
+80002100:	90 8c       	ld.uh	r12,r8[0x0]
+80002102:	f0 1f 00 05 	mcall	80002114 <tc0_irq+0x4c>
+80002106:	d4 02       	popm	lr
+80002108:	d6 03       	rete
+8000210a:	00 00       	add	r0,r0
+8000210c:	00 00       	add	r0,r0
+8000210e:	00 0a       	add	r10,r0
+80002110:	00 00       	add	r0,r0
+80002112:	00 08       	add	r8,r0
+80002114:	80 00       	ld.sh	r0,r0[0x0]
+80002116:	20 30       	sub	r0,3
+
+80002118 <tc1_irq>:
+/* Timer 1 interruption
+ *
+ * This interruption occurs at 44.1 kHz for .wav playback
+ *
+ */
+__attribute__((__interrupt__)) void tc1_irq( void ){
+80002118:	d4 01       	pushm	lr
+	audio_set_output(audioR, audioL);
+8000211a:	48 58       	lddpc	r8,8000212c <tc1_irq+0x14>
+8000211c:	90 8b       	ld.uh	r11,r8[0x0]
+8000211e:	48 58       	lddpc	r8,80002130 <tc1_irq+0x18>
+80002120:	90 8c       	ld.uh	r12,r8[0x0]
+80002122:	f0 1f 00 05 	mcall	80002134 <tc1_irq+0x1c>
+}
+80002126:	d4 02       	popm	lr
+80002128:	d6 03       	rete
+8000212a:	00 00       	add	r0,r0
+8000212c:	00 00       	add	r0,r0
+8000212e:	00 08       	add	r8,r0
+80002130:	00 00       	add	r0,r0
+80002132:	00 0a       	add	r10,r0
+80002134:	80 00       	ld.sh	r0,r0[0x0]
+80002136:	20 30       	sub	r0,3
+
+80002138 <audio_set_volume>:
+ * 
+ * Created 06.11.17 MLN
+ * Last modified 08.11.17 MLN
+ */
+
+void audio_set_volume (uint8_t volume){
+80002138:	eb cd 40 80 	pushm	r7,lr
+8000213c:	18 97       	mov	r7,r12
+	
+	// Selecting DAC1
+	spi_selectChip(&AVR32_SPI1, DAC1);
+8000213e:	30 2b       	mov	r11,2
+80002140:	fe 7c 28 00 	mov	r12,-55296
+80002144:	f0 1f 00 0e 	mcall	8000217c <audio_set_volume+0x44>
+	
+	/* Sending volume level to DAC1
+	 * Volume has to be in the middle nibbles of a 2-byte integer
+	 * as per AD5300BRMZ datasheet
+	 */
+	spi_write(&AVR32_SPI1, volume<<4);
+80002148:	ee 0b 15 04 	lsl	r11,r7,0x4
+8000214c:	e2 1b ff f0 	andl	r11,0xfff0,COH
+80002150:	fe 7c 28 00 	mov	r12,-55296
+80002154:	f0 1f 00 0b 	mcall	80002180 <audio_set_volume+0x48>
+	
+	// Deselecting DAC1
+	spi_unselectChip(&AVR32_SPI1, DAC1);
+80002158:	30 2b       	mov	r11,2
+8000215a:	fe 7c 28 00 	mov	r12,-55296
+8000215e:	f0 1f 00 0a 	mcall	80002184 <audio_set_volume+0x4c>
+	
+	if (volume == 0) {
+80002162:	58 07       	cp.w	r7,0
+80002164:	c0 61       	brne	80002170 <audio_set_volume+0x38>
+		// If volume superior to 0, do not shutdown amplifier
+		gpio_clr_gpio_pin(PIN_SHUTDOWN);
+80002166:	31 9c       	mov	r12,25
+80002168:	f0 1f 00 08 	mcall	80002188 <audio_set_volume+0x50>
+8000216c:	e3 cd 80 80 	ldm	sp++,r7,pc
+	} else {
+		gpio_set_gpio_pin(PIN_SHUTDOWN);
+80002170:	31 9c       	mov	r12,25
+80002172:	f0 1f 00 07 	mcall	8000218c <audio_set_volume+0x54>
+80002176:	e3 cd 80 80 	ldm	sp++,r7,pc
+8000217a:	00 00       	add	r0,r0
+8000217c:	80 00       	ld.sh	r0,r0[0x0]
+8000217e:	25 30       	sub	r0,83
+80002180:	80 00       	ld.sh	r0,r0[0x0]
+80002182:	26 62       	sub	r2,102
+80002184:	80 00       	ld.sh	r0,r0[0x0]
+80002186:	25 7c       	sub	r12,87
+80002188:	80 00       	ld.sh	r0,r0[0x0]
+8000218a:	22 cc       	sub	r12,44
+8000218c:	80 00       	ld.sh	r0,r0[0x0]
+8000218e:	22 a4       	sub	r4,42
+
+80002190 <flashc_set_wait_state>:
+}
+
+
+void flashc_set_wait_state(unsigned int wait_state)
+{
+	u_avr32_flashc_fcr_t u_avr32_flashc_fcr = {AVR32_FLASHC.fcr};
+80002190:	fe 68 14 00 	mov	r8,-125952
+80002194:	70 09       	ld.w	r9,r8[0x0]
+	u_avr32_flashc_fcr.FCR.fws = wait_state;
+80002196:	f3 dc d0 c1 	bfins	r9,r12,0x6,0x1
+	AVR32_FLASHC.fcr = u_avr32_flashc_fcr.fcr;
+8000219a:	91 09       	st.w	r8[0x0],r9
+}
+8000219c:	5e fc       	retal	r12
+
+8000219e <gpio_enable_module_pin>:
+ *
+ * \return \ref GPIO_SUCCESS or \ref GPIO_INVALID_ARGUMENT.
+ */
+uint32_t gpio_enable_module_pin(uint32_t pin, uint32_t function)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[pin >> 5];
+8000219e:	f8 08 16 05 	lsr	r8,r12,0x5
+800021a2:	a9 68       	lsl	r8,0x8
+800021a4:	e0 28 f0 00 	sub	r8,61440
+
+	/* Enable the correct function. */
+	switch (function) {
+800021a8:	58 1b       	cp.w	r11,1
+800021aa:	c0 d0       	breq	800021c4 <gpio_enable_module_pin+0x26>
+800021ac:	c0 63       	brcs	800021b8 <gpio_enable_module_pin+0x1a>
+800021ae:	58 2b       	cp.w	r11,2
+800021b0:	c1 00       	breq	800021d0 <gpio_enable_module_pin+0x32>
+800021b2:	58 3b       	cp.w	r11,3
+800021b4:	c1 40       	breq	800021dc <gpio_enable_module_pin+0x3e>
+800021b6:	5e ff       	retal	1
+	case 0: /* A function. */
+		gpio_port->pmr0c = 1 << (pin & 0x1F);
+800021b8:	30 19       	mov	r9,1
+800021ba:	f2 0c 09 49 	lsl	r9,r9,r12
+800021be:	91 69       	st.w	r8[0x18],r9
+		gpio_port->pmr1c = 1 << (pin & 0x1F);
+800021c0:	91 a9       	st.w	r8[0x28],r9
+#if (AVR32_GPIO_H_VERSION >= 210)
+		gpio_port->pmr2c = 1 << (pin & 0x1F);
+#endif
+		break;
+800021c2:	c1 28       	rjmp	800021e6 <gpio_enable_module_pin+0x48>
+
+	case 1: /* B function. */
+		gpio_port->pmr0s = 1 << (pin & 0x1F);
+800021c4:	30 19       	mov	r9,1
+800021c6:	f2 0c 09 49 	lsl	r9,r9,r12
+800021ca:	91 59       	st.w	r8[0x14],r9
+		gpio_port->pmr1c = 1 << (pin & 0x1F);
+800021cc:	91 a9       	st.w	r8[0x28],r9
+#if (AVR32_GPIO_H_VERSION >= 210)
+		gpio_port->pmr2c = 1 << (pin & 0x1F);
+#endif
+		break;
+800021ce:	c0 c8       	rjmp	800021e6 <gpio_enable_module_pin+0x48>
+
+	case 2: /* C function. */
+		gpio_port->pmr0c = 1 << (pin & 0x1F);
+800021d0:	30 19       	mov	r9,1
+800021d2:	f2 0c 09 49 	lsl	r9,r9,r12
+800021d6:	91 69       	st.w	r8[0x18],r9
+		gpio_port->pmr1s = 1 << (pin & 0x1F);
+800021d8:	91 99       	st.w	r8[0x24],r9
+#if (AVR32_GPIO_H_VERSION >= 210)
+		gpio_port->pmr2c = 1 << (pin & 0x1F);
+#endif
+		break;
+800021da:	c0 68       	rjmp	800021e6 <gpio_enable_module_pin+0x48>
+
+	case 3: /* D function. */
+		gpio_port->pmr0s = 1 << (pin & 0x1F);
+800021dc:	30 19       	mov	r9,1
+800021de:	f2 0c 09 49 	lsl	r9,r9,r12
+800021e2:	91 59       	st.w	r8[0x14],r9
+		gpio_port->pmr1s = 1 << (pin & 0x1F);
+800021e4:	91 99       	st.w	r8[0x24],r9
+	default:
+		return GPIO_INVALID_ARGUMENT;
+	}
+
+	/* Disable GPIO control. */
+	gpio_port->gperc = 1 << (pin & 0x1F);
+800021e6:	30 19       	mov	r9,1
+800021e8:	f2 0c 09 4c 	lsl	r12,r9,r12
+800021ec:	91 2c       	st.w	r8[0x8],r12
+800021ee:	5e fd       	retal	0
+
+800021f0 <gpio_enable_module>:
+ * \param size The number of pins in \a gpiomap.
+ *
+ * \return \ref GPIO_SUCCESS or \ref GPIO_INVALID_ARGUMENT.
+ */
+uint32_t gpio_enable_module(const gpio_map_t gpiomap, uint32_t size)
+{
+800021f0:	d4 21       	pushm	r4-r7,lr
+800021f2:	18 97       	mov	r7,r12
+800021f4:	16 94       	mov	r4,r11
+	uint32_t status = GPIO_SUCCESS;
+	uint32_t i;
+
+	for (i = 0; i < size; i++) {
+800021f6:	58 0b       	cp.w	r11,0
+800021f8:	c0 31       	brne	800021fe <gpio_enable_module+0xe>
+800021fa:	30 05       	mov	r5,0
+800021fc:	c0 d8       	rjmp	80002216 <gpio_enable_module+0x26>
+800021fe:	30 06       	mov	r6,0
+80002200:	0c 95       	mov	r5,r6
+		status |= gpio_enable_module_pin(gpiomap->pin, gpiomap->function);
+80002202:	6e 1b       	ld.w	r11,r7[0x4]
+80002204:	6e 0c       	ld.w	r12,r7[0x0]
+80002206:	f0 1f 00 06 	mcall	8000221c <gpio_enable_module+0x2c>
+8000220a:	18 45       	or	r5,r12
+		gpiomap++;
+8000220c:	2f 87       	sub	r7,-8
+uint32_t gpio_enable_module(const gpio_map_t gpiomap, uint32_t size)
+{
+	uint32_t status = GPIO_SUCCESS;
+	uint32_t i;
+
+	for (i = 0; i < size; i++) {
+8000220e:	2f f6       	sub	r6,-1
+80002210:	0c 34       	cp.w	r4,r6
+80002212:	fe 9b ff f8 	brhi	80002202 <gpio_enable_module+0x12>
+		status |= gpio_enable_module_pin(gpiomap->pin, gpiomap->function);
+		gpiomap++;
+	}
+
+	return status;
+}
+80002216:	0a 9c       	mov	r12,r5
+80002218:	d8 22       	popm	r4-r7,pc
+8000221a:	00 00       	add	r0,r0
+8000221c:	80 00       	ld.sh	r0,r0[0x0]
+8000221e:	21 9e       	sub	lr,25
+
+80002220 <gpio_configure_group>:
+ * \param mask The mask.
+ * \param flags The configuration.
+ */
+void gpio_configure_group(uint32_t port, uint32_t mask, uint32_t flags)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[port];
+80002220:	a9 6c       	lsl	r12,0x8
+80002222:	e0 2c f0 00 	sub	r12,61440
+	} else {
+		gpio_port->pderc = mask;
+	}
+
+#endif
+	if (flags & GPIO_PULL_UP) {
+80002226:	14 98       	mov	r8,r10
+80002228:	e2 18 00 04 	andl	r8,0x4,COH
+		gpio_port->puers = mask;
+8000222c:	f9 fb 1a 1d 	st.wne	r12[0x74],r11
+	} else {
+		gpio_port->puerc = mask;
+80002230:	f9 fb 0a 1e 	st.weq	r12[0x78],r11
+	}
+
+#endif
+
+	/* Select interrupt level for group */
+	if (flags & GPIO_INTERRUPT) {
+80002234:	14 98       	mov	r8,r10
+80002236:	e2 18 00 80 	andl	r8,0x80,COH
+8000223a:	c1 a0       	breq	8000226e <gpio_configure_group+0x4e>
+		if (flags & GPIO_BOTHEDGES) {
+8000223c:	14 98       	mov	r8,r10
+8000223e:	e2 18 01 80 	andl	r8,0x180,COH
+80002242:	c0 60       	breq	8000224e <gpio_configure_group+0x2e>
+			gpio_port->imr0c = mask;
+80002244:	f9 4b 00 a8 	st.w	r12[168],r11
+			gpio_port->imr1c = mask;
+80002248:	f9 4b 00 b8 	st.w	r12[184],r11
+8000224c:	c1 18       	rjmp	8000226e <gpio_configure_group+0x4e>
+		} else if (flags & GPIO_RISING) {
+8000224e:	14 98       	mov	r8,r10
+80002250:	e2 18 02 80 	andl	r8,0x280,COH
+80002254:	c0 60       	breq	80002260 <gpio_configure_group+0x40>
+			gpio_port->imr0s = mask;
+80002256:	f9 4b 00 a4 	st.w	r12[164],r11
+			gpio_port->imr1c = mask;
+8000225a:	f9 4b 00 b8 	st.w	r12[184],r11
+8000225e:	c0 88       	rjmp	8000226e <gpio_configure_group+0x4e>
+		} else if (flags & GPIO_FALLING) {
+80002260:	14 98       	mov	r8,r10
+80002262:	e2 18 03 80 	andl	r8,0x380,COH
+			gpio_port->imr0c = mask;
+80002266:	f9 fb 1a 2a 	st.wne	r12[0xa8],r11
+			gpio_port->imr1s = mask;
+8000226a:	f9 fb 1a 2d 	st.wne	r12[0xb4],r11
+		}
+	}
+
+	/* Select direction and initial pin state */
+	if (flags & GPIO_DIR_OUTPUT) {
+8000226e:	f1 da c0 01 	bfextu	r8,r10,0x0,0x1
+80002272:	c0 a0       	breq	80002286 <gpio_configure_group+0x66>
+		if (flags & GPIO_INIT_HIGH) {
+80002274:	e2 1a 00 02 	andl	r10,0x2,COH
+			gpio_port->ovrs = mask;
+80002278:	f9 fb 1a 15 	st.wne	r12[0x54],r11
+		} else {
+			gpio_port->ovrc = mask;
+8000227c:	f9 fb 0a 16 	st.weq	r12[0x58],r11
+		}
+
+		gpio_port->oders = mask;
+80002280:	f9 4b 00 44 	st.w	r12[68],r11
+80002284:	c0 38       	rjmp	8000228a <gpio_configure_group+0x6a>
+	} else {
+		gpio_port->oderc = mask;
+80002286:	f9 4b 00 48 	st.w	r12[72],r11
+	}
+
+	/* Enable GPIO */
+	gpio_port->gpers = mask;
+8000228a:	99 1b       	st.w	r12[0x4],r11
+}
+8000228c:	5e fc       	retal	r12
+
+8000228e <gpio_get_pin_value>:
+ *
+ * \return The pin value.
+ */
+bool gpio_get_pin_value(uint32_t pin)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[pin >> 5];
+8000228e:	f8 08 16 05 	lsr	r8,r12,0x5
+80002292:	a9 68       	lsl	r8,0x8
+80002294:	e0 28 f0 00 	sub	r8,61440
+	
+	return (gpio_port->pvr >> (pin & 0x1F)) & 1;
+80002298:	71 88       	ld.w	r8,r8[0x60]
+8000229a:	f0 0c 0a 4c 	lsr	r12,r8,r12
+}
+8000229e:	f9 dc c0 01 	bfextu	r12,r12,0x0,0x1
+800022a2:	5e fc       	retal	r12
+
+800022a4 <gpio_set_gpio_pin>:
+ *
+ * \param pin The pin number.
+ */
+void gpio_set_gpio_pin(uint32_t pin)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[pin >> 5];
+800022a4:	f8 08 16 05 	lsr	r8,r12,0x5
+800022a8:	a9 68       	lsl	r8,0x8
+800022aa:	e0 28 f0 00 	sub	r8,61440
+	
+	/* Value to be driven on the I/O line: 1. */
+	gpio_port->ovrs  = 1 << (pin & 0x1F);
+800022ae:	30 19       	mov	r9,1
+800022b0:	f2 0c 09 4c 	lsl	r12,r9,r12
+800022b4:	f1 4c 00 54 	st.w	r8[84],r12
+	/* The GPIO output driver is enabled for that pin. */ 
+	gpio_port->oders = 1 << (pin & 0x1F);
+800022b8:	f1 4c 00 44 	st.w	r8[68],r12
+	/* The GPIO module controls that pin. */
+	gpio_port->gpers = 1 << (pin & 0x1F);
+800022bc:	91 1c       	st.w	r8[0x4],r12
+}
+800022be:	5e fc       	retal	r12
+
+800022c0 <gpio_set_group_high>:
+ * \param port The port number.
+ * \param mask The mask.
+ */
+void gpio_set_group_high(uint32_t port, uint32_t mask)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[port];
+800022c0:	a9 6c       	lsl	r12,0x8
+800022c2:	e0 2c f0 00 	sub	r12,61440
+	
+	/* Value to be driven on the I/O group: 1. */
+	gpio_port->ovrs  = mask;
+800022c6:	f9 4b 00 54 	st.w	r12[84],r11
+}
+800022ca:	5e fc       	retal	r12
+
+800022cc <gpio_clr_gpio_pin>:
+ *
+ * \param pin The pin number.
+ */
+void gpio_clr_gpio_pin(uint32_t pin)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[pin >> 5];
+800022cc:	f8 08 16 05 	lsr	r8,r12,0x5
+800022d0:	a9 68       	lsl	r8,0x8
+800022d2:	e0 28 f0 00 	sub	r8,61440
+	
+	/* Value to be driven on the I/O line: 0. */
+	gpio_port->ovrc  = 1 << (pin & 0x1F);
+800022d6:	30 19       	mov	r9,1
+800022d8:	f2 0c 09 4c 	lsl	r12,r9,r12
+800022dc:	f1 4c 00 58 	st.w	r8[88],r12
+	/* The GPIO output driver is enabled for that pin. */
+	gpio_port->oders = 1 << (pin & 0x1F);
+800022e0:	f1 4c 00 44 	st.w	r8[68],r12
+	/* The GPIO module controls that pin. */
+	gpio_port->gpers = 1 << (pin & 0x1F);
+800022e4:	91 1c       	st.w	r8[0x4],r12
+}
+800022e6:	5e fc       	retal	r12
+
+800022e8 <gpio_set_group_low>:
+ * \param port The port number.
+ * \param mask The mask.
+ */
+void gpio_set_group_low(uint32_t port, uint32_t mask)
+{
+	volatile avr32_gpio_port_t *gpio_port = &AVR32_GPIO.port[port];
+800022e8:	a9 6c       	lsl	r12,0x8
+800022ea:	e0 2c f0 00 	sub	r12,61440
+	
+	/* Value to be driven on the I/O group: 0. */
+	gpio_port->ovrc  = mask;
+800022ee:	f9 4b 00 58 	st.w	r12[88],r11
+}
+800022f2:	5e fc       	retal	r12
+
+800022f4 <pm_set_osc0_mode>:
+ * \param mode Oscillator 0 mode (i.e. AVR32_PM_OSCCTRL0_MODE_x).
+ */
+static void pm_set_osc0_mode(volatile avr32_pm_t *pm, unsigned int mode)
+{
+  // Read
+  u_avr32_pm_oscctrl0_t u_avr32_pm_oscctrl0 = {pm->oscctrl0};
+800022f4:	78 a8       	ld.w	r8,r12[0x28]
+  // Modify
+  u_avr32_pm_oscctrl0.OSCCTRL0.mode = mode;
+800022f6:	f1 db d0 03 	bfins	r8,r11,0x0,0x3
+  // Write
+  pm->oscctrl0 = u_avr32_pm_oscctrl0.oscctrl0;
+800022fa:	99 a8       	st.w	r12[0x28],r8
+}
+800022fc:	5e fc       	retal	r12
+800022fe:	d7 03       	nop
+
+80002300 <pm_enable_osc0_crystal>:
+  pm_set_osc0_mode(pm, AVR32_PM_OSCCTRL0_MODE_EXT_CLOCK);
+}
+
+
+void pm_enable_osc0_crystal(volatile avr32_pm_t *pm, unsigned int fosc0)
+{
+80002300:	d4 01       	pushm	lr
+  pm_set_osc0_mode(pm, (fosc0 <  900000) ? AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G0 :
+80002302:	ec 5b bb 9f 	cp.w	r11,899999
+80002306:	e0 8b 00 04 	brhi	8000230e <pm_enable_osc0_crystal+0xe>
+8000230a:	30 4b       	mov	r11,4
+8000230c:	c1 38       	rjmp	80002332 <pm_enable_osc0_crystal+0x32>
+8000230e:	e0 68 c6 bf 	mov	r8,50879
+80002312:	ea 18 00 2d 	orh	r8,0x2d
+80002316:	10 3b       	cp.w	r11,r8
+80002318:	e0 8b 00 04 	brhi	80002320 <pm_enable_osc0_crystal+0x20>
+8000231c:	30 5b       	mov	r11,5
+8000231e:	c0 a8       	rjmp	80002332 <pm_enable_osc0_crystal+0x32>
+80002320:	e0 68 12 00 	mov	r8,4608
+80002324:	ea 18 00 7a 	orh	r8,0x7a
+80002328:	10 3b       	cp.w	r11,r8
+8000232a:	f9 bb 03 06 	movlo	r11,6
+8000232e:	f9 bb 02 07 	movhs	r11,7
+80002332:	f0 1f 00 02 	mcall	80002338 <pm_enable_osc0_crystal+0x38>
+                       (fosc0 < 3000000) ? AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G1 :
+                       (fosc0 < 8000000) ? AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G2 :
+                                           AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G3);
+}
+80002336:	d8 02       	popm	pc
+80002338:	80 00       	ld.sh	r0,r0[0x0]
+8000233a:	22 f4       	sub	r4,47
+
+8000233c <pm_enable_clk0_no_wait>:
+
+
+void pm_enable_clk0_no_wait(volatile avr32_pm_t *pm, unsigned int startup)
+{
+  // Read register
+  u_avr32_pm_oscctrl0_t u_avr32_pm_oscctrl0 = {pm->oscctrl0};
+8000233c:	78 a8       	ld.w	r8,r12[0x28]
+  // Modify
+  u_avr32_pm_oscctrl0.OSCCTRL0.startup = startup;
+8000233e:	f1 db d1 03 	bfins	r8,r11,0x8,0x3
+  // Write back
+  pm->oscctrl0 = u_avr32_pm_oscctrl0.oscctrl0;
+80002342:	99 a8       	st.w	r12[0x28],r8
+
+  pm->mcctrl |= AVR32_PM_MCCTRL_OSC0EN_MASK;
+80002344:	78 08       	ld.w	r8,r12[0x0]
+80002346:	a3 a8       	sbr	r8,0x2
+80002348:	99 08       	st.w	r12[0x0],r8
+}
+8000234a:	5e fc       	retal	r12
+
+8000234c <pm_wait_for_clk0_ready>:
+
+
+void pm_wait_for_clk0_ready(volatile avr32_pm_t *pm)
+{
+  while (!(pm->poscsr & AVR32_PM_POSCSR_OSC0RDY_MASK));
+8000234c:	79 58       	ld.w	r8,r12[0x54]
+8000234e:	e2 18 00 80 	andl	r8,0x80,COH
+80002352:	cf d0       	breq	8000234c <pm_wait_for_clk0_ready>
+}
+80002354:	5e fc       	retal	r12
+80002356:	d7 03       	nop
+
+80002358 <pm_enable_clk0>:
+                                           AVR32_PM_OSCCTRL0_MODE_CRYSTAL_G3);
+}
+
+
+void pm_enable_clk0(volatile avr32_pm_t *pm, unsigned int startup)
+{
+80002358:	eb cd 40 80 	pushm	r7,lr
+8000235c:	18 97       	mov	r7,r12
+  pm_enable_clk0_no_wait(pm, startup);
+8000235e:	f0 1f 00 04 	mcall	8000236c <pm_enable_clk0+0x14>
+  pm_wait_for_clk0_ready(pm);
+80002362:	0e 9c       	mov	r12,r7
+80002364:	f0 1f 00 03 	mcall	80002370 <pm_enable_clk0+0x18>
+}
+80002368:	e3 cd 80 80 	ldm	sp++,r7,pc
+8000236c:	80 00       	ld.sh	r0,r0[0x0]
+8000236e:	23 3c       	sub	r12,51
+80002370:	80 00       	ld.sh	r0,r0[0x0]
+80002372:	23 4c       	sub	r12,52
+
+80002374 <pm_cksel>:
+              unsigned int pbasel,
+              unsigned int pbbdiv,
+              unsigned int pbbsel,
+              unsigned int hsbdiv,
+              unsigned int hsbsel)
+{
+80002374:	eb cd 40 d0 	pushm	r4,r6-r7,lr
+80002378:	fa c4 ff f0 	sub	r4,sp,-16
+  u_avr32_pm_cksel_t u_avr32_pm_cksel = {0};
+8000237c:	30 0e       	mov	lr,0
+
+  u_avr32_pm_cksel.CKSEL.cpusel = hsbsel;
+8000237e:	09 f7       	ld.ub	r7,r4[0x7]
+80002380:	ef d7 c0 03 	bfextu	r7,r7,0x0,0x3
+80002384:	fd d7 d0 03 	bfins	lr,r7,0x0,0x3
+  u_avr32_pm_cksel.CKSEL.cpudiv = hsbdiv;
+80002388:	09 b4       	ld.ub	r4,r4[0x3]
+8000238a:	08 96       	mov	r6,r4
+8000238c:	e9 d4 c0 01 	bfextu	r4,r4,0x0,0x1
+80002390:	fd d4 d0 e1 	bfins	lr,r4,0x7,0x1
+  u_avr32_pm_cksel.CKSEL.hsbsel = hsbsel;
+80002394:	fd d7 d1 03 	bfins	lr,r7,0x8,0x3
+  u_avr32_pm_cksel.CKSEL.hsbdiv = hsbdiv;
+80002398:	fd d4 d1 e1 	bfins	lr,r4,0xf,0x1
+  u_avr32_pm_cksel.CKSEL.pbasel = pbasel;
+8000239c:	fd da d2 03 	bfins	lr,r10,0x10,0x3
+  u_avr32_pm_cksel.CKSEL.pbadiv = pbadiv;
+800023a0:	fd db d2 e1 	bfins	lr,r11,0x17,0x1
+  u_avr32_pm_cksel.CKSEL.pbbsel = pbbsel;
+800023a4:	fd d8 d3 03 	bfins	lr,r8,0x18,0x3
+  u_avr32_pm_cksel.CKSEL.pbbdiv = pbbdiv;
+800023a8:	fd d9 d3 e1 	bfins	lr,r9,0x1f,0x1
+
+  pm->cksel = u_avr32_pm_cksel.cksel;
+800023ac:	99 1e       	st.w	r12[0x4],lr
+
+  // Wait for ckrdy bit and then clear it
+  while (!(pm->poscsr & AVR32_PM_POSCSR_CKRDY_MASK));
+800023ae:	79 58       	ld.w	r8,r12[0x54]
+800023b0:	e2 18 00 20 	andl	r8,0x20,COH
+800023b4:	cf d0       	breq	800023ae <pm_cksel+0x3a>
+}
+800023b6:	e3 cd 80 d0 	ldm	sp++,r4,r6-r7,pc
+
+800023ba <pm_pll_setup>:
+                  unsigned int pll,
+                  unsigned int mul,
+                  unsigned int div,
+                  unsigned int osc,
+                  unsigned int lockcount)
+{
+800023ba:	eb cd 40 80 	pushm	r7,lr
+800023be:	40 27       	lddsp	r7,sp[0x8]
+  u_avr32_pm_pll_t u_avr32_pm_pll = {0};
+800023c0:	30 0e       	mov	lr,0
+
+  u_avr32_pm_pll.PLL.pllosc   = osc;
+800023c2:	fd d8 d0 21 	bfins	lr,r8,0x1,0x1
+  u_avr32_pm_pll.PLL.plldiv   = div;
+800023c6:	fd d9 d1 04 	bfins	lr,r9,0x8,0x4
+  u_avr32_pm_pll.PLL.pllmul   = mul;
+800023ca:	fd da d2 04 	bfins	lr,r10,0x10,0x4
+  u_avr32_pm_pll.PLL.pllcount = lockcount;
+800023ce:	fd d7 d3 06 	bfins	lr,r7,0x18,0x6
+
+  pm->pll[pll] = u_avr32_pm_pll.pll;
+800023d2:	2f 8b       	sub	r11,-8
+800023d4:	f8 0b 09 2e 	st.w	r12[r11<<0x2],lr
+}
+800023d8:	e3 cd 80 80 	ldm	sp++,r7,pc
+
+800023dc <pm_pll_set_option>:
+void pm_pll_set_option(volatile avr32_pm_t *pm,
+                       unsigned int pll,
+                       unsigned int pll_freq,
+                       unsigned int pll_div2,
+                       unsigned int pll_wbwdisable)
+{
+800023dc:	d4 01       	pushm	lr
+  u_avr32_pm_pll_t u_avr32_pm_pll = {pm->pll[pll]};
+800023de:	2f 8b       	sub	r11,-8
+800023e0:	f8 0b 03 2e 	ld.w	lr,r12[r11<<0x2]
+  u_avr32_pm_pll.PLL.pllopt = pll_freq | (pll_div2 << 1) | (pll_wbwdisable << 2);
+800023e4:	f5 e9 10 19 	or	r9,r10,r9<<0x1
+800023e8:	f3 e8 10 28 	or	r8,r9,r8<<0x2
+800023ec:	fd d8 d0 43 	bfins	lr,r8,0x2,0x3
+  pm->pll[pll] = u_avr32_pm_pll.pll;
+800023f0:	f8 0b 09 2e 	st.w	r12[r11<<0x2],lr
+}
+800023f4:	d8 02       	popm	pc
+
+800023f6 <pm_pll_enable>:
+
+
+void pm_pll_enable(volatile avr32_pm_t *pm,
+                  unsigned int pll)
+{
+  pm->pll[pll] |= AVR32_PM_PLLEN_MASK;
+800023f6:	2f 8b       	sub	r11,-8
+800023f8:	f8 0b 03 28 	ld.w	r8,r12[r11<<0x2]
+800023fc:	a1 a8       	sbr	r8,0x0
+800023fe:	f8 0b 09 28 	st.w	r12[r11<<0x2],r8
+}
+80002402:	5e fc       	retal	r12
+
+80002404 <pm_wait_for_pll0_locked>:
+}
+
+
+void pm_wait_for_pll0_locked(volatile avr32_pm_t *pm)
+{
+  while (!(pm->poscsr & AVR32_PM_POSCSR_LOCK0_MASK));
+80002404:	79 58       	ld.w	r8,r12[0x54]
+80002406:	f1 d8 c0 01 	bfextu	r8,r8,0x0,0x1
+8000240a:	cf d0       	breq	80002404 <pm_wait_for_pll0_locked>
+}
+8000240c:	5e fc       	retal	r12
+
+8000240e <pm_switch_to_clock>:
+
+
+void pm_switch_to_clock(volatile avr32_pm_t *pm, unsigned long clock)
+{
+  // Read
+  u_avr32_pm_mcctrl_t u_avr32_pm_mcctrl = {pm->mcctrl};
+8000240e:	78 08       	ld.w	r8,r12[0x0]
+  // Modify
+  u_avr32_pm_mcctrl.MCCTRL.mcsel = clock;
+80002410:	f1 db d0 02 	bfins	r8,r11,0x0,0x2
+  // Write back
+  pm->mcctrl = u_avr32_pm_mcctrl.mcctrl;
+80002414:	99 08       	st.w	r12[0x0],r8
+}
+80002416:	5e fc       	retal	r12
+
+80002418 <pm_switch_to_osc0>:
+
+
+void pm_switch_to_osc0(volatile avr32_pm_t *pm, unsigned int fosc0, unsigned int startup)
+{
+80002418:	eb cd 40 c0 	pushm	r6-r7,lr
+8000241c:	18 97       	mov	r7,r12
+8000241e:	14 96       	mov	r6,r10
+  pm_enable_osc0_crystal(pm, fosc0);            // Enable the Osc0 in crystal mode
+80002420:	f0 1f 00 06 	mcall	80002438 <pm_switch_to_osc0+0x20>
+  pm_enable_clk0(pm, startup);                  // Crystal startup time - This parameter is critical and depends on the characteristics of the crystal
+80002424:	0c 9b       	mov	r11,r6
+80002426:	0e 9c       	mov	r12,r7
+80002428:	f0 1f 00 05 	mcall	8000243c <pm_switch_to_osc0+0x24>
+  pm_switch_to_clock(pm, AVR32_PM_MCSEL_OSC0);  // Then switch main clock to Osc0
+8000242c:	30 1b       	mov	r11,1
+8000242e:	0e 9c       	mov	r12,r7
+80002430:	f0 1f 00 04 	mcall	80002440 <pm_switch_to_osc0+0x28>
+}
+80002434:	e3 cd 80 c0 	ldm	sp++,r6-r7,pc
+80002438:	80 00       	ld.sh	r0,r0[0x0]
+8000243a:	23 00       	sub	r0,48
+8000243c:	80 00       	ld.sh	r0,r0[0x0]
+8000243e:	23 58       	sub	r8,53
+80002440:	80 00       	ld.sh	r0,r0[0x0]
+80002442:	24 0e       	sub	lr,64
+
+80002444 <sysclk_init>:
+/* sysclk_init (void)
+*
+* Initializes SYSCLK for a 64 MHz clock.
+*
+*/
+void sysclk_init (void) {
+80002444:	d4 01       	pushm	lr
+  // PLL formula = PLL_OUT (OSC0 / DIV) * (MUL+1) => (16MHz / 1) * (7+1) = 128MHz
+  pm_switch_to_osc0(&AVR32_PM, F_OSC0, OSC0_STARTUP_US);  // Switch main clock to Osc0.
+80002446:	30 3a       	mov	r10,3
+80002448:	e0 6b 90 00 	mov	r11,36864
+8000244c:	ea 1b 03 d0 	orh	r11,0x3d0
+80002450:	fe 7c 0c 00 	mov	r12,-62464
+80002454:	f0 1f 00 19 	mcall	800024b8 <sysclk_init+0x74>
+  pm_pll_setup(&AVR32_PM, PLL, MUL, DIV, OSC, LOCK_COUNT);
+80002458:	31 08       	mov	r8,16
+8000245a:	1a d8       	st.w	--sp,r8
+8000245c:	30 08       	mov	r8,0
+8000245e:	30 19       	mov	r9,1
+80002460:	30 7a       	mov	r10,7
+80002462:	10 9b       	mov	r11,r8
+80002464:	fe 7c 0c 00 	mov	r12,-62464
+80002468:	f0 1f 00 15 	mcall	800024bc <sysclk_init+0x78>
+   pll_freq Set to 1 for VCO frequency range 80-180MHz, set to 0 for VCO frequency range 160-240Mhz.
+   pll_div2 Divide the PLL output frequency by 2 (this settings does not change the FVCO value)
+   pll_wbwdisable 1 Disable the Wide-Bandith Mode (Wide-Bandwith mode allow a faster startup time and out-of-lock time). 0 to enable the Wide-Bandith Mode.
+  */
+  /* PLL output VCO frequency is 128MHz. We divide it by 2 with the pll_div2=1. This enable to get later main clock to 64MHz */
+  pm_pll_set_option(&AVR32_PM, PLL, PLL_F, PLL_DIV2, PLL_WBW_DIS);
+8000246c:	30 08       	mov	r8,0
+8000246e:	30 19       	mov	r9,1
+80002470:	12 9a       	mov	r10,r9
+80002472:	10 9b       	mov	r11,r8
+80002474:	fe 7c 0c 00 	mov	r12,-62464
+80002478:	f0 1f 00 12 	mcall	800024c0 <sysclk_init+0x7c>
+  pm_pll_enable(&AVR32_PM, PLL);
+8000247c:	30 0b       	mov	r11,0
+8000247e:	fe 7c 0c 00 	mov	r12,-62464
+80002482:	f0 1f 00 11 	mcall	800024c4 <sysclk_init+0x80>
+
+  /* Wait for PLL0 locked */
+  pm_wait_for_pll0_locked(&AVR32_PM) ;
+80002486:	fe 7c 0c 00 	mov	r12,-62464
+8000248a:	f0 1f 00 10 	mcall	800024c8 <sysclk_init+0x84>
+  pm_cksel(&AVR32_PM, 1, 0, 0, 0, 0, 0);		// 1 divides PBA clock by two
+8000248e:	30 0a       	mov	r10,0
+80002490:	1a da       	st.w	--sp,r10
+80002492:	1a da       	st.w	--sp,r10
+80002494:	14 98       	mov	r8,r10
+80002496:	14 99       	mov	r9,r10
+80002498:	30 1b       	mov	r11,1
+8000249a:	fe 7c 0c 00 	mov	r12,-62464
+8000249e:	f0 1f 00 0c 	mcall	800024cc <sysclk_init+0x88>
+
+  // Set one wait-state (WS) for flash controller. 0 WS access is up to 30MHz for HSB/CPU clock.
+  // As we want to have 64MHz on HSB/CPU clock, we need to set 1 WS on flash controller.
+  flashc_set_wait_state(1);
+800024a2:	30 1c       	mov	r12,1
+800024a4:	f0 1f 00 0b 	mcall	800024d0 <sysclk_init+0x8c>
+  pm_switch_to_clock(&AVR32_PM, AVR32_PM_MCSEL_PLL0); /* Switch main clock to 64MHz */	
+800024a8:	30 2b       	mov	r11,2
+800024aa:	fe 7c 0c 00 	mov	r12,-62464
+800024ae:	f0 1f 00 0a 	mcall	800024d4 <sysclk_init+0x90>
+800024b2:	2f dd       	sub	sp,-12
+}
+800024b4:	d8 02       	popm	pc
+800024b6:	00 00       	add	r0,r0
+800024b8:	80 00       	ld.sh	r0,r0[0x0]
+800024ba:	24 18       	sub	r8,65
+800024bc:	80 00       	ld.sh	r0,r0[0x0]
+800024be:	23 ba       	sub	r10,59
+800024c0:	80 00       	ld.sh	r0,r0[0x0]
+800024c2:	23 dc       	sub	r12,61
+800024c4:	80 00       	ld.sh	r0,r0[0x0]
+800024c6:	23 f6       	sub	r6,63
+800024c8:	80 00       	ld.sh	r0,r0[0x0]
+800024ca:	24 04       	sub	r4,64
+800024cc:	80 00       	ld.sh	r0,r0[0x0]
+800024ce:	23 74       	sub	r4,55
+800024d0:	80 00       	ld.sh	r0,r0[0x0]
+800024d2:	21 90       	sub	r0,25
+800024d4:	80 00       	ld.sh	r0,r0[0x0]
+800024d6:	24 0e       	sub	lr,64
+
+800024d8 <getBaudDiv>:
+xSemaphoreHandle xSPIMutex;
+#endif
+
+int16_t getBaudDiv(const uint32_t baudrate, uint32_t pb_hz)
+{
+	uint32_t baudDiv = div_ceil(pb_hz, baudrate);
+800024d8:	f8 c8 00 01 	sub	r8,r12,1
+800024dc:	f0 0b 00 0b 	add	r11,r8,r11
+800024e0:	f6 0c 0d 0a 	divu	r10,r11,r12
+800024e4:	14 9c       	mov	r12,r10
+
+	if (baudDiv <= 0 || baudDiv > 255) {
+800024e6:	f4 c8 00 01 	sub	r8,r10,1
+800024ea:	e0 48 00 fe 	cp.w	r8,254
+800024ee:	e0 88 00 03 	brls	800024f4 <getBaudDiv+0x1c>
+800024f2:	5e fe       	retal	-1
+		return -1;
+	}
+
+	return baudDiv;
+800024f4:	5c 8c       	casts.h	r12
+}
+800024f6:	5e fc       	retal	r12
+
+800024f8 <spi_initMaster>:
+spi_status_t spi_initMaster(volatile avr32_spi_t *spi,
+		const spi_options_t *options)
+{
+	u_avr32_spi_mr_t u_avr32_spi_mr;
+
+	if (options->modfdis > 1) {
+800024f8:	f7 39 00 0d 	ld.ub	r9,r11[13]
+800024fc:	30 18       	mov	r8,1
+800024fe:	f0 09 18 00 	cp.b	r9,r8
+80002502:	e0 88 00 04 	brls	8000250a <spi_initMaster+0x12>
+80002506:	30 2c       	mov	r12,2
+80002508:	5e fc       	retal	r12
+		return SPI_ERROR_ARGUMENT;
+	}
+
+	/* Reset. */
+	spi->cr = AVR32_SPI_CR_SWRST_MASK;
+8000250a:	e0 68 00 80 	mov	r8,128
+8000250e:	99 08       	st.w	r12[0x0],r8
+
+	/* Master Mode. */
+	u_avr32_spi_mr.mr = spi->mr;
+80002510:	78 18       	ld.w	r8,r12[0x4]
+	u_avr32_spi_mr.MR.mstr = 1;
+80002512:	30 19       	mov	r9,1
+80002514:	f1 d9 d0 01 	bfins	r8,r9,0x0,0x1
+	u_avr32_spi_mr.MR.modfdis = options->modfdis;
+80002518:	f7 39 00 0d 	ld.ub	r9,r11[13]
+8000251c:	f1 d9 d0 81 	bfins	r8,r9,0x4,0x1
+	u_avr32_spi_mr.MR.llb = 0;
+80002520:	30 09       	mov	r9,0
+80002522:	f1 d9 d0 e1 	bfins	r8,r9,0x7,0x1
+	u_avr32_spi_mr.MR.pcs = (1 << AVR32_SPI_MR_PCS_SIZE) - 1;
+80002526:	30 fa       	mov	r10,15
+80002528:	f1 da d2 04 	bfins	r8,r10,0x10,0x4
+	spi->mr = u_avr32_spi_mr.mr;
+8000252c:	99 18       	st.w	r12[0x4],r8
+8000252e:	5e f9       	retal	r9
+
+80002530 <spi_selectChip>:
+	while (pdFALSE == xSemaphoreTake(xSPIMutex, 20)) {
+	}
+#endif
+
+	/* Assert all lines; no peripheral is selected. */
+	spi->mr |= AVR32_SPI_MR_PCS_MASK;
+80002530:	78 18       	ld.w	r8,r12[0x4]
+80002532:	ea 18 00 0f 	orh	r8,0xf
+80002536:	99 18       	st.w	r12[0x4],r8
+
+	if (spi->mr & AVR32_SPI_MR_PCSDEC_MASK) {
+80002538:	78 18       	ld.w	r8,r12[0x4]
+8000253a:	e2 18 00 04 	andl	r8,0x4,COH
+8000253e:	c0 f0       	breq	8000255c <spi_selectChip+0x2c>
+		/* The signal is decoded; allow up to 15 chips. */
+		if (chip > 14) {
+80002540:	30 e8       	mov	r8,14
+80002542:	f0 0b 18 00 	cp.b	r11,r8
+80002546:	e0 8b 00 19 	brhi	80002578 <spi_selectChip+0x48>
+			return SPI_ERROR_ARGUMENT;
+		}
+
+		spi->mr &= ~AVR32_SPI_MR_PCS_MASK |
+8000254a:	78 18       	ld.w	r8,r12[0x4]
+8000254c:	b1 6b       	lsl	r11,0x10
+8000254e:	ea 1b ff f0 	orh	r11,0xfff0
+80002552:	e8 1b ff ff 	orl	r11,0xffff
+80002556:	10 6b       	and	r11,r8
+80002558:	99 1b       	st.w	r12[0x4],r11
+8000255a:	5e fd       	retal	0
+				(chip << AVR32_SPI_MR_PCS_OFFSET);
+	} else {
+		if (chip > 3) {
+8000255c:	30 38       	mov	r8,3
+8000255e:	f0 0b 18 00 	cp.b	r11,r8
+80002562:	e0 8b 00 0b 	brhi	80002578 <spi_selectChip+0x48>
+			return SPI_ERROR_ARGUMENT;
+		}
+
+		spi->mr &= ~(1 << (AVR32_SPI_MR_PCS_OFFSET + chip));
+80002566:	78 18       	ld.w	r8,r12[0x4]
+80002568:	2f 0b       	sub	r11,-16
+8000256a:	30 19       	mov	r9,1
+8000256c:	f2 0b 09 4b 	lsl	r11,r9,r11
+80002570:	5c db       	com	r11
+80002572:	10 6b       	and	r11,r8
+80002574:	99 1b       	st.w	r12[0x4],r11
+80002576:	5e fd       	retal	0
+80002578:	30 2c       	mov	r12,2
+	}
+
+	return SPI_OK;
+}
+8000257a:	5e fc       	retal	r12
+
+8000257c <spi_unselectChip>:
+
+spi_status_t spi_unselectChip(volatile avr32_spi_t *spi, uint8_t chip)
+{
+8000257c:	e0 68 3a 98 	mov	r8,15000
+	uint32_t timeout = SPI_TIMEOUT;
+
+	while (!(spi->sr & AVR32_SPI_SR_TXEMPTY_MASK)) {
+80002580:	c0 58       	rjmp	8000258a <spi_unselectChip+0xe>
+		if (!timeout--) {
+80002582:	58 08       	cp.w	r8,0
+80002584:	c0 21       	brne	80002588 <spi_unselectChip+0xc>
+80002586:	5e ff       	retal	1
+80002588:	20 18       	sub	r8,1
+
+spi_status_t spi_unselectChip(volatile avr32_spi_t *spi, uint8_t chip)
+{
+	uint32_t timeout = SPI_TIMEOUT;
+
+	while (!(spi->sr & AVR32_SPI_SR_TXEMPTY_MASK)) {
+8000258a:	78 49       	ld.w	r9,r12[0x10]
+8000258c:	e2 19 02 00 	andl	r9,0x200,COH
+80002590:	cf 90       	breq	80002582 <spi_unselectChip+0x6>
+			return SPI_ERROR_TIMEOUT;
+		}
+	}
+
+	/* Assert all lines; no peripheral is selected. */
+	spi->mr |= AVR32_SPI_MR_PCS_MASK;
+80002592:	78 18       	ld.w	r8,r12[0x4]
+80002594:	ea 18 00 0f 	orh	r8,0xf
+80002598:	99 18       	st.w	r12[0x4],r8
+
+	/* Last transfer, so de-assert the current NPCS if CSAAT is set. */
+	spi->cr = AVR32_SPI_CR_LASTXFER_MASK;
+8000259a:	fc 18 01 00 	movh	r8,0x100
+8000259e:	99 08       	st.w	r12[0x0],r8
+800025a0:	5e fd       	retal	0
+800025a2:	d7 03       	nop
+
+800025a4 <spi_setupChipReg>:
+}
+
+spi_status_t spi_setupChipReg(volatile avr32_spi_t *spi,
+		const spi_options_t *options,
+		uint32_t pb_hz)
+{
+800025a4:	eb cd 40 f8 	pushm	r3-r7,lr
+800025a8:	18 95       	mov	r5,r12
+800025aa:	16 97       	mov	r7,r11
+	u_avr32_spi_csr_t u_avr32_spi_csr;
+
+	if (options->spi_mode > 3 ||
+800025ac:	f7 36 00 0c 	ld.ub	r6,r11[12]
+800025b0:	30 38       	mov	r8,3
+800025b2:	f0 06 18 00 	cp.b	r6,r8
+800025b6:	e0 8b 00 4d 	brhi	80002650 <spi_setupChipReg+0xac>
+			options->stay_act > 1 ||
+800025ba:	f7 34 00 0b 	ld.ub	r4,r11[11]
+		const spi_options_t *options,
+		uint32_t pb_hz)
+{
+	u_avr32_spi_csr_t u_avr32_spi_csr;
+
+	if (options->spi_mode > 3 ||
+800025be:	30 18       	mov	r8,1
+800025c0:	f0 04 18 00 	cp.b	r4,r8
+800025c4:	e0 8b 00 46 	brhi	80002650 <spi_setupChipReg+0xac>
+			options->stay_act > 1 ||
+			options->bits < 8 || options->bits > 16) {
+800025c8:	f7 33 00 08 	ld.ub	r3,r11[8]
+		const spi_options_t *options,
+		uint32_t pb_hz)
+{
+	u_avr32_spi_csr_t u_avr32_spi_csr;
+
+	if (options->spi_mode > 3 ||
+800025cc:	30 78       	mov	r8,7
+800025ce:	f0 03 18 00 	cp.b	r3,r8
+800025d2:	e0 88 00 3f 	brls	80002650 <spi_setupChipReg+0xac>
+800025d6:	31 08       	mov	r8,16
+800025d8:	f0 03 18 00 	cp.b	r3,r8
+800025dc:	e0 8b 00 3a 	brhi	80002650 <spi_setupChipReg+0xac>
+			options->stay_act > 1 ||
+			options->bits < 8 || options->bits > 16) {
+		return SPI_ERROR_ARGUMENT;
+	}
+
+	int baudDiv = getBaudDiv(options->baudrate, pb_hz);
+800025e0:	14 9b       	mov	r11,r10
+800025e2:	6e 1c       	ld.w	r12,r7[0x4]
+800025e4:	f0 1f 00 1d 	mcall	80002658 <spi_setupChipReg+0xb4>
+
+	if (baudDiv < 0) {
+800025e8:	c3 45       	brlt	80002650 <spi_setupChipReg+0xac>
+		return SPI_ERROR_ARGUMENT;
+	}
+
+	/* Will use CSR0 offsets; these are the same for CSR0 to CSR3. */
+	u_avr32_spi_csr.csr = 0;
+800025ea:	30 08       	mov	r8,0
+	u_avr32_spi_csr.CSR.cpol   = options->spi_mode >> 1;
+800025ec:	ec 09 16 01 	lsr	r9,r6,0x1
+800025f0:	f1 d9 d0 01 	bfins	r8,r9,0x0,0x1
+	u_avr32_spi_csr.CSR.ncpha  = (options->spi_mode & 0x1) ^ 0x1;
+800025f4:	ec 16 00 01 	eorl	r6,0x1
+800025f8:	f1 d6 d0 21 	bfins	r8,r6,0x1,0x1
+	u_avr32_spi_csr.CSR.csaat  = options->stay_act;
+800025fc:	f1 d4 d0 61 	bfins	r8,r4,0x3,0x1
+	u_avr32_spi_csr.CSR.bits   = options->bits - 8;
+80002600:	20 83       	sub	r3,8
+80002602:	f1 d3 d0 84 	bfins	r8,r3,0x4,0x4
+	u_avr32_spi_csr.CSR.scbr   = baudDiv;
+80002606:	f1 dc d1 08 	bfins	r8,r12,0x8,0x8
+	u_avr32_spi_csr.CSR.dlybs  = options->spck_delay;
+8000260a:	ef 39 00 09 	ld.ub	r9,r7[9]
+8000260e:	f1 d9 d2 08 	bfins	r8,r9,0x10,0x8
+	u_avr32_spi_csr.CSR.dlybct = options->trans_delay;
+80002612:	ef 39 00 0a 	ld.ub	r9,r7[10]
+80002616:	f1 d9 d3 08 	bfins	r8,r9,0x18,0x8
+
+	switch (options->reg) {
+8000261a:	0f 89       	ld.ub	r9,r7[0x0]
+8000261c:	30 1a       	mov	r10,1
+8000261e:	f4 09 18 00 	cp.b	r9,r10
+80002622:	c0 e0       	breq	8000263e <spi_setupChipReg+0x9a>
+80002624:	c0 a3       	brcs	80002638 <spi_setupChipReg+0x94>
+80002626:	30 2a       	mov	r10,2
+80002628:	f4 09 18 00 	cp.b	r9,r10
+8000262c:	c0 c0       	breq	80002644 <spi_setupChipReg+0xa0>
+8000262e:	30 3a       	mov	r10,3
+80002630:	f4 09 18 00 	cp.b	r9,r10
+80002634:	c0 e1       	brne	80002650 <spi_setupChipReg+0xac>
+80002636:	c0 a8       	rjmp	8000264a <spi_setupChipReg+0xa6>
+	case 0:
+		spi->csr0 = u_avr32_spi_csr.csr;
+80002638:	8b c8       	st.w	r5[0x30],r8
+8000263a:	e3 cf 80 f8 	ldm	sp++,r3-r7,pc,r12=0
+		break;
+
+	case 1:
+		spi->csr1 = u_avr32_spi_csr.csr;
+8000263e:	8b d8       	st.w	r5[0x34],r8
+80002640:	e3 cf 80 f8 	ldm	sp++,r3-r7,pc,r12=0
+		break;
+
+	case 2:
+		spi->csr2 = u_avr32_spi_csr.csr;
+80002644:	8b e8       	st.w	r5[0x38],r8
+80002646:	e3 cf 80 f8 	ldm	sp++,r3-r7,pc,r12=0
+		break;
+
+	case 3:
+		spi->csr3 = u_avr32_spi_csr.csr;
+8000264a:	8b f8       	st.w	r5[0x3c],r8
+8000264c:	e3 cf 80 f8 	ldm	sp++,r3-r7,pc,r12=0
+		break;
+80002650:	30 2c       	mov	r12,2
+		}
+	}
+#endif
+
+	return SPI_OK;
+}
+80002652:	e3 cd 80 f8 	ldm	sp++,r3-r7,pc
+80002656:	00 00       	add	r0,r0
+80002658:	80 00       	ld.sh	r0,r0[0x0]
+8000265a:	24 d8       	sub	r8,77
+
+8000265c <spi_enable>:
+
+void spi_enable(volatile avr32_spi_t *spi)
+{
+	spi->cr = AVR32_SPI_CR_SPIEN_MASK;
+8000265c:	30 18       	mov	r8,1
+8000265e:	99 08       	st.w	r12[0x0],r8
+}
+80002660:	5e fc       	retal	r12
+
+80002662 <spi_write>:
+{
+	return ((spi->sr & AVR32_SPI_SR_TDRE_MASK) != 0);
+}
+
+spi_status_t spi_write(volatile avr32_spi_t *spi, uint16_t data)
+{
+80002662:	e0 68 3a 98 	mov	r8,15000
+	uint32_t timeout = SPI_TIMEOUT;
+
+	while (!(spi->sr & AVR32_SPI_SR_TDRE_MASK)) {
+80002666:	c0 58       	rjmp	80002670 <spi_write+0xe>
+		if (!timeout--) {
+80002668:	58 08       	cp.w	r8,0
+8000266a:	c0 21       	brne	8000266e <spi_write+0xc>
+8000266c:	5e ff       	retal	1
+8000266e:	20 18       	sub	r8,1
+
+spi_status_t spi_write(volatile avr32_spi_t *spi, uint16_t data)
+{
+	uint32_t timeout = SPI_TIMEOUT;
+
+	while (!(spi->sr & AVR32_SPI_SR_TDRE_MASK)) {
+80002670:	78 49       	ld.w	r9,r12[0x10]
+80002672:	e2 19 00 02 	andl	r9,0x2,COH
+80002676:	cf 90       	breq	80002668 <spi_write+0x6>
+		if (!timeout--) {
+			return SPI_ERROR_TIMEOUT;
+		}
+	}
+
+	spi->tdr = data << AVR32_SPI_TDR_TD_OFFSET;
+80002678:	5c 7b       	castu.h	r11
+8000267a:	99 3b       	st.w	r12[0xc],r11
+8000267c:	5e fd       	retal	0
+
+8000267e <tc_init_waveform>:
+
+
+int tc_init_waveform(volatile avr32_tc_t *tc, const tc_waveform_opt_t *opt)
+{
+  // Check for valid input.
+  if (opt->channel >= TC_NUMBER_OF_CHANNELS)
+8000267e:	76 09       	ld.w	r9,r11[0x0]
+80002680:	58 29       	cp.w	r9,2
+80002682:	e0 88 00 03 	brls	80002688 <tc_init_waveform+0xa>
+80002686:	5e fe       	retal	-1
+    return TC_INVALID_ARGUMENT;
+
+  // GENERATE SIGNALS: Waveform operating mode.
+  tc->channel[opt->channel].cmr = opt->bswtrg << AVR32_TC_BSWTRG_OFFSET |
+80002688:	76 18       	ld.w	r8,r11[0x4]
+8000268a:	f5 d8 c0 03 	bfextu	r10,r8,0x0,0x3
+8000268e:	af ba       	sbr	r10,0xf
+80002690:	10 9b       	mov	r11,r8
+80002692:	e6 1b c0 00 	andh	r11,0xc000,COH
+80002696:	16 4a       	or	r10,r11
+80002698:	10 9b       	mov	r11,r8
+8000269a:	e6 1b 30 00 	andh	r11,0x3000,COH
+8000269e:	16 4a       	or	r10,r11
+800026a0:	10 9b       	mov	r11,r8
+800026a2:	e6 1b 0c 00 	andh	r11,0xc00,COH
+800026a6:	16 4a       	or	r10,r11
+800026a8:	10 9b       	mov	r11,r8
+800026aa:	e6 1b 03 00 	andh	r11,0x300,COH
+800026ae:	16 4a       	or	r10,r11
+800026b0:	10 9b       	mov	r11,r8
+800026b2:	e6 1b 00 c0 	andh	r11,0xc0,COH
+800026b6:	16 4a       	or	r10,r11
+800026b8:	10 9b       	mov	r11,r8
+800026ba:	e6 1b 00 30 	andh	r11,0x30,COH
+800026be:	16 4a       	or	r10,r11
+800026c0:	10 9b       	mov	r11,r8
+800026c2:	e6 1b 00 0c 	andh	r11,0xc,COH
+800026c6:	16 4a       	or	r10,r11
+800026c8:	10 9b       	mov	r11,r8
+800026ca:	e6 1b 00 03 	andh	r11,0x3,COH
+800026ce:	16 4a       	or	r10,r11
+800026d0:	10 9b       	mov	r11,r8
+800026d2:	e2 1b 60 00 	andl	r11,0x6000,COH
+800026d6:	16 4a       	or	r10,r11
+800026d8:	f7 d8 c1 81 	bfextu	r11,r8,0xc,0x1
+800026dc:	f5 eb 10 ca 	or	r10,r10,r11<<0xc
+800026e0:	10 9b       	mov	r11,r8
+800026e2:	e2 1b 0c 00 	andl	r11,0xc00,COH
+800026e6:	16 4a       	or	r10,r11
+800026e8:	10 9b       	mov	r11,r8
+800026ea:	e2 1b 03 00 	andl	r11,0x300,COH
+800026ee:	16 4a       	or	r10,r11
+800026f0:	f7 d8 c0 e1 	bfextu	r11,r8,0x7,0x1
+800026f4:	f5 eb 10 7a 	or	r10,r10,r11<<0x7
+800026f8:	f7 d8 c0 c1 	bfextu	r11,r8,0x6,0x1
+800026fc:	f5 eb 10 6a 	or	r10,r10,r11<<0x6
+80002700:	10 9b       	mov	r11,r8
+80002702:	e2 1b 00 30 	andl	r11,0x30,COH
+80002706:	16 4a       	or	r10,r11
+80002708:	f1 d8 c0 61 	bfextu	r8,r8,0x3,0x1
+8000270c:	f5 e8 10 38 	or	r8,r10,r8<<0x3
+80002710:	a5 69       	lsl	r9,0x4
+80002712:	2f f9       	sub	r9,-1
+80002714:	f8 09 09 28 	st.w	r12[r9<<0x2],r8
+80002718:	5e fd       	retal	0
+
+8000271a <tc_start>:
+
+
+int tc_start(volatile avr32_tc_t *tc, unsigned int channel)
+{
+  // Check for valid input.
+  if (channel >= TC_NUMBER_OF_CHANNELS)
+8000271a:	58 2b       	cp.w	r11,2
+8000271c:	e0 88 00 03 	brls	80002722 <tc_start+0x8>
+80002720:	5e fe       	retal	-1
+    return TC_INVALID_ARGUMENT;
+
+  // Enable, reset and start the selected timer/counter channel.
+  tc->channel[channel].ccr = AVR32_TC_SWTRG_MASK | AVR32_TC_CLKEN_MASK;
+80002722:	a7 6b       	lsl	r11,0x6
+80002724:	16 0c       	add	r12,r11
+80002726:	30 58       	mov	r8,5
+80002728:	99 08       	st.w	r12[0x0],r8
+8000272a:	5e fd       	retal	0
+
+8000272c <tc_write_rc>:
+
+
+int tc_write_rc(volatile avr32_tc_t *tc, unsigned int channel, unsigned short value)
+{
+  // Check for valid input.
+  if (channel >= TC_NUMBER_OF_CHANNELS)
+8000272c:	58 2b       	cp.w	r11,2
+8000272e:	e0 88 00 03 	brls	80002734 <tc_write_rc+0x8>
+80002732:	5e fe       	retal	-1
+    return TC_INVALID_ARGUMENT;
+
+  // This function is only available in WAVEFORM mode.
+  if (Tst_bits(tc->channel[channel].cmr, AVR32_TC_WAVE_MASK))
+80002734:	f6 08 15 04 	lsl	r8,r11,0x4
+80002738:	2f f8       	sub	r8,-1
+8000273a:	f8 08 03 28 	ld.w	r8,r12[r8<<0x2]
+8000273e:	e2 18 80 00 	andl	r8,0x8000,COH
+80002742:	c0 c0       	breq	8000275a <tc_write_rc+0x2e>
+    Wr_bitfield(tc->channel[channel].rc, AVR32_TC_RC_MASK, value);
+80002744:	a7 6b       	lsl	r11,0x6
+80002746:	16 0c       	add	r12,r11
+80002748:	2e 4c       	sub	r12,-28
+8000274a:	78 08       	ld.w	r8,r12[0x0]
+8000274c:	f3 da c0 10 	bfextu	r9,r10,0x0,0x10
+80002750:	e0 18 00 00 	andl	r8,0x0
+80002754:	f3 e8 10 08 	or	r8,r9,r8
+80002758:	99 08       	st.w	r12[0x0],r8
+
+  return value;
+8000275a:	f9 da c0 10 	bfextu	r12,r10,0x0,0x10
+}
+8000275e:	5e fc       	retal	r12
+
+80002760 <tc_configure_interrupts>:
+  return tc->channel[channel].imr;
+}
+
+
+int tc_configure_interrupts(volatile avr32_tc_t *tc, unsigned int channel, const tc_interrupt_t *bitfield)
+{
+80002760:	eb cd 40 fc 	pushm	r2-r7,lr
+  bool global_interrupt_enabled = Is_global_interrupt_enabled();
+80002764:	e1 b9 00 00 	mfsr	r9,0x0
+
+  // Check for valid input.
+  if (channel >= TC_NUMBER_OF_CHANNELS)
+80002768:	58 2b       	cp.w	r11,2
+8000276a:	e0 88 00 04 	brls	80002772 <tc_configure_interrupts+0x12>
+8000276e:	e3 cf c0 fc 	ldm	sp++,r2-r7,pc,r12=-1
+	return flags;
+}
+
+static inline bool cpu_irq_is_enabled_flags(irqflags_t flags)
+{
+	return !(flags & AVR32_SR_GM_MASK);
+80002772:	ee 19 00 01 	eorh	r9,0x1
+80002776:	f3 d9 c2 01 	bfextu	r9,r9,0x10,0x1
+    return TC_INVALID_ARGUMENT;
+
+  // Enable the appropriate interrupts.
+  tc->channel[channel].ier = bitfield->etrgs << AVR32_TC_ETRGS_OFFSET |
+8000277a:	74 08       	ld.w	r8,r10[0x0]
+8000277c:	ef d8 c0 e1 	bfextu	r7,r8,0x7,0x1
+80002780:	fd d8 c0 c1 	bfextu	lr,r8,0x6,0x1
+80002784:	a7 6e       	lsl	lr,0x6
+80002786:	fd e7 10 7e 	or	lr,lr,r7<<0x7
+8000278a:	ef d8 c0 01 	bfextu	r7,r8,0x0,0x1
+8000278e:	0e 4e       	or	lr,r7
+80002790:	ef d8 c0 a1 	bfextu	r7,r8,0x5,0x1
+80002794:	fd e7 10 5e 	or	lr,lr,r7<<0x5
+80002798:	ef d8 c0 81 	bfextu	r7,r8,0x4,0x1
+8000279c:	fd e7 10 4e 	or	lr,lr,r7<<0x4
+800027a0:	ef d8 c0 61 	bfextu	r7,r8,0x3,0x1
+800027a4:	fd e7 10 3e 	or	lr,lr,r7<<0x3
+800027a8:	ef d8 c0 41 	bfextu	r7,r8,0x2,0x1
+800027ac:	fd e7 10 2e 	or	lr,lr,r7<<0x2
+800027b0:	f1 d8 c0 21 	bfextu	r8,r8,0x1,0x1
+800027b4:	fd e8 10 18 	or	r8,lr,r8<<0x1
+800027b8:	f6 0e 15 06 	lsl	lr,r11,0x6
+800027bc:	f8 0e 00 0e 	add	lr,r12,lr
+800027c0:	2d ce       	sub	lr,-36
+800027c2:	9d 08       	st.w	lr[0x0],r8
+                             bitfield->cpas << AVR32_TC_CPAS_OFFSET |
+                             bitfield->lovrs << AVR32_TC_LOVRS_OFFSET |
+                             bitfield->covfs << AVR32_TC_COVFS_OFFSET;
+
+  // Disable the appropriate interrupts.
+  if (global_interrupt_enabled) Disable_global_interrupt();
+800027c4:	58 09       	cp.w	r9,0
+800027c6:	c0 20       	breq	800027ca <tc_configure_interrupts+0x6a>
+800027c8:	d3 03       	ssrf	0x10
+  tc->channel[channel].idr = (~bitfield->etrgs & 1) << AVR32_TC_ETRGS_OFFSET |
+800027ca:	74 08       	ld.w	r8,r10[0x0]
+800027cc:	f1 d8 c0 e1 	bfextu	r8,r8,0x7,0x1
+800027d0:	e0 65 00 80 	mov	r5,128
+800027d4:	f9 b5 01 00 	movne	r5,0
+                             (~bitfield->ldrbs & 1) << AVR32_TC_LDRBS_OFFSET |
+800027d8:	74 08       	ld.w	r8,r10[0x0]
+800027da:	f1 d8 c0 c1 	bfextu	r8,r8,0x6,0x1
+800027de:	f9 b4 00 40 	moveq	r4,64
+800027e2:	f9 b4 01 00 	movne	r4,0
+                             (~bitfield->ldras & 1) << AVR32_TC_LDRAS_OFFSET |
+800027e6:	74 08       	ld.w	r8,r10[0x0]
+800027e8:	f1 d8 c0 a1 	bfextu	r8,r8,0x5,0x1
+800027ec:	f9 b3 00 20 	moveq	r3,32
+800027f0:	f9 b3 01 00 	movne	r3,0
+                             (~bitfield->cpcs & 1) << AVR32_TC_CPCS_OFFSET |
+800027f4:	74 08       	ld.w	r8,r10[0x0]
+800027f6:	f1 d8 c0 81 	bfextu	r8,r8,0x4,0x1
+800027fa:	f9 b2 00 10 	moveq	r2,16
+800027fe:	f9 b2 01 00 	movne	r2,0
+                             (~bitfield->cpbs & 1) << AVR32_TC_CPBS_OFFSET |
+80002802:	74 08       	ld.w	r8,r10[0x0]
+80002804:	f1 d8 c0 61 	bfextu	r8,r8,0x3,0x1
+80002808:	f9 b6 00 08 	moveq	r6,8
+8000280c:	f9 b6 01 00 	movne	r6,0
+                             (~bitfield->cpas & 1) << AVR32_TC_CPAS_OFFSET |
+80002810:	74 08       	ld.w	r8,r10[0x0]
+80002812:	f1 d8 c0 41 	bfextu	r8,r8,0x2,0x1
+80002816:	f9 b7 00 04 	moveq	r7,4
+8000281a:	f9 b7 01 00 	movne	r7,0
+                             (~bitfield->lovrs & 1) << AVR32_TC_LOVRS_OFFSET |
+8000281e:	74 08       	ld.w	r8,r10[0x0]
+80002820:	f1 d8 c0 21 	bfextu	r8,r8,0x1,0x1
+80002824:	f9 be 00 02 	moveq	lr,2
+80002828:	f9 be 01 00 	movne	lr,0
+                             bitfield->lovrs << AVR32_TC_LOVRS_OFFSET |
+                             bitfield->covfs << AVR32_TC_COVFS_OFFSET;
+
+  // Disable the appropriate interrupts.
+  if (global_interrupt_enabled) Disable_global_interrupt();
+  tc->channel[channel].idr = (~bitfield->etrgs & 1) << AVR32_TC_ETRGS_OFFSET |
+8000282c:	74 08       	ld.w	r8,r10[0x0]
+8000282e:	ec 18 00 01 	eorl	r8,0x1
+80002832:	f1 d8 c0 01 	bfextu	r8,r8,0x0,0x1
+80002836:	eb e8 10 08 	or	r8,r5,r8
+8000283a:	08 48       	or	r8,r4
+8000283c:	06 48       	or	r8,r3
+8000283e:	04 48       	or	r8,r2
+80002840:	0c 48       	or	r8,r6
+80002842:	0e 48       	or	r8,r7
+80002844:	1c 48       	or	r8,lr
+80002846:	f6 0a 15 06 	lsl	r10,r11,0x6
+8000284a:	f8 0a 00 0a 	add	r10,r12,r10
+8000284e:	2d 8a       	sub	r10,-40
+80002850:	95 08       	st.w	r10[0x0],r8
+                             (~bitfield->cpcs & 1) << AVR32_TC_CPCS_OFFSET |
+                             (~bitfield->cpbs & 1) << AVR32_TC_CPBS_OFFSET |
+                             (~bitfield->cpas & 1) << AVR32_TC_CPAS_OFFSET |
+                             (~bitfield->lovrs & 1) << AVR32_TC_LOVRS_OFFSET |
+                             (~bitfield->covfs & 1) << AVR32_TC_COVFS_OFFSET;
+  tc->channel[channel].sr;
+80002852:	a7 6b       	lsl	r11,0x6
+80002854:	2e 0b       	sub	r11,-32
+80002856:	16 0c       	add	r12,r11
+80002858:	78 08       	ld.w	r8,r12[0x0]
+  if (global_interrupt_enabled) Enable_global_interrupt();
+8000285a:	58 09       	cp.w	r9,0
+8000285c:	c0 31       	brne	80002862 <tc_configure_interrupts+0x102>
+8000285e:	e3 cf 80 fc 	ldm	sp++,r2-r7,pc,r12=0
+80002862:	d5 03       	csrf	0x10
+80002864:	e3 cf 80 fc 	ldm	sp++,r2-r7,pc,r12=0
+
+80002868 <_unhandled_interrupt>:
+__attribute__((__interrupt__))
+#elif (defined __ICCAVR32__)
+__interrupt
+#endif
+static void _unhandled_interrupt(void)
+{
+80002868:	c0 08       	rjmp	80002868 <_unhandled_interrupt>
+8000286a:	d7 03       	nop
+
+8000286c <INTC_register_interrupt>:
+ */
+void INTC_register_interrupt(__int_handler handler, uint32_t irq,
+	uint32_t int_level)
+{
+	// Determine the group of the IRQ.
+	uint32_t int_grp = irq / AVR32_INTC_MAX_NUM_IRQS_PER_GRP;
+8000286c:	f6 08 16 05 	lsr	r8,r11,0x5
+
+	/* Store in _int_line_handler_table_x the pointer to the interrupt
+	handler, so that _get_interrupt_handler can retrieve it when the
+	interrupt is vectored. */
+	_int_handler_table[int_grp]
+		._int_line_handler_table[irq % AVR32_INTC_MAX_NUM_IRQS_PER_GRP]
+80002870:	49 99       	lddpc	r9,800028d4 <INTC_register_interrupt+0x68>
+80002872:	f2 08 00 39 	add	r9,r9,r8<<0x3
+80002876:	f7 db c0 05 	bfextu	r11,r11,0x0,0x5
+8000287a:	72 19       	ld.w	r9,r9[0x4]
+	uint32_t int_grp = irq / AVR32_INTC_MAX_NUM_IRQS_PER_GRP;
+
+	/* Store in _int_line_handler_table_x the pointer to the interrupt
+	handler, so that _get_interrupt_handler can retrieve it when the
+	interrupt is vectored. */
+	_int_handler_table[int_grp]
+8000287c:	f2 0b 09 2c 	st.w	r9[r11<<0x2],r12
+	/* Program the corresponding IPRX register to set the interrupt priority
+	level and the interrupt vector offset that will be fetched by the core
+	interrupt system.
+	NOTE: The _intx functions are intermediate assembly functions between
+	the core interrupt system and the user interrupt handler. */
+	if (int_level == AVR32_INTC_INT0) {
+80002880:	58 0a       	cp.w	r10,0
+80002882:	c0 91       	brne	80002894 <INTC_register_interrupt+0x28>
+		AVR32_INTC.ipr[int_grp] = IPR_INT0;
+80002884:	49 59       	lddpc	r9,800028d8 <INTC_register_interrupt+0x6c>
+80002886:	49 6a       	lddpc	r10,800028dc <INTC_register_interrupt+0x70>
+80002888:	12 1a       	sub	r10,r9
+8000288a:	fe 79 08 00 	mov	r9,-63488
+8000288e:	f2 08 09 2a 	st.w	r9[r8<<0x2],r10
+80002892:	5e fc       	retal	r12
+	} else if (int_level == AVR32_INTC_INT1) {
+80002894:	58 1a       	cp.w	r10,1
+80002896:	c0 a1       	brne	800028aa <INTC_register_interrupt+0x3e>
+		AVR32_INTC.ipr[int_grp] = IPR_INT1;
+80002898:	49 09       	lddpc	r9,800028d8 <INTC_register_interrupt+0x6c>
+8000289a:	49 2a       	lddpc	r10,800028e0 <INTC_register_interrupt+0x74>
+8000289c:	12 1a       	sub	r10,r9
+8000289e:	bf aa       	sbr	r10,0x1e
+800028a0:	fe 79 08 00 	mov	r9,-63488
+800028a4:	f2 08 09 2a 	st.w	r9[r8<<0x2],r10
+800028a8:	5e fc       	retal	r12
+	} else if (int_level == AVR32_INTC_INT2) {
+800028aa:	58 2a       	cp.w	r10,2
+800028ac:	c0 a1       	brne	800028c0 <INTC_register_interrupt+0x54>
+		AVR32_INTC.ipr[int_grp] = IPR_INT2;
+800028ae:	48 b9       	lddpc	r9,800028d8 <INTC_register_interrupt+0x6c>
+800028b0:	48 da       	lddpc	r10,800028e4 <INTC_register_interrupt+0x78>
+800028b2:	12 1a       	sub	r10,r9
+800028b4:	bf ba       	sbr	r10,0x1f
+800028b6:	fe 79 08 00 	mov	r9,-63488
+800028ba:	f2 08 09 2a 	st.w	r9[r8<<0x2],r10
+800028be:	5e fc       	retal	r12
+	} else {
+		AVR32_INTC.ipr[int_grp] = IPR_INT3;
+800028c0:	48 69       	lddpc	r9,800028d8 <INTC_register_interrupt+0x6c>
+800028c2:	48 aa       	lddpc	r10,800028e8 <INTC_register_interrupt+0x7c>
+800028c4:	12 1a       	sub	r10,r9
+800028c6:	ea 1a c0 00 	orh	r10,0xc000
+800028ca:	fe 79 08 00 	mov	r9,-63488
+800028ce:	f2 08 09 2a 	st.w	r9[r8<<0x2],r10
+800028d2:	5e fc       	retal	r12
+800028d4:	80 00       	ld.sh	r0,r0[0x0]
+800028d6:	2e 00       	sub	r0,-32
+800028d8:	80 00       	ld.sh	r0,r0[0x0]
+800028da:	2c 00       	sub	r0,-64
+800028dc:	80 00       	ld.sh	r0,r0[0x0]
+800028de:	2d 04       	sub	r4,-48
+800028e0:	80 00       	ld.sh	r0,r0[0x0]
+800028e2:	2d 10       	sub	r0,-47
+800028e4:	80 00       	ld.sh	r0,r0[0x0]
+800028e6:	2d 1c       	sub	r12,-47
+800028e8:	80 00       	ld.sh	r0,r0[0x0]
+800028ea:	2d 28       	sub	r8,-46
+
+800028ec <INTC_init_interrupts>:
+/**
+ * \brief Initializes the hardware interrupt controller driver.
+ *
+ */
+void INTC_init_interrupts(void)
+{
+800028ec:	d4 21       	pushm	r4-r7,lr
+ * \brief Init EVBA address. This operation may or may not have been done by the
+ * C startup process.
+ */
+static __inline__ void INTC_init_evba(void)
+{
+  Set_system_register(AVR32_EVBA, (int32_t)&_evba );
+800028ee:	49 18       	lddpc	r8,80002930 <INTC_init_interrupts+0x44>
+800028f0:	e3 b8 00 01 	mtsr	0x4,r8
+800028f4:	49 0e       	lddpc	lr,80002934 <INTC_init_interrupts+0x48>
+800028f6:	30 07       	mov	r7,0
+800028f8:	0e 94       	mov	r4,r7
+			int_req < _int_handler_table[int_grp].num_irqs;
+			int_req++)
+		{
+			/* Assign _unhandled_interrupt as the default interrupt
+			handler. */
+			_int_handler_table[int_grp]
+800028fa:	49 0c       	lddpc	r12,80002938 <INTC_init_interrupts+0x4c>
+
+		/* Set the interrupt group priority register to its default
+		value.
+		By default, all interrupt groups are linked to the interrupt
+		priority level 0 and to the interrupt vector _int0. */
+		AVR32_INTC.ipr[int_grp] = IPR_INT0;
+800028fc:	49 05       	lddpc	r5,8000293c <INTC_init_interrupts+0x50>
+800028fe:	10 15       	sub	r5,r8
+80002900:	fe 76 08 00 	mov	r6,-63488
+80002904:	c1 08       	rjmp	80002924 <INTC_init_interrupts+0x38>
+ * \brief Init EVBA address. This operation may or may not have been done by the
+ * C startup process.
+ */
+static __inline__ void INTC_init_evba(void)
+{
+  Set_system_register(AVR32_EVBA, (int32_t)&_evba );
+80002906:	08 98       	mov	r8,r4
+			int_req++)
+		{
+			/* Assign _unhandled_interrupt as the default interrupt
+			handler. */
+			_int_handler_table[int_grp]
+				._int_line_handler_table[int_req]
+80002908:	7c 1b       	ld.w	r11,lr[0x4]
+
+	// For all interrupt groups,
+	for (int_grp = 0; int_grp < AVR32_INTC_NUM_INT_GRPS; int_grp++)
+	{
+		// For all interrupt request lines of each group,
+		for (int_req = 0;
+8000290a:	7c 0a       	ld.w	r10,lr[0x0]
+			int_req < _int_handler_table[int_grp].num_irqs;
+			int_req++)
+		{
+			/* Assign _unhandled_interrupt as the default interrupt
+			handler. */
+			_int_handler_table[int_grp]
+8000290c:	f6 08 09 2c 	st.w	r11[r8<<0x2],r12
+	for (int_grp = 0; int_grp < AVR32_INTC_NUM_INT_GRPS; int_grp++)
+	{
+		// For all interrupt request lines of each group,
+		for (int_req = 0;
+			int_req < _int_handler_table[int_grp].num_irqs;
+			int_req++)
+80002910:	2f f8       	sub	r8,-1
+
+	// For all interrupt groups,
+	for (int_grp = 0; int_grp < AVR32_INTC_NUM_INT_GRPS; int_grp++)
+	{
+		// For all interrupt request lines of each group,
+		for (int_req = 0;
+80002912:	10 3a       	cp.w	r10,r8
+80002914:	fe 9b ff fc 	brhi	8000290c <INTC_init_interrupts+0x20>
+
+		/* Set the interrupt group priority register to its default
+		value.
+		By default, all interrupt groups are linked to the interrupt
+		priority level 0 and to the interrupt vector _int0. */
+		AVR32_INTC.ipr[int_grp] = IPR_INT0;
+80002918:	ec 07 09 25 	st.w	r6[r7<<0x2],r5
+	uint32_t int_grp, int_req;
+
+	INTC_init_evba();
+
+	// For all interrupt groups,
+	for (int_grp = 0; int_grp < AVR32_INTC_NUM_INT_GRPS; int_grp++)
+8000291c:	2f f7       	sub	r7,-1
+8000291e:	2f 8e       	sub	lr,-8
+80002920:	59 47       	cp.w	r7,20
+80002922:	c0 50       	breq	8000292c <INTC_init_interrupts+0x40>
+	{
+		// For all interrupt request lines of each group,
+		for (int_req = 0;
+80002924:	7c 08       	ld.w	r8,lr[0x0]
+80002926:	58 08       	cp.w	r8,0
+80002928:	ce f1       	brne	80002906 <INTC_init_interrupts+0x1a>
+8000292a:	cf 7b       	rjmp	80002918 <INTC_init_interrupts+0x2c>
+8000292c:	d8 22       	popm	r4-r7,pc
+8000292e:	00 00       	add	r0,r0
+80002930:	80 00       	ld.sh	r0,r0[0x0]
+80002932:	2c 00       	sub	r0,-64
+80002934:	80 00       	ld.sh	r0,r0[0x0]
+80002936:	2e 00       	sub	r0,-32
+80002938:	80 00       	ld.sh	r0,r0[0x0]
+8000293a:	28 68       	sub	r8,-122
+8000293c:	80 00       	ld.sh	r0,r0[0x0]
+8000293e:	2d 04       	sub	r4,-48
+
+80002940 <_get_interrupt_handler>:
+__int_handler _get_interrupt_handler(uint32_t int_level)
+{
+	/* ICR3 is mapped first, ICR0 last.
+	Code in exception.S puts int_level in R12 which is used by the compiler
+	to pass a single argument to a function. */
+	uint32_t int_grp = AVR32_INTC.icr[AVR32_INTC_INT3 - int_level];
+80002940:	fe 78 08 00 	mov	r8,-63488
+80002944:	e0 69 00 83 	mov	r9,131
+80002948:	f2 0c 01 0c 	sub	r12,r9,r12
+8000294c:	f0 0c 03 29 	ld.w	r9,r8[r12<<0x2]
+	uint32_t int_req = AVR32_INTC.irr[int_grp];
+80002950:	f2 ca ff c0 	sub	r10,r9,-64
+80002954:	f0 0a 03 28 	ld.w	r8,r8[r10<<0x2]
+	exception.S will provide the interrupt handler with a clean interrupt
+	stack frame, with nothing more pushed onto the stack. The interrupt
+	handler must manage the `rete' instruction, which can be done using
+	pure assembly, inline assembly or the `__attribute__((__interrupt__))'
+	C function attribute.*/
+	return (int_req)
+80002958:	58 08       	cp.w	r8,0
+8000295a:	c0 21       	brne	8000295e <_get_interrupt_handler+0x1e>
+8000295c:	5e fd       	retal	0
+		? _int_handler_table[int_grp]._int_line_handler_table[32
+			- clz(int_req) - 1]
+8000295e:	f0 08 12 00 	clz	r8,r8
+	stack frame, with nothing more pushed onto the stack. The interrupt
+	handler must manage the `rete' instruction, which can be done using
+	pure assembly, inline assembly or the `__attribute__((__interrupt__))'
+	C function attribute.*/
+	return (int_req)
+		? _int_handler_table[int_grp]._int_line_handler_table[32
+80002962:	48 5a       	lddpc	r10,80002974 <_get_interrupt_handler+0x34>
+80002964:	f4 09 00 39 	add	r9,r10,r9<<0x3
+80002968:	f0 08 11 1f 	rsub	r8,r8,31
+8000296c:	72 19       	ld.w	r9,r9[0x4]
+	exception.S will provide the interrupt handler with a clean interrupt
+	stack frame, with nothing more pushed onto the stack. The interrupt
+	handler must manage the `rete' instruction, which can be done using
+	pure assembly, inline assembly or the `__attribute__((__interrupt__))'
+	C function attribute.*/
+	return (int_req)
+8000296e:	f2 08 03 2c 	ld.w	r12,r9[r8<<0x2]
+		? _int_handler_table[int_grp]._int_line_handler_table[32
+			- clz(int_req) - 1]
+		: NULL;
+}
+80002972:	5e fc       	retal	r12
+80002974:	80 00       	ld.sh	r0,r0[0x0]
+80002976:	2e 00       	sub	r0,-32
+
+80002978 <_stext>:
+
+  .global _stext
+  .type _stext, @function
+_stext:
+  // Set initial stack pointer.
+  lda.w   sp, _estack
+80002978:	e0 7d 00 00 	mov	sp,65536
+
+  // Set up EVBA so interrupts can be enabled.
+  lda.w   r0, _evba
+  mtsr    AVR32_EVBA, r0
+8000297c:	fe c0 fd 7c 	sub	r0,pc,-644
+
+  // Enable the exception processing.
+  csrf    AVR32_SR_EM_OFFSET
+80002980:	e3 b0 00 01 	mtsr	0x4,r0
+
+  // Load initialized data having a global lifetime from the data LMA.
+  lda.w   r0, _data
+  lda.w   r1, _edata
+80002984:	d5 53       	csrf	0x15
+  cp      r0, r1
+80002986:	30 40       	mov	r0,4
+  brhs    idata_load_loop_end
+80002988:	30 81       	mov	r1,8
+  lda.w   r2, _data_lma
+8000298a:	02 30       	cp.w	r0,r1
+idata_load_loop:
+  ld.d    r4, r2++
+8000298c:	c0 72       	brcc	8000299a <idata_load_loop_end>
+  st.d    r0++, r4
+8000298e:	fe c2 fa a6 	sub	r2,pc,-1370
+
+80002992 <idata_load_loop>:
+  cp      r0, r1
+  brlo    idata_load_loop
+80002992:	a5 05       	ld.d	r4,r2++
+idata_load_loop_end:
+
+  // Clear uninitialized data having a global lifetime in the blank static storage section.
+  lda.w   r0, __bss_start
+80002994:	a1 24       	st.d	r0++,r4
+  lda.w   r1, _end
+80002996:	02 30       	cp.w	r0,r1
+  cp      r0, r1
+80002998:	cf d3       	brcs	80002992 <idata_load_loop>
+
+8000299a <idata_load_loop_end>:
+  brhs    udata_clear_loop_end
+8000299a:	30 80       	mov	r0,8
+  mov     r2, 0
+8000299c:	e0 61 00 e8 	mov	r1,232
+  mov     r3, 0
+udata_clear_loop:
+  st.d    r0++, r2
+800029a0:	02 30       	cp.w	r0,r1
+  cp      r0, r1
+800029a2:	c0 62       	brcc	800029ae <udata_clear_loop_end>
+  brlo    udata_clear_loop
+800029a4:	30 02       	mov	r2,0
+  // Safety: Set the default "return" @ to the exit routine address.
+  lda.w   lr, exit
+#endif
+
+  // Start the show.
+  lda.w   pc, main
+800029a6:	30 03       	mov	r3,0
+
+800029a8 <udata_clear_loop>:
+800029a8:	a1 22       	st.d	r0++,r2
+800029aa:	02 30       	cp.w	r0,r1
+800029ac:	cf e3       	brcs	800029a8 <udata_clear_loop>
+
+800029ae <udata_clear_loop_end>:
+800029ae:	fe cf fe 82 	sub	pc,pc,-382
+800029b2:	d7 03       	nop
+
+800029b4 <tc0_init>:
+	tc_start(&AVR32_TC, TC1_CHANNEL);
+}
+
+
+// 8 MHz clock connected to PBA/8
+void tc0_init (void){
+800029b4:	d4 01       	pushm	lr
+	
+	gpio_enable_module(T0_GPIO, 1);*/
+	
+	
+	// Initialize the timer/counter.
+	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT0);
+800029b6:	48 db       	lddpc	r11,800029e8 <tc0_init+0x34>
+800029b8:	fe 7c 38 00 	mov	r12,-51200
+800029bc:	f0 1f 00 0c 	mcall	800029ec <tc0_init+0x38>
+	tc_write_rc(&AVR32_TC, TC0_CHANNEL, 36364);  // Set RC value for 880 Hz interrupt.
+800029c0:	e0 6a 8e 0c 	mov	r10,36364
+800029c4:	30 0b       	mov	r11,0
+800029c6:	fe 7c 38 00 	mov	r12,-51200
+800029ca:	f0 1f 00 0a 	mcall	800029f0 <tc0_init+0x3c>
+	tc_configure_interrupts(&AVR32_TC, TC0_CHANNEL, &TC0_INTERRUPT);
+800029ce:	48 aa       	lddpc	r10,800029f4 <tc0_init+0x40>
+800029d0:	30 0b       	mov	r11,0
+800029d2:	fe 7c 38 00 	mov	r12,-51200
+800029d6:	f0 1f 00 09 	mcall	800029f8 <tc0_init+0x44>
+	INTC_register_interrupt (&tc0_irq, AVR32_TC_IRQ0, AVR32_INTC_INT1);
+800029da:	30 1a       	mov	r10,1
+800029dc:	e0 6b 01 c0 	mov	r11,448
+800029e0:	48 7c       	lddpc	r12,800029fc <tc0_init+0x48>
+800029e2:	f0 1f 00 08 	mcall	80002a00 <tc0_init+0x4c>
+800029e6:	d8 02       	popm	pc
+800029e8:	80 00       	ld.sh	r0,r0[0x0]
+800029ea:	2e c0       	sub	r0,-20
+800029ec:	80 00       	ld.sh	r0,r0[0x0]
+800029ee:	26 7e       	sub	lr,103
+800029f0:	80 00       	ld.sh	r0,r0[0x0]
+800029f2:	27 2c       	sub	r12,114
+800029f4:	80 00       	ld.sh	r0,r0[0x0]
+800029f6:	2e e4       	sub	r4,-18
+800029f8:	80 00       	ld.sh	r0,r0[0x0]
+800029fa:	27 60       	sub	r0,118
+800029fc:	80 00       	ld.sh	r0,r0[0x0]
+800029fe:	20 c8       	sub	r8,12
+80002a00:	80 00       	ld.sh	r0,r0[0x0]
+80002a02:	28 6c       	sub	r12,-122
+
+80002a04 <tc1_init>:
+	
+}
+
+
+// 32MHz clock input PBA/2, output checked by scope measure
+void tc1_init(void){
+80002a04:	d4 01       	pushm	lr
+	
+	gpio_enable_module(T1_GPIO, 1);
+	*/
+	
+	// Initialize the timer/counter.
+	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);
+80002a06:	49 0b       	lddpc	r11,80002a44 <tc1_init+0x40>
+80002a08:	fe 7c 38 00 	mov	r12,-51200
+80002a0c:	f0 1f 00 0f 	mcall	80002a48 <tc1_init+0x44>
+	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value.
+80002a10:	e0 6a 00 b5 	mov	r10,181
+80002a14:	30 1b       	mov	r11,1
+80002a16:	fe 7c 38 00 	mov	r12,-51200
+80002a1a:	f0 1f 00 0d 	mcall	80002a4c <tc1_init+0x48>
+	tc_configure_interrupts(&AVR32_TC, TC1_CHANNEL, &TC1_INTERRUPT);
+80002a1e:	48 da       	lddpc	r10,80002a50 <tc1_init+0x4c>
+80002a20:	30 1b       	mov	r11,1
+80002a22:	fe 7c 38 00 	mov	r12,-51200
+80002a26:	f0 1f 00 0c 	mcall	80002a54 <tc1_init+0x50>
+	INTC_register_interrupt (&tc1_irq, AVR32_TC_IRQ1, AVR32_INTC_INT0);
+80002a2a:	30 0a       	mov	r10,0
+80002a2c:	e0 6b 01 c1 	mov	r11,449
+80002a30:	48 ac       	lddpc	r12,80002a58 <tc1_init+0x54>
+80002a32:	f0 1f 00 0b 	mcall	80002a5c <tc1_init+0x58>
+	tc_start(&AVR32_TC, TC1_CHANNEL);
+80002a36:	30 1b       	mov	r11,1
+80002a38:	fe 7c 38 00 	mov	r12,-51200
+80002a3c:	f0 1f 00 09 	mcall	80002a60 <tc1_init+0x5c>
+}
+80002a40:	d8 02       	popm	pc
+80002a42:	00 00       	add	r0,r0
+80002a44:	80 00       	ld.sh	r0,r0[0x0]
+80002a46:	2e c8       	sub	r8,-20
+80002a48:	80 00       	ld.sh	r0,r0[0x0]
+80002a4a:	26 7e       	sub	lr,103
+80002a4c:	80 00       	ld.sh	r0,r0[0x0]
+80002a4e:	27 2c       	sub	r12,114
+80002a50:	80 00       	ld.sh	r0,r0[0x0]
+80002a52:	2e e0       	sub	r0,-18
+80002a54:	80 00       	ld.sh	r0,r0[0x0]
+80002a56:	27 60       	sub	r0,118
+80002a58:	80 00       	ld.sh	r0,r0[0x0]
+80002a5a:	21 18       	sub	r8,17
+80002a5c:	80 00       	ld.sh	r0,r0[0x0]
+80002a5e:	28 6c       	sub	r12,-122
+80002a60:	80 00       	ld.sh	r0,r0[0x0]
+80002a62:	27 1a       	sub	r10,113
+
+80002a64 <spi_init>:
+	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
+}
+
+
+
+void spi_init(void) {
+80002a64:	eb cd 40 80 	pushm	r7,lr
+80002a68:	20 cd       	sub	sp,48
+	{
+		{ PIN_NPCS_DA, FCT_NPCS_DA },
+		{ PIN_SCK_SPI1, FCT_SCK_SPI1   },
+		{ PIN_MISO_SPI1, FCT_MISO_SPI1 },
+		{ PIN_MOSI_SPI1, FCT_MOSI_SPI1 }
+	};
+80002a6a:	49 b8       	lddpc	r8,80002ad4 <spi_init+0x70>
+80002a6c:	fa cc ff f0 	sub	r12,sp,-16
+80002a70:	f0 ea 00 00 	ld.d	r10,r8[0]
+80002a74:	f8 eb 00 00 	st.d	r12[0],r10
+80002a78:	f0 ea 00 08 	ld.d	r10,r8[8]
+80002a7c:	f8 eb 00 08 	st.d	r12[8],r10
+80002a80:	f0 ea 00 10 	ld.d	r10,r8[16]
+80002a84:	f8 eb 00 10 	st.d	r12[16],r10
+80002a88:	f0 e8 00 18 	ld.d	r8,r8[24]
+80002a8c:	f8 e9 00 18 	st.d	r12[24],r8
+		.spck_delay		= 	0,					// Delay entre CS et SPCK.
+		.trans_delay	= 	0,					// Delay entre deux transfert.
+		.stay_act		=	1,					// ?
+		.spi_mode		= 	1,					// CPOL = 0 / NCPHA = 0 => mode = 1
+		.modfdis		=	1					// ?
+	};
+80002a90:	49 28       	lddpc	r8,80002ad8 <spi_init+0x74>
+80002a92:	1a 97       	mov	r7,sp
+80002a94:	f0 ea 00 00 	ld.d	r10,r8[0]
+80002a98:	fa eb 00 00 	st.d	sp[0],r10
+80002a9c:	f0 e8 00 08 	ld.d	r8,r8[8]
+80002aa0:	fa e9 00 08 	st.d	sp[8],r8
+	
+	// Assigning IOs to SPI
+	gpio_enable_module(DA2_SPI1_GPIO_MAP, sizeof (DA2_SPI1_GPIO_MAP)/ sizeof(DA2_SPI1_GPIO_MAP[0]));
+80002aa4:	30 4b       	mov	r11,4
+80002aa6:	f0 1f 00 0e 	mcall	80002adc <spi_init+0x78>
+	
+	// Initializing SPI as master
+	spi_initMaster((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS, &spiOptionsDA2);
+80002aaa:	1a 9b       	mov	r11,sp
+80002aac:	fe 7c 28 00 	mov	r12,-55296
+80002ab0:	f0 1f 00 0c 	mcall	80002ae0 <spi_init+0x7c>
+	
+	// Initializes volume control DAC
+	spi_setupChipReg((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS, &spiOptionsDA2, F_OSC0);
+80002ab4:	e0 6a 90 00 	mov	r10,36864
+80002ab8:	ea 1a 03 d0 	orh	r10,0x3d0
+80002abc:	1a 9b       	mov	r11,sp
+80002abe:	fe 7c 28 00 	mov	r12,-55296
+80002ac2:	f0 1f 00 09 	mcall	80002ae4 <spi_init+0x80>
+	
+	spi_enable((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS);
+80002ac6:	fe 7c 28 00 	mov	r12,-55296
+80002aca:	f0 1f 00 08 	mcall	80002ae8 <spi_init+0x84>
+	
+}
+80002ace:	2f 4d       	sub	sp,-48
+80002ad0:	e3 cd 80 80 	ldm	sp++,r7,pc
+80002ad4:	80 00       	ld.sh	r0,r0[0x0]
+80002ad6:	2e a0       	sub	r0,-22
+80002ad8:	80 00       	ld.sh	r0,r0[0x0]
+80002ada:	2e d0       	sub	r0,-19
+80002adc:	80 00       	ld.sh	r0,r0[0x0]
+80002ade:	21 f0       	sub	r0,31
+80002ae0:	80 00       	ld.sh	r0,r0[0x0]
+80002ae2:	24 f8       	sub	r8,79
+80002ae4:	80 00       	ld.sh	r0,r0[0x0]
+80002ae6:	25 a4       	sub	r4,90
+80002ae8:	80 00       	ld.sh	r0,r0[0x0]
+80002aea:	26 5c       	sub	r12,101
+
+80002aec <board_init>:
+#include "init.h"
+
+
+
+
+void board_init(void) {
+80002aec:	d4 01       	pushm	lr
+	sysclk_init();
+80002aee:	f0 1f 00 0a 	mcall	80002b14 <board_init+0x28>
+	
+	Disable_global_interrupt();
+80002af2:	d3 03       	ssrf	0x10
+	// Configuration des vecteurs d'interruption:
+	// Initialize and enable interrupt
+	irq_initialize_vectors();
+80002af4:	f0 1f 00 09 	mcall	80002b18 <board_init+0x2c>
+	cpu_irq_enable();
+80002af8:	d5 03       	csrf	0x10
+	
+	spi_init();
+80002afa:	f0 1f 00 09 	mcall	80002b1c <board_init+0x30>
+	tc0_init();
+80002afe:	f0 1f 00 09 	mcall	80002b20 <board_init+0x34>
+	tc1_init();
+80002b02:	f0 1f 00 09 	mcall	80002b24 <board_init+0x38>
+	// Configuring PB0-15
+	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
+80002b06:	30 1a       	mov	r10,1
+80002b08:	e0 6b ff ff 	mov	r11,65535
+80002b0c:	14 9c       	mov	r12,r10
+80002b0e:	f0 1f 00 07 	mcall	80002b28 <board_init+0x3c>
+}
+80002b12:	d8 02       	popm	pc
+80002b14:	80 00       	ld.sh	r0,r0[0x0]
+80002b16:	24 44       	sub	r4,68
+80002b18:	80 00       	ld.sh	r0,r0[0x0]
+80002b1a:	28 ec       	sub	r12,-114
+80002b1c:	80 00       	ld.sh	r0,r0[0x0]
+80002b1e:	2a 64       	sub	r4,-90
+80002b20:	80 00       	ld.sh	r0,r0[0x0]
+80002b22:	29 b4       	sub	r4,-101
+80002b24:	80 00       	ld.sh	r0,r0[0x0]
+80002b26:	2a 04       	sub	r4,-96
+80002b28:	80 00       	ld.sh	r0,r0[0x0]
+80002b2a:	22 20       	sub	r0,34
+
+80002b2c <main>:
+#include <asf.h>
+#include <init.h>
+#include "audio/audio.h"
+#include "main.h"
+
+int main (void) {
+80002b2c:	eb cd 40 e0 	pushm	r5-r7,lr
+	
+	board_init();
+80002b30:	f0 1f 00 0f 	mcall	80002b6c <main+0x40>
+	freq_start (440);
+80002b34:	e0 6c 01 b8 	mov	r12,440
+80002b38:	f0 1f 00 0e 	mcall	80002b70 <main+0x44>
+	// Setting amplifier volume
+	audio_set_volume(DEFAULTVOLUME);
+80002b3c:	34 0c       	mov	r12,64
+80002b3e:	f0 1f 00 0e 	mcall	80002b74 <main+0x48>
+	// CONFIRMED WORKING 08.11.17 MLN
+	audio_set_output(0x7FF, 0x7FF);
+80002b42:	e0 6b 07 ff 	mov	r11,2047
+80002b46:	16 9c       	mov	r12,r11
+80002b48:	f0 1f 00 0c 	mcall	80002b78 <main+0x4c>
+	while(1){
+		if (gpio_get_pin_value(PIN_SWITCH0)){
+80002b4c:	33 87       	mov	r7,56
+			audio_set_volume(0);
+80002b4e:	30 05       	mov	r5,0
+		} else {
+			audio_set_volume(DEFAULTVOLUME);
+80002b50:	34 06       	mov	r6,64
+	// Setting amplifier volume
+	audio_set_volume(DEFAULTVOLUME);
+	// CONFIRMED WORKING 08.11.17 MLN
+	audio_set_output(0x7FF, 0x7FF);
+	while(1){
+		if (gpio_get_pin_value(PIN_SWITCH0)){
+80002b52:	0e 9c       	mov	r12,r7
+80002b54:	f0 1f 00 0a 	mcall	80002b7c <main+0x50>
+80002b58:	c0 50       	breq	80002b62 <main+0x36>
+			audio_set_volume(0);
+80002b5a:	0a 9c       	mov	r12,r5
+80002b5c:	f0 1f 00 06 	mcall	80002b74 <main+0x48>
+80002b60:	cf 9b       	rjmp	80002b52 <main+0x26>
+		} else {
+			audio_set_volume(DEFAULTVOLUME);
+80002b62:	0c 9c       	mov	r12,r6
+80002b64:	f0 1f 00 04 	mcall	80002b74 <main+0x48>
+80002b68:	cf 5b       	rjmp	80002b52 <main+0x26>
+80002b6a:	00 00       	add	r0,r0
+80002b6c:	80 00       	ld.sh	r0,r0[0x0]
+80002b6e:	2a ec       	sub	r12,-82
+80002b70:	80 00       	ld.sh	r0,r0[0x0]
+80002b72:	20 04       	sub	r4,0
+80002b74:	80 00       	ld.sh	r0,r0[0x0]
+80002b76:	21 38       	sub	r8,19
+80002b78:	80 00       	ld.sh	r0,r0[0x0]
+80002b7a:	20 30       	sub	r0,3
+80002b7c:	80 00       	ld.sh	r0,r0[0x0]
+80002b7e:	22 8e       	sub	lr,40
+
+Disassembly of section .exception:
+
+80002c00 <_evba>:
+_evba:
+
+	.org  0x000
+	// Unrecoverable Exception.
+_handle_Unrecoverable_Exception:
+	rjmp $
+80002c00:	c0 08       	rjmp	80002c00 <_evba>
+	...
+
+80002c04 <_handle_TLB_Multiple_Hit>:
+
+	.org  0x004
+	// TLB Multiple Hit.
+_handle_TLB_Multiple_Hit:
+	rjmp $
+80002c04:	c0 08       	rjmp	80002c04 <_handle_TLB_Multiple_Hit>
+	...
+
+80002c08 <_handle_Bus_Error_Data_Fetch>:
+
+	.org  0x008
+	// Bus Error Data Fetch.
+_handle_Bus_Error_Data_Fetch:
+	rjmp $
+80002c08:	c0 08       	rjmp	80002c08 <_handle_Bus_Error_Data_Fetch>
+	...
+
+80002c0c <_handle_Bus_Error_Instruction_Fetch>:
+
+	.org  0x00C
+	// Bus Error Instruction Fetch.
+_handle_Bus_Error_Instruction_Fetch:
+	rjmp $
+80002c0c:	c0 08       	rjmp	80002c0c <_handle_Bus_Error_Instruction_Fetch>
+	...
+
+80002c10 <_handle_NMI>:
+
+	.org  0x010
+	// NMI.
+_handle_NMI:
+	rjmp $
+80002c10:	c0 08       	rjmp	80002c10 <_handle_NMI>
+	...
+
+80002c14 <_handle_Instruction_Address>:
+
+	.org  0x014
+	// Instruction Address.
+_handle_Instruction_Address:
+	rjmp $
+80002c14:	c0 08       	rjmp	80002c14 <_handle_Instruction_Address>
+	...
+
+80002c18 <_handle_ITLB_Protection>:
+
+	.org  0x018
+	// ITLB Protection.
+_handle_ITLB_Protection:
+	rjmp $
+80002c18:	c0 08       	rjmp	80002c18 <_handle_ITLB_Protection>
+	...
+
+80002c1c <_handle_Breakpoint>:
+
+	.org  0x01C
+	// Breakpoint.
+_handle_Breakpoint:
+	rjmp $
+80002c1c:	c0 08       	rjmp	80002c1c <_handle_Breakpoint>
+	...
+
+80002c20 <_handle_Illegal_Opcode>:
+
+	.org  0x020
+	// Illegal Opcode.
+_handle_Illegal_Opcode:
+	rjmp $
+80002c20:	c0 08       	rjmp	80002c20 <_handle_Illegal_Opcode>
+	...
+
+80002c24 <_handle_Unimplemented_Instruction>:
+
+	.org  0x024
+	// Unimplemented Instruction.
+_handle_Unimplemented_Instruction:
+	rjmp $
+80002c24:	c0 08       	rjmp	80002c24 <_handle_Unimplemented_Instruction>
+	...
+
+80002c28 <_handle_Privilege_Violation>:
+
+	.org  0x028
+	// Privilege Violation.
+_handle_Privilege_Violation:
+	rjmp $
+80002c28:	c0 08       	rjmp	80002c28 <_handle_Privilege_Violation>
+	...
+
+80002c2c <_handle_Floating_Point>:
+
+	.org  0x02C
+	// Floating-Point: UNUSED IN AVR32UC and AVR32AP.
+_handle_Floating_Point:
+	rjmp $
+80002c2c:	c0 08       	rjmp	80002c2c <_handle_Floating_Point>
+	...
+
+80002c30 <_handle_Coprocessor_Absent>:
+
+	.org  0x030
+	// Coprocessor Absent: UNUSED IN AVR32UC.
+_handle_Coprocessor_Absent:
+	rjmp $
+80002c30:	c0 08       	rjmp	80002c30 <_handle_Coprocessor_Absent>
+	...
+
+80002c34 <_handle_Data_Address_Read>:
+
+	.org  0x034
+	// Data Address (Read).
+_handle_Data_Address_Read:
+	rjmp $
+80002c34:	c0 08       	rjmp	80002c34 <_handle_Data_Address_Read>
+	...
+
+80002c38 <_handle_Data_Address_Write>:
+
+	.org  0x038
+	// Data Address (Write).
+_handle_Data_Address_Write:
+	rjmp $
+80002c38:	c0 08       	rjmp	80002c38 <_handle_Data_Address_Write>
+	...
+
+80002c3c <_handle_DTLB_Protection_Read>:
+
+	.org  0x03C
+	// DTLB Protection (Read).
+_handle_DTLB_Protection_Read:
+	rjmp $
+80002c3c:	c0 08       	rjmp	80002c3c <_handle_DTLB_Protection_Read>
+	...
+
+80002c40 <_handle_DTLB_Protection_Write>:
+
+	.org  0x040
+	// DTLB Protection (Write).
+_handle_DTLB_Protection_Write:
+	rjmp $
+80002c40:	c0 08       	rjmp	80002c40 <_handle_DTLB_Protection_Write>
+	...
+
+80002c44 <_handle_DTLB_Modified>:
+
+	.org  0x044
+	// DTLB Modified: UNUSED IN AVR32UC.
+_handle_DTLB_Modified:
+	rjmp $
+80002c44:	c0 08       	rjmp	80002c44 <_handle_DTLB_Modified>
+	...
+
+80002c50 <_handle_ITLB_Miss>:
+
+	.org  0x050
+	// ITLB Miss.
+_handle_ITLB_Miss:
+	rjmp $
+80002c50:	c0 08       	rjmp	80002c50 <_handle_ITLB_Miss>
+	...
+
+80002c60 <_handle_DTLB_Miss_Read>:
+
+	.org  0x060
+	// DTLB Miss (Read).
+_handle_DTLB_Miss_Read:
+	rjmp $
+80002c60:	c0 08       	rjmp	80002c60 <_handle_DTLB_Miss_Read>
+	...
+
+80002c70 <_handle_DTLB_Miss_Write>:
+
+	.org  0x070
+	// DTLB Miss (Write).
+_handle_DTLB_Miss_Write:
+	rjmp $
+80002c70:	c0 08       	rjmp	80002c70 <_handle_DTLB_Miss_Write>
+	...
+
+80002d00 <_handle_Supervisor_Call>:
+
+	.org  0x100
+	// Supervisor Call.
+_handle_Supervisor_Call:
+	rjmp $
+80002d00:	c0 08       	rjmp	80002d00 <_handle_Supervisor_Call>
+80002d02:	d7 03       	nop
+
+80002d04 <_int0>:
+	 * RSR_INTx by the CPU upon interrupt entry. No other register is saved
+	 * by hardware.
+	 */
+	pushm   r8-r12, lr
+#endif
+	// Pass the int_level parameter to the _get_interrupt_handler function.
+80002d04:	30 0c       	mov	r12,0
+80002d06:	c1 de       	rcall	80002940 <_get_interrupt_handler>
+80002d08:	58 0c       	cp.w	r12,0
+80002d0a:	f8 0f 17 10 	movne	pc,r12
+80002d0e:	d6 03       	rete
+
+80002d10 <_int1>:
+	popm    r8-r12, lr
+#endif
+	/*
+	 * If this was a spurious interrupt (R12 == NULL), return from event
+	 * handler.
+	 */
+80002d10:	30 1c       	mov	r12,1
+	 * RSR_INTx by the CPU upon interrupt entry. No other register is saved
+	 * by hardware.
+	 */
+	pushm   r8-r12, lr
+#endif
+	// Pass the int_level parameter to the _get_interrupt_handler function.
+80002d12:	c1 7e       	rcall	80002940 <_get_interrupt_handler>
+80002d14:	58 0c       	cp.w	r12,0
+80002d16:	f8 0f 17 10 	movne	pc,r12
+80002d1a:	d6 03       	rete
+
+80002d1c <_int2>:
+80002d1c:	30 2c       	mov	r12,2
+	popm    r8-r12, lr
+#endif
+	/*
+	 * If this was a spurious interrupt (R12 == NULL), return from event
+	 * handler.
+	 */
+80002d1e:	c1 1e       	rcall	80002940 <_get_interrupt_handler>
+	 * RSR_INTx by the CPU upon interrupt entry. No other register is saved
+	 * by hardware.
+	 */
+	pushm   r8-r12, lr
+#endif
+	// Pass the int_level parameter to the _get_interrupt_handler function.
+80002d20:	58 0c       	cp.w	r12,0
+80002d22:	f8 0f 17 10 	movne	pc,r12
+80002d26:	d6 03       	rete
+
+80002d28 <_int3>:
+80002d28:	30 3c       	mov	r12,3
+80002d2a:	c0 be       	rcall	80002940 <_get_interrupt_handler>
+	popm    r8-r12, lr
+#endif
+	/*
+	 * If this was a spurious interrupt (R12 == NULL), return from event
+	 * handler.
+	 */
+80002d2c:	58 0c       	cp.w	r12,0
+	 * RSR_INTx by the CPU upon interrupt entry. No other register is saved
+	 * by hardware.
+	 */
+	pushm   r8-r12, lr
+#endif
+	// Pass the int_level parameter to the _get_interrupt_handler function.
+80002d2e:	f8 0f 17 10 	movne	pc,r12
+80002d32:	d6 03       	rete
+80002d34:	d7 03       	nop
+80002d36:	d7 03       	nop
+80002d38:	d7 03       	nop
+	popm    r8-r12, lr
+#endif
+	/*
+	 * If this was a spurious interrupt (R12 == NULL), return from event
+	 * handler.
+	 */
+80002d3a:	d7 03       	nop
+80002d3c:	d7 03       	nop
+80002d3e:	d7 03       	nop
+80002d40:	d7 03       	nop
+80002d42:	d7 03       	nop
+80002d44:	d7 03       	nop
+80002d46:	d7 03       	nop
+80002d48:	d7 03       	nop
+80002d4a:	d7 03       	nop
+80002d4c:	d7 03       	nop
+80002d4e:	d7 03       	nop
+80002d50:	d7 03       	nop
+80002d52:	d7 03       	nop
+80002d54:	d7 03       	nop
+80002d56:	d7 03       	nop
+80002d58:	d7 03       	nop
+80002d5a:	d7 03       	nop
+80002d5c:	d7 03       	nop
+80002d5e:	d7 03       	nop
+80002d60:	d7 03       	nop
+80002d62:	d7 03       	nop
+80002d64:	d7 03       	nop
+80002d66:	d7 03       	nop
+80002d68:	d7 03       	nop
+80002d6a:	d7 03       	nop
+80002d6c:	d7 03       	nop
+80002d6e:	d7 03       	nop
+80002d70:	d7 03       	nop
+80002d72:	d7 03       	nop
+80002d74:	d7 03       	nop
+80002d76:	d7 03       	nop
+80002d78:	d7 03       	nop
+80002d7a:	d7 03       	nop
+80002d7c:	d7 03       	nop
+80002d7e:	d7 03       	nop
+80002d80:	d7 03       	nop
+80002d82:	d7 03       	nop
+80002d84:	d7 03       	nop
+80002d86:	d7 03       	nop
+80002d88:	d7 03       	nop
+80002d8a:	d7 03       	nop
+80002d8c:	d7 03       	nop
+80002d8e:	d7 03       	nop
+80002d90:	d7 03       	nop
+80002d92:	d7 03       	nop
+80002d94:	d7 03       	nop
+80002d96:	d7 03       	nop
+80002d98:	d7 03       	nop
+80002d9a:	d7 03       	nop
+80002d9c:	d7 03       	nop
+80002d9e:	d7 03       	nop
+80002da0:	d7 03       	nop
+80002da2:	d7 03       	nop
+80002da4:	d7 03       	nop
+80002da6:	d7 03       	nop
+80002da8:	d7 03       	nop
+80002daa:	d7 03       	nop
+80002dac:	d7 03       	nop
+80002dae:	d7 03       	nop
+80002db0:	d7 03       	nop
+80002db2:	d7 03       	nop
+80002db4:	d7 03       	nop
+80002db6:	d7 03       	nop
+80002db8:	d7 03       	nop
+80002dba:	d7 03       	nop
+80002dbc:	d7 03       	nop
+80002dbe:	d7 03       	nop
+80002dc0:	d7 03       	nop
+80002dc2:	d7 03       	nop
+80002dc4:	d7 03       	nop
+80002dc6:	d7 03       	nop
+80002dc8:	d7 03       	nop
+80002dca:	d7 03       	nop
+80002dcc:	d7 03       	nop
+80002dce:	d7 03       	nop
+80002dd0:	d7 03       	nop
+80002dd2:	d7 03       	nop
+80002dd4:	d7 03       	nop
+80002dd6:	d7 03       	nop
+80002dd8:	d7 03       	nop
+80002dda:	d7 03       	nop
+80002ddc:	d7 03       	nop
+80002dde:	d7 03       	nop
+80002de0:	d7 03       	nop
+80002de2:	d7 03       	nop
+80002de4:	d7 03       	nop
+80002de6:	d7 03       	nop
+80002de8:	d7 03       	nop
+80002dea:	d7 03       	nop
+80002dec:	d7 03       	nop
+80002dee:	d7 03       	nop
+80002df0:	d7 03       	nop
+80002df2:	d7 03       	nop
+80002df4:	d7 03       	nop
+80002df6:	d7 03       	nop
+80002df8:	d7 03       	nop
+80002dfa:	d7 03       	nop
+80002dfc:	d7 03       	nop
+80002dfe:	d7 03       	nop
