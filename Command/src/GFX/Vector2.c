@@ -5,7 +5,7 @@
  *  Author: voletqu
  */ 
 
-#include "Vector2.h"
+#include "vector2.h"
 
 Vector2 vector2_Add(Vector2 v1, Vector2 v2){
 	return (Vector2){.x = v1.x + v2.x,

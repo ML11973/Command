@@ -66,7 +66,9 @@ src/main.d src/main.o src/main.o: ../src/main.c ../src/asf.h \
  ../src/ASF/avr32/drivers/usart/usart.h \
  ../src/ASF/common/boards/user_board/init.h ../src/config/conf_cpu.h \
  ../src/ASF/common/boards/user_board/../../../../audio/audio.h \
- ../src/audio/audio.h ../src/main.h
+ ../src/audio/audio.h ../src/mainCentre.c ../src/SDCard/sdcard.h \
+ ../src/GFX/screen.h ../src/GFX/vector2.h ../src/GFX/rectangle.h \
+ ../src/GFX/Vector2.h ../src/GFX/color.h ../src/GFX/gui.h
 
 ../src/asf.h:
 
@@ -218,4 +220,18 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/audio/audio.h:
 
-../src/main.h:
+../src/mainCentre.c:
+
+../src/SDCard/sdcard.h:
+
+../src/GFX/screen.h:
+
+../src/GFX/vector2.h:
+
+../src/GFX/rectangle.h:
+
+../src/GFX/Vector2.h:
+
+../src/GFX/color.h:
+
+../src/GFX/gui.h:

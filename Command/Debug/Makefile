@@ -58,12 +58,24 @@ SUBDIRS :=  \
 ../src/ASF/common/utils/ \
 ../src/ASF/common/utils/interrupt/ \
 ../src/config/ \
-../src/audio
+../src/audio \
+../src/GFX/ \
+../src/SDCard/ \
+../src/SDCard/NewFolder1/
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
 ../src/audio/audio.c \
+../src/GFX/fonts.c \
+../src/GFX/gfx.c \
+../src/GFX/gui.c \
+../src/GFX/rectangle.c \
+../src/GFX/screen.c \
+../src/GFX/vector2.c \
+../src/mainCentre.c \
+../src/mainGauche.c \
+../src/SDCard/SDCard.c \
 ../src/syntax.c \
 ../src/ASF/avr32/drivers/flashc/flashc.c \
 ../src/ASF/avr32/drivers/gpio/gpio.c \
@@ -91,6 +103,15 @@ ASM_SRCS +=
 
 OBJS +=  \
 src/audio/audio.o \
+src/GFX/fonts.o \
+src/GFX/gfx.o \
+src/GFX/gui.o \
+src/GFX/rectangle.o \
+src/GFX/screen.o \
+src/GFX/vector2.o \
+src/mainCentre.o \
+src/mainGauche.o \
+src/SDCard/SDCard.o \
 src/syntax.o \
 src/ASF/avr32/drivers/flashc/flashc.o \
 src/ASF/avr32/drivers/gpio/gpio.o \
@@ -111,6 +132,15 @@ src/main.o
 
 OBJS_AS_ARGS +=  \
 src/audio/audio.o \
+src/GFX/fonts.o \
+src/GFX/gfx.o \
+src/GFX/gui.o \
+src/GFX/rectangle.o \
+src/GFX/screen.o \
+src/GFX/vector2.o \
+src/mainCentre.o \
+src/mainGauche.o \
+src/SDCard/SDCard.o \
 src/syntax.o \
 src/ASF/avr32/drivers/flashc/flashc.o \
 src/ASF/avr32/drivers/gpio/gpio.o \
@@ -131,6 +161,15 @@ src/main.o
 
 C_DEPS +=  \
 src/audio/audio.d \
+src/GFX/fonts.d \
+src/GFX/gfx.d \
+src/GFX/gui.d \
+src/GFX/rectangle.d \
+src/GFX/screen.d \
+src/GFX/vector2.d \
+src/mainCentre.d \
+src/mainGauche.d \
+src/SDCard/SDCard.d \
 src/syntax.d \
 src/ASF/avr32/drivers/flashc/flashc.d \
 src/ASF/avr32/drivers/gpio/gpio.d \
@@ -151,6 +190,15 @@ src/main.d
 
 C_DEPS_AS_ARGS +=  \
 src/audio/audio.d \
+src/GFX/fonts.d \
+src/GFX/gfx.d \
+src/GFX/gui.d \
+src/GFX/rectangle.d \
+src/GFX/screen.d \
+src/GFX/vector2.d \
+src/mainCentre.d \
+src/mainGauche.d \
+src/SDCard/SDCard.d \
 src/syntax.d \
 src/ASF/avr32/drivers/flashc/flashc.d \
 src/ASF/avr32/drivers/gpio/gpio.d \
@@ -214,6 +262,24 @@ LINKER_SCRIPT_DEP+=
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 src/audio/%.o: ../src/audio/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
@@ -221,7 +287,21 @@ src/audio/%.o: ../src/audio/%.c
 	@echo Finished building: $<
 	
 
+src/GFX/%.o: ../src/GFX/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/avr32/utils" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi" -I"../src/ASF/avr32/drivers/usart" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/cpu/cycle_counter"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 src/%.o: ../src/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/avr32/utils" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi" -I"../src/ASF/avr32/drivers/usart" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/cpu/cycle_counter"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+src/SDCard/%.o: ../src/SDCard/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
 	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/avr32/utils" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi" -I"../src/ASF/avr32/drivers/usart" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/cpu/cycle_counter"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

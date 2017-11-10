@@ -4,7 +4,7 @@
  * Created: 08.11.2017 15:52:18
  *  Author: voletqu
  */ 
-#include "Rectangle.h"
+#include "rectangle.h"
 
 uint16_t rectangle_GetWidth(Rectangle rect){
 	return rect.topRight.x - rect.bottomLeft.x;

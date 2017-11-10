@@ -364,7 +364,7 @@
     <Compile Include="src\audio\audio.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Color.h">
+    <Compile Include="src\GFX\color.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\GFX\fonts.c">
@@ -373,28 +373,40 @@
     <Compile Include="src\GFX\fonts.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\GFX.c">
+    <Compile Include="src\GFX\gfx.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\GFX.h">
+    <Compile Include="src\GFX\gfx.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Rectangle.c">
+    <Compile Include="src\GFX\gui.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Rectangle.h">
+    <Compile Include="src\GFX\gui.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Screen.c">
+    <Compile Include="src\GFX\rectangle.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Screen.h">
+    <Compile Include="src\GFX\rectangle.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Vector2.c">
+    <Compile Include="src\GFX\screen.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\GFX\Vector2.h">
+    <Compile Include="src\GFX\screen.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\GFX\vector2.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\GFX\vector2.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\mainCentre.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\mainGauche.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\SDCard\SDCard.c">

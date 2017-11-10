@@ -20,27 +20,29 @@
  *
  */
 
+//#define AVIS_POLITIQUE GAUCHE
+
 #include <asf.h>
 #include <init.h>
 #include "audio/audio.h"
-#include "main.h"
+
+#ifdef AVIS_POLITIQUE
+	#include "mainGauche.c"
+#else
+	#include "mainCentre.c"
+#endif
+
 
 int main (void) {
 	
-	board_init();
-	freq_start (440);
-	// Setting amplifier volume
-	audio_set_volume(DEFAULTVOLUME);
-	// CONFIRMED WORKING 08.11.17 MLN
-	audio_set_output(0x7FF, 0x7FF);
-	while(1){
-		if (gpio_get_pin_value(PIN_SWITCH0)){
-			audio_set_volume(0);
-		} else {
-			audio_set_volume(DEFAULTVOLUME);
-		}
-		
-	}
+	#ifdef AVIS_POLITIQUE
+		mainGauche();
+	#else
+		mainCentre();
+	#endif
+	
 }
+	
+
 
 

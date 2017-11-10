@@ -4,6 +4,24 @@
 
 src\audio\audio.c
 
+src\GFX\fonts.c
+
+src\GFX\gfx.c
+
+src\GFX\gui.c
+
+src\GFX\rectangle.c
+
+src\GFX\screen.c
+
+src\GFX\vector2.c
+
+src\mainCentre.c
+
+src\mainGauche.c
+
+src\SDCard\SDCard.c
+
 src\syntax.c
 
 src\ASF\avr32\drivers\flashc\flashc.c

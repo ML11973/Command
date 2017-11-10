@@ -1,4 +1,4 @@
-src/syntax.d src/syntax.o src/syntax.o: ../src/syntax.c ../src/syntax.h \
+src/mainCentre.d src/mainCentre.o src/mainCentre.o: ../src/mainCentre.c \
  ../src/asf.h ../src/ASF/avr32/drivers/cpu/cycle_counter/cycle_counter.h \
  ../src/ASF/avr32/utils/compiler.h \
  ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
@@ -63,11 +63,11 @@ src/syntax.d src/syntax.o src/syntax.o: ../src/syntax.c ../src/syntax.h \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
- ../src/ASF/avr32/drivers/usart/usart.h ../src/GFX/GFX.h \
- ../src/GFX/vector2.h ../src/GFX/rectangle.h ../src/GFX/color.h \
- ../src/GFX/screen.h
-
-../src/syntax.h:
+ ../src/ASF/avr32/drivers/usart/usart.h \
+ ../src/ASF/common/boards/user_board/init.h ../src/config/conf_cpu.h \
+ ../src/ASF/common/boards/user_board/../../../../audio/audio.h \
+ ../src/SDCard/sdcard.h ../src/GFX/screen.h ../src/GFX/vector2.h \
+ ../src/GFX/rectangle.h ../src/GFX/color.h ../src/GFX/gui.h
 
 ../src/asf.h:
 
@@ -211,7 +211,15 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/ASF/avr32/drivers/usart/usart.h:
 
-../src/GFX/GFX.h:
+../src/ASF/common/boards/user_board/init.h:
+
+../src/config/conf_cpu.h:
+
+../src/ASF/common/boards/user_board/../../../../audio/audio.h:
+
+../src/SDCard/sdcard.h:
+
+../src/GFX/screen.h:
 
 ../src/GFX/vector2.h:
 
@@ -219,4 +227,4 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/GFX/color.h:
 
-../src/GFX/screen.h:
+../src/GFX/gui.h:

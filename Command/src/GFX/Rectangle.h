@@ -10,7 +10,7 @@
 #define RECTANGLE_H_
 
 #include <asf.h>
-#include "Vector2.h"
+#include "vector2.h"
 
 struct rectangle
 {
