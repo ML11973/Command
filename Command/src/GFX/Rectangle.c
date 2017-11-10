@@ -6,20 +6,20 @@
  */ 
 #include "Rectangle.h"
 
-uint16_t Rectangle_GetWidth(Rectangle rect){
+uint16_t rectangle_GetWidth(Rectangle rect){
 	return rect.topRight.x - rect.bottomLeft.x;
 }
 
-uint8_t  Rectangle_GetHeight(Rectangle rect){
+uint8_t  rectangle_GetHeight(Rectangle rect){
 	return rect.topRight.y - rect.bottomLeft.y;
 }
 
-uint32_t Rectangle_GetArea(Rectangle rect){
+uint32_t rectangle_GetArea(Rectangle rect){
 	volatile uint32_t value = (uint32_t)(rect.topRight.x - rect.bottomLeft.x +1)*(uint32_t)(rect.topRight.y - rect.bottomLeft.y +1);
 	return value;
 }
 
-void Rectangle_VerifySize(Rectangle *rect, uint16_t maxWidth, uint8_t maxHeight){
+void rectangle_VerifySize(Rectangle *rect, uint16_t maxWidth, uint8_t maxHeight){
 	if(rect->bottomLeft.x > maxWidth)
 		rect->bottomLeft.x = maxWidth;
 

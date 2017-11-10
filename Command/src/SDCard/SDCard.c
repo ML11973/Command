@@ -5,7 +5,7 @@
  *  Author: voletqu
  */ 
 
-#include "SDCard.h"
+#include "sdcard.h"
 
 // Master Boot Entry
 typedef union {
@@ -76,9 +76,9 @@ volatile file_menu_t file_menu[100];
 static bool _setupFAT(void);
 static uint8_t _filesName(void);
 
-bool SDCard_ReadSector(void *ram, uint32_t sector);
+bool sdcard_ReadSector(void *ram, uint32_t sector);
 
-void SDCard_Init(void){
+void sdcard_Init(void){
 	gpio_map_t sdGPIO={
 		{PIN_NPCS_SD,	FCT_NPCS_SD	  },
 		{PIN_SCK_SPI1,	FCT_SCK_SPI1  },
@@ -98,8 +98,8 @@ void SDCard_Init(void){
 	spi_enable((volatile struct avr32_spi_t*) SD_MMC_SPI);
 }
 
-bool SDCard_Mount(void){
-	if(!SDCard_CheckPresence())
+bool sdcard_Mount(void){
+	if(!sdcard_CheckPresence())
 		return false;
 	if(!sd_mmc_spi_init(sdOptions, BOARD_OSC0_HZ))
 		return false;
@@ -110,11 +110,11 @@ bool SDCard_Mount(void){
 	return true;
 }
 
-bool SDCard_CheckPresence(void){
+bool sdcard_CheckPresence(void){
 	return sd_mmc_spi_check_presence(); 
 }
 
-bool SDCard_ReadSector(void *ram, uint32_t sector){
+bool sdcard_ReadSector(void *ram, uint32_t sector){
 	uint8_t *_ram = ram;
 	uint16_t  i;
 	uint16_t  read_time_out;
@@ -203,7 +203,7 @@ bool Root_directory(uint8_t file_numero){
 	  entry++;
 	  if ((entry % 16) == 0)
 	  {
-		if (SDCard_ReadSector((uint8_t *) &data_mem, sectors) == true) sectors++;
+		if (sdcard_ReadSector((uint8_t *) &data_mem, sectors) == true) sectors++;
 		else return false;
 	  }
 	  
@@ -243,7 +243,7 @@ static bool _setupFAT(void){
 	FAT = 0;
 		
 	//if (sd_spi_quick_read_sector_to_ram((uint8_t *) &data_mem, 0) == true)
-	if (SDCard_ReadSector((uint8_t *) &data_mem, 0) == true)
+	if (sdcard_ReadSector((uint8_t *) &data_mem, 0) == true)
 	{
 		for (i = 0; i < 16; i++)
 		{
@@ -263,7 +263,7 @@ static bool _setupFAT(void){
 			FAT = 1;
 		}
 			
-		if (SDCard_ReadSector((uint8_t *) &data_mem, sectors) == true)
+		if (sdcard_ReadSector((uint8_t *) &data_mem, sectors) == true)
 		{
 			for (i = 0; i < 61; i++)
 			{
@@ -343,7 +343,7 @@ static uint8_t _filesName(void)
 	  entry++;
 	  if ((entry % 16) == 0)
 	  {
-		if (SDCard_ReadSector((uint8_t *) &data_mem, sectors) == true) sectors++;
+		if (sdcard_ReadSector((uint8_t *) &data_mem, sectors) == true) sectors++;
 		else return false;
 	  }
 	  

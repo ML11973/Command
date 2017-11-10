@@ -19,12 +19,12 @@ struct rectangle
 };
 typedef struct rectangle Rectangle;
 
-uint16_t Rectangle_GetWidth(Rectangle rect);
-uint8_t  Rectangle_GetHeight(Rectangle rect);
+uint16_t rectangle_GetWidth(Rectangle rect);
+uint8_t  rectangle_GetHeight(Rectangle rect);
 
-uint32_t Rectangle_GetArea(Rectangle rect);
+uint32_t rectangle_GetArea(Rectangle rect);
 
-void Rectangle_VerifySize(Rectangle *rect, uint16_t maxWidth, uint8_t maxHeight);
+void rectangle_VerifySize(Rectangle *rect, uint16_t maxWidth, uint8_t maxHeight);
 
 Rectangle Rect(uint16_t x1, uint8_t y1, uint16_t x2, uint8_t y2);
 

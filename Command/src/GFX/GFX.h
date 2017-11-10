@@ -11,12 +11,10 @@
 
 #include <asf.h>
 
-#include "Vector2.h"
-#include "Rectangle.h"
-#include "Color.h"
-#include "Screen.h"
-
-typedef void (*buttonCallback) (void);
+#include "vector2.h"
+#include "rectangle.h"
+#include "color.h"
+#include "screen.h"
 
 typedef enum{
 	Small,
@@ -25,22 +23,24 @@ typedef enum{
 }TextSize;
 
 
-void GFX_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width);
+void gfx_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width);
 
-void GFX_DrawPixel(Vector2 position, Color color);
+void gfx_DrawPixel(Vector2 position, Color color);
 
-void GFX_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color);
+void gfx_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color);
 
-void GFX_DrawRectangle(Rectangle rect, Color color, bool isFilled);
+void gfx_DrawRectangle(Rectangle rect, Color color, bool isFilled);
 
-void GFX_DrawTriangle(Vector2 firstCorner, Vector2 secondCorner, Vector2 ThirdCorner, Color color, bool isFilled);
+void gfx_DrawTriangle(Vector2 firstCorner, Vector2 secondCorner, Vector2 ThirdCorner, Color color, bool isFilled);
 
-void GFX_FillScreen(Color color);
+void gfx_FillScreen(Color color);
 
-void GFX_Label(Vector2 position, volatile char *content, uint8_t contentSize, TextSize textSize, Color color);
+void gfx_Label(Vector2 position, char *content, uint8_t contentSize, TextSize textSize, Color color);
 
-void GFX_SelectedLabel(Rectangle rect, char *content, Color textColor, Color backgroundColor);
+void gfx_BeginTerminal(Vector2 topLeft);
 
-void GFX_Button(Rectangle rect, char *content, buttonCallback callback);
+void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color);
+
+void gfx_EndTerminal();
 
 #endif /* GFX_H_ */

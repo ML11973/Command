@@ -18,6 +18,6 @@ struct vector2
 };
 typedef struct vector2 Vector2;
 
-Vector2 Vector2_Add(Vector2 v1, Vector2 v2);
+Vector2 vector2_Add(Vector2 v1, Vector2 v2);
 
 #endif /* VECTOR2_H_ */

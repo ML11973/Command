@@ -107,7 +107,7 @@ static void _powerUp();
 static void _reset();
 static void _setPWM();
 
-void Screen_Init(){
+void screen_Init(){
 	const gpio_map_t screenGPIO =
 	{
 		{PIN_SCK_SPI0,  FCT_SCK_SPI0 },			// SPI Clock.
@@ -143,31 +143,31 @@ void Screen_Init(){
 }
 
 
-void Screen_SetBacklightStrength(uint8_t strength){
+void screen_SetBacklightStrength(uint8_t strength){
 
 
 }
 
-void Screen_TouchZone(Rectangle rect, void *callback(void)){
+void screen_TouchZone(Rectangle rect, void *callback(void)){
 
 
 }
 
-void Screen_SetPixel(Vector2 position, Color color){
+void screen_SetPixel(Vector2 position, Color color){
 	_setStart(position);
 	_selectRegister(R61580_DATA_WRITE);
 	_writeRAM(color.value);
 	spi_unselectChip(SCREEN_SPI,SCREEN_SPI_NPCS);
 }
 
-void Screen_SetPixels(Rectangle rect, Color color){
-	Rectangle_VerifySize(&rect, SCREEN_WIDTH, SCREEN_HEIGHT);
+void screen_SetPixels(Rectangle rect, Color color){
+	rectangle_VerifySize(&rect, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	_setLimits(rect);
 	_setStart(rect.bottomLeft);
 
 	_selectRegister(R61580_DATA_WRITE);
-	volatile c = Rectangle_GetArea(rect);
+	volatile c = rectangle_GetArea(rect);
 	for(uint32_t count = c; count > 0; count--){
 		_writeRAM(color.value);
 	}

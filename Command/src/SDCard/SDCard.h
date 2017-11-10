@@ -11,17 +11,15 @@
 
 #include <asf.h>
 
-void SDCard_Init(void);
+void sdcard_Init(void);
 
-bool SDCard_Mount(void);
+bool sdcard_Mount(void);
 
-bool SDCard_CheckPresence(void);
+bool sdcard_CheckPresence(void);
 
-bool SDCard_ReadSector(void *ram, uint32_t sector);
+bool sdcard_ReadSector(void *ram, uint32_t sector);
 
 bool Root_directory(uint8_t file_numero);
-
-//char** SDCard_GetFilesList(void);
 
 typedef struct file_menu_t
 {

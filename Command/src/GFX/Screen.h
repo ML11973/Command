@@ -9,18 +9,16 @@
 #ifndef SCREEN_H_
 #define SCREEN_H_
 
-#include "Vector2.h"
-#include "Rectangle.h"
-#include "Color.h"
+#include "vector2.h"
+#include "rectangle.h"
+#include "color.h"
 
-void Screen_Init();
+void screen_Init();
 
-void Screen_SetBacklightStrength(uint8_t strength);
+void screen_SetBacklightStrength(uint8_t strength);
 
-void Screen_TouchZone(Rectangle rect, void *callback(void));
+void screen_SetPixel(Vector2 position, Color color);
 
-void Screen_SetPixel(Vector2 position, Color color);
-
-void Screen_SetPixels(Rectangle rect, Color color);
+void screen_SetPixels(Rectangle rect, Color color);
 
 #endif /* SCREEN_H_ */

@@ -5,10 +5,10 @@
  *  Author: voletqu
  */ 
 
-#include "GFX.h"
+#include "gfx.h"
 #include "fonts.h"
 
-void GFX_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
+void gfx_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
 	/*uint16_t progress = 0;
 	uint16_t deltaX = abs(start.x - end.x);
 	uint16_t deltaY = abs(start.y - end.y);
@@ -66,8 +66,8 @@ void GFX_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
 			for (j=width ; j>0 ; j--)
 			{
 				k = (U16) (j / 2);
-				if ((j & 0x0001)) { Screen_SetPixel((Vector2){x,y+k},color); }
-				else { Screen_SetPixel((Vector2){x,y-k},color); }
+				if ((j & 0x0001)) { screen_SetPixel((Vector2){x,y+k},color); }
+				else { screen_SetPixel((Vector2){x,y-k},color); }
 			}
 			// Sub-pixel "error" overflowed, so we step Y and reset the "error".
 			if (e <= 0){
@@ -85,8 +85,8 @@ void GFX_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
 			for (j=width ; j>0 ; j--)
 			{
 				k = (U16) (j / 2);
-				if ((j & 0x0001)){ Screen_SetPixel((Vector2){x+k,y},color); }
-				else { Screen_SetPixel((Vector2){x-k,y},color); }
+				if ((j & 0x0001)){ screen_SetPixel((Vector2){x+k,y},color); }
+				else { screen_SetPixel((Vector2){x-k,y},color); }
 			}
 			// Sub-pixel "error" overflowed, so we step X and reset the "error".
 			if (e <= 0){
@@ -100,11 +100,11 @@ void GFX_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
 	}
 }
 
-void GFX_DrawPixel(Vector2 position, Color color){
-	Screen_SetPixel(position,color);
+void gfx_DrawPixel(Vector2 position, Color color){
+	screen_SetPixel(position,color);
 }
 
-void GFX_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color){
+void gfx_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color){
 	int16_t x, y, e;
 	x = 0;
 	y = radius;
@@ -114,10 +114,10 @@ void GFX_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color)
 	{
 		if(width == radius)
 		{
-			Screen_SetPixels(Rect(center.x -x, center.y +y, center.x+x, center.y +y),color);
-			Screen_SetPixels(Rect(center.x -x, center.y -y, center.x+x, center.y -y),color);
-			Screen_SetPixels(Rect(center.x -y, center.y +x, center.x+y, center.y +x),color);
-			Screen_SetPixels(Rect(center.x -y, center.y -x, center.x+y, center.y -x),color);
+			screen_SetPixels(Rect(center.x -x, center.y +y, center.x+x, center.y +y),color);
+			screen_SetPixels(Rect(center.x -x, center.y -y, center.x+x, center.y -y),color);
+			screen_SetPixels(Rect(center.x -y, center.y +x, center.x+y, center.y +x),color);
+			screen_SetPixels(Rect(center.x -y, center.y -x, center.x+y, center.y -x),color);
 		}
 		else
 		{
@@ -130,15 +130,15 @@ void GFX_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color)
 			Screen_SetPixel(Vector2_Add((Vector2){ y, -x},center),color);
 			Screen_SetPixel(Vector2_Add((Vector2){-y, -x},center),color);*/
 				
-			Screen_SetPixels(Rect(center.x + x, center.y + y - width, center.x + x, center.y + y),color);
-			Screen_SetPixels(Rect(center.x + x, center.y - y, center.x + x, center.y - y + width),color);
-			Screen_SetPixels(Rect(center.x - x, center.y + y - width, center.x - x, center.y + y),color);
-			Screen_SetPixels(Rect(center.x - x, center.y - y, center.x - x, center.y - y + width),color);
+			screen_SetPixels(Rect(center.x + x, center.y + y - width, center.x + x, center.y + y),color);
+			screen_SetPixels(Rect(center.x + x, center.y - y, center.x + x, center.y - y + width),color);
+			screen_SetPixels(Rect(center.x - x, center.y + y - width, center.x - x, center.y + y),color);
+			screen_SetPixels(Rect(center.x - x, center.y - y, center.x - x, center.y - y + width),color);
 			
-			Screen_SetPixels(Rect(center.x + y - width, center.y + x, center.x + y, center.y + x),color);
-			Screen_SetPixels(Rect(center.x + y - width, center.y - x, center.x + y, center.y - x),color);
-			Screen_SetPixels(Rect(center.x - y, center.y + x, center.x - y + width, center.y + x),color);
-			Screen_SetPixels(Rect(center.x - y, center.y - x, center.x - y + width, center.y - x),color);
+			screen_SetPixels(Rect(center.x + y - width, center.y + x, center.x + y, center.y + x),color);
+			screen_SetPixels(Rect(center.x + y - width, center.y - x, center.x + y, center.y - x),color);
+			screen_SetPixels(Rect(center.x - y, center.y + x, center.x - y + width, center.y + x),color);
+			screen_SetPixels(Rect(center.x - y, center.y - x, center.x - y + width, center.y - x),color);
 		}
 
 		if(e < 0)
@@ -149,40 +149,46 @@ void GFX_DrawCircle(Vector2 center, uint16_t radius, uint8_t width, Color color)
 	} while(x  <= y);
 }
 
-void GFX_DrawRectangle(Rectangle rect, Color color, bool isFilled){
+void gfx_DrawRectangle(Rectangle rect, Color color, bool isFilled){
 	
 	
 }
 
-void GFX_DrawTriangle(Vector2 firstCorner, Vector2 secondCorner, Vector2 ThirdCorner, Color color, bool isFilled){
+void gfx_DrawTriangle(Vector2 firstCorner, Vector2 secondCorner, Vector2 ThirdCorner, Color color, bool isFilled){
 
 
 }
 
-void GFX_FillScreen(Color color){
+void gfx_FillScreen(Color color){
 
 
 }
 
-void GFX_Label(Vector2 position, volatile char *content, uint8_t contentSize,TextSize textSize, Color color){
+void gfx_Label(Vector2 position, char *content, uint8_t contentSize,TextSize textSize, Color color){
 	if(*content == '\0' || contentSize == 0)
 		return;
+	Vector2 fontSize = {8,8};
+	if(textSize == Medium){
+		fontSize.x = 20;
+		fontSize.y = 16;
+	}
 		
 	for(uint8_t n = 0; n < contentSize; n++, content++){
 		if(*content == '\0')
 			break;
 		
-		for(uint8_t x = 0; x < 8; x++){
-			for(uint8_t y = 0; y < 8; y++){
-				if(FONT8x8[*content - 31][x] & (1<<y))
-					Screen_SetPixel(Vector2_Add(position,(Vector2){n * 10 + 8 - y,8-x}),color);
+		for(uint8_t x = 0; x < fontSize.x; x++){
+			uint16_t mask = 1;
+			for(uint8_t y = 0; y < fontSize.y; y++){
+				if(textSize == Medium){
+					if(FONT16x12[*content - 31][x] & mask)
+						screen_SetPixel(vector2_Add(position,(Vector2){n * 14 + 16 - y, 12 - x}), color);
+				}else{
+					if(FONT8x8[*content - 31][x] & (1<<y))
+						screen_SetPixel(vector2_Add(position,(Vector2){n * 10 + 8 - y, 8 - x}), color);
+				}
+				mask <<= 1;
 			}
 		}
 	}
-	
-}
-
-void GFX_SelectedLabel(Rectangle rect, char *content, Color textColor, Color backgroundColor){
-
-
 }
