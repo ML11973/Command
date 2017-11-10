@@ -1,4 +1,4 @@
-src/GFX/gfx.d src/GFX/gfx.o src/GFX/gfx.o: ../src/GFX/gfx.c \
+src/GFX/GFX.d src/GFX/GFX.o src/GFX/GFX.o: ../src/GFX/GFX.c \
  ../src/GFX/gfx.h ../src/asf.h \
  ../src/ASF/avr32/drivers/cpu/cycle_counter/cycle_counter.h \
  ../src/ASF/avr32/utils/compiler.h \
@@ -65,8 +65,8 @@ src/GFX/gfx.d src/GFX/gfx.o src/GFX/gfx.o: ../src/GFX/gfx.c \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
  ../src/ASF/avr32/drivers/usart/usart.h ../src/GFX/vector2.h \
- ../src/GFX/rectangle.h ../src/GFX/color.h ../src/GFX/screen.h \
- ../src/GFX/fonts.h
+ ../src/GFX/rectangle.h ../src/GFX/Vector2.h ../src/GFX/color.h \
+ ../src/GFX/screen.h ../src/GFX/fonts.h
 
 ../src/GFX/gfx.h:
 
@@ -215,6 +215,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/GFX/vector2.h:
 
 ../src/GFX/rectangle.h:
+
+../src/GFX/Vector2.h:
 
 ../src/GFX/color.h:
 

@@ -1,5 +1,5 @@
-src/GFX/vector2.d src/GFX/vector2.o src/GFX/vector2.o: \
- ../src/GFX/vector2.c ../src/GFX/vector2.h ../src/asf.h \
+src/GFX/Vector2.d src/GFX/Vector2.o src/GFX/Vector2.o: \
+ ../src/GFX/Vector2.c ../src/GFX/Vector2.h ../src/asf.h \
  ../src/ASF/avr32/drivers/cpu/cycle_counter/cycle_counter.h \
  ../src/ASF/avr32/utils/compiler.h \
  ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
@@ -66,7 +66,7 @@ src/GFX/vector2.d src/GFX/vector2.o src/GFX/vector2.o: \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
  ../src/ASF/avr32/drivers/usart/usart.h
 
-../src/GFX/vector2.h:
+../src/GFX/Vector2.h:
 
 ../src/asf.h:
 

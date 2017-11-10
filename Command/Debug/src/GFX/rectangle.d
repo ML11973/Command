@@ -1,5 +1,5 @@
-src/GFX/rectangle.d src/GFX/rectangle.o src/GFX/rectangle.o: \
- ../src/GFX/rectangle.c ../src/GFX/rectangle.h ../src/asf.h \
+src/GFX/Rectangle.d src/GFX/Rectangle.o src/GFX/Rectangle.o: \
+ ../src/GFX/Rectangle.c ../src/GFX/Rectangle.h ../src/asf.h \
  ../src/ASF/avr32/drivers/cpu/cycle_counter/cycle_counter.h \
  ../src/ASF/avr32/utils/compiler.h \
  ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
@@ -64,9 +64,9 @@ src/GFX/rectangle.d src/GFX/rectangle.o src/GFX/rectangle.o: \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
- ../src/ASF/avr32/drivers/usart/usart.h ../src/GFX/vector2.h
+ ../src/ASF/avr32/drivers/usart/usart.h ../src/GFX/Vector2.h
 
-../src/GFX/rectangle.h:
+../src/GFX/Rectangle.h:
 
 ../src/asf.h:
 
@@ -210,4 +210,4 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/ASF/avr32/drivers/usart/usart.h:
 
-../src/GFX/vector2.h:
+../src/GFX/Vector2.h:
