@@ -26,6 +26,8 @@
 #include <init.h>
 #include "audio/audio.h"
 
+#define AVIS_POLITIQUE
+
 #ifdef AVIS_POLITIQUE
 	#include "mainGauche.c"
 #else

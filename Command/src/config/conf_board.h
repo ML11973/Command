@@ -17,10 +17,19 @@
 #define SD_MMC_SPI AVR32_SPI1_ADDRESS
 #define SD_MMC_SPI_NPCS 1
 
+#define DAC1_SPI AVR32_SPI1_ADDRESS
+#define DAC1_SPI_NPCS 2
+
 #define SCREEN_SPI AVR32_SPI0_ADDRESS
 #define SCREEN_SPI_NPCS 0
 
-#define BOARD_OSC0_HZ
+
+#define BOARD_OSC0_HZ	64000000
+
+// Définition des interruptions des timers
+#define TC1_CHANNEL 1
+#define TC0_CHANNEL 0
+
 
 // Définition des broches de l'UART0 pour l'affichage 7 segements //
 #define				USART1_TXD_PIN			6

@@ -5,10 +5,12 @@
  *  Author: leemannma
  */ 
 
-//#include <asf.h>
 #include "audio.h"
 
-#define BOARD_OSC0_HZ 64000000
+#ifndef BOARD_OSC0_HZ
+	#define BOARD_OSC0_HZ 64000000
+#endif
+
 #define AUDIOOUTPUTMASK 0x000003FF
 #define AUDIOMAXINPUT 0x3FF
 
@@ -39,11 +41,12 @@ uint16_t sineTable [] = {
 	0xc1,0xce,0xda,0xe7,0xf5,0x102,0x110,0x11e,
 	0x12c,0x13a,0x148,0x157,0x166,0x175,0x184,0x193,
 0x1a2,0x1b2,0x1c1,0x1d1,0x1e0,0x1f0,0x200};
+
 uint16_t i = 0;
-uint16_t j = 0/*(max+1)/2*/;
-uint8_t max = sizeof(sineTable)/sizeof(sineTable[0]) - 1;
+uint16_t j = 0;
 uint16_t audioR = 0;
 uint16_t audioL = 0;
+
 /*
  * set_volume
  *
@@ -52,22 +55,22 @@ uint16_t audioL = 0;
  * amplifier.
  * 
  * Created 06.11.17 MLN
- * Last modified 08.11.17 MLN
+ * Last modified 13.11.17 MLN
  */
 
 void audio_set_volume (uint8_t volume){
 	
 	// Selecting DAC1
-	spi_selectChip(&AVR32_SPI1, DAC1);
+	spi_selectChip((volatile struct avr32_spi_t*)DAC1_SPI, DAC1_SPI_NPCS);
 	
 	/* Sending volume level to DAC1
 	 * Volume has to be in the middle nibbles of a 2-byte integer
 	 * as per AD5300BRMZ datasheet
 	 */
-	spi_write(&AVR32_SPI1, volume<<4);
+	spi_write((volatile struct avr32_spi_t*)DAC1_SPI, volume<<4);
 	
 	// Deselecting DAC1
-	spi_unselectChip(&AVR32_SPI1, DAC1);
+	spi_unselectChip((volatile struct avr32_spi_t*)DAC1_SPI, DAC1_SPI_NPCS);
 	
 	if (volume == 0) {
 		// If volume superior to 0, do not shutdown amplifier
@@ -91,6 +94,7 @@ void audio_set_volume (uint8_t volume){
  * Created 06.11.17 MLN
  * Last modified 08.11.17 MLN
  */
+
 void audio_set_output (uint16_t inputA, uint16_t inputB){
 	
 	// First we update DA0-9 parallel inputs
