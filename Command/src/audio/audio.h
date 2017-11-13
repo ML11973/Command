@@ -13,6 +13,7 @@
 /************************************************************************/
 
 #include <asf.h>
+#include "../SDCard/sdcard.h"
 
 
 
@@ -23,12 +24,26 @@
 // Default volume
 #define DEFAULTVOLUME 0x40
 
-extern uint16_t sineTable[];
+// Audio playback error codes
+#define ERROR_NO_SD 0x02
+#define ERROR_NO_FILE 0x03
+
+
+
+/************************************************************************/
+/* VARIABLES                                                            */
+/************************************************************************/
+extern const uint16_t sineTable[];
 extern uint16_t i;
 extern uint16_t j;
 extern uint8_t max;
 extern uint16_t audioL;
 extern uint16_t audioR;
+extern volatile uint32_t ram;
+extern uint8_t volume;
+extern bool audio_firstCall;
+
+
 
 /************************************************************************/
 /* FUNCTIONS	                                                        */
@@ -44,7 +59,7 @@ extern uint16_t audioR;
  * Created 06.11.17 MLN
  * Last modified 08.11.17 MLN
  */
-void audio_set_volume (uint8_t);
+void audio_setVolume (uint8_t);
 
 
 
@@ -60,12 +75,12 @@ void audio_set_volume (uint8_t);
  * Created 06.11.17 MLN
  * Last modified 08.11.17 MLN
  */
-void audio_set_output (uint16_t, uint16_t);
+void _setOutput (uint16_t, uint16_t);
 
 
 
-void freq_start(uint16_t);
-void freq_stop(void);
+void audio_freqStart(uint16_t);
+void audio_freqStop(void);
 
 
 

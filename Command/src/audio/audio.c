@@ -11,10 +11,24 @@
 	#define BOARD_OSC0_HZ 64000000
 #endif
 
+/************************************************************************/
+/* DEFINITIONS                                                          */
+/************************************************************************/
+
 #define AUDIOOUTPUTMASK 0x000003FF
 #define AUDIOMAXINPUT 0x3FF
 
-uint16_t sineTable [] = {
+#define		END_SECTEUR_16		0x0000FFEF		//  Fin de fichier dans la FAT16
+#define		END_SECTEUR_32		0x0FFFFFF8		//  Fin de fichier dans la FAT32
+#define		DIV_16				8				//  Décalage nombre de secteurs par bloc
+#define		DIV_32				7				//  Idem pour la Fat32
+
+
+
+/************************************************************************/
+/* VARIABLES                                                            */
+/************************************************************************/
+const uint16_t sineTable [] = {
 	0x200,0x20f,0x21f,0x22e,0x23e,0x24d,0x25d,0x26c,
 	0x27b,0x28a,0x299,0x2a8,0x2b7,0x2c5,0x2d3,0x2e1,
 	0x2ef,0x2fd,0x30a,0x318,0x325,0x331,0x33e,0x34a,
@@ -30,25 +44,60 @@ uint16_t sineTable [] = {
 	0x26c,0x25d,0x24d,0x23e,0x22e,0x21f,0x20f,0x200,
 	0x1f0,0x1e0,0x1d1,0x1c1,0x1b2,0x1a2,0x193,0x184,
 	0x175,0x166,0x157,0x148,0x13a,0x12c,0x11e,0x110,
-	0x102,0xf5,0xe7,0xda,0xce,0xc1,0xb5,0xaa,
-	0x9e,0x93,0x88,0x7e,0x74,0x6a,0x61,0x58,
-	0x4f,0x47,0x3f,0x38,0x31,0x2b,0x25,0x1f,
-	0x1a,0x15,0x11,0xd,0xa,0x7,0x5,0x3,
-	0x1,0x1,0x0,0x0,0x1,0x1,0x3,0x5,
-	0x7,0xa,0xd,0x11,0x15,0x1a,0x1f,0x25,
-	0x2b,0x31,0x38,0x3f,0x47,0x4f,0x58,0x61,
-	0x6a,0x74,0x7e,0x88,0x93,0x9e,0xaa,0xb5,
-	0xc1,0xce,0xda,0xe7,0xf5,0x102,0x110,0x11e,
+	0x102,0x0f5,0x0e7,0x0da,0x0ce,0x0c1,0x0b5,0x0aa,
+	0x09e,0x093,0x088,0x07e,0x074,0x06a,0x061,0x058,
+	0x04f,0x047,0x03f,0x038,0x031,0x02b,0x025,0x01f,
+	0x01a,0x015,0x011,0x00d,0x00a,0x007,0x005,0x003,
+	0x001,0x001,0x000,0x000,0x001,0x001,0x003,0x005,
+	0x007,0x00a,0x00d,0x011,0x015,0x01a,0x01f,0x005,
+	0x02b,0x031,0x038,0x03f,0x047,0x04f,0x058,0x061,
+	0x06a,0x074,0x07e,0x088,0x093,0x09e,0x0aa,0x0b5,
+	0x0c1,0x0ce,0x0da,0x0e7,0x0f5,0x102,0x110,0x11e,
 	0x12c,0x13a,0x148,0x157,0x166,0x175,0x184,0x193,
-0x1a2,0x1b2,0x1c1,0x1d1,0x1e0,0x1f0,0x200};
+	0x1a2,0x1b2,0x1c1,0x1d1,0x1e0,0x1f0,0x200};
 
 uint16_t i = 0;
 uint16_t j = 0;
 uint16_t audioR = 0;
 uint16_t audioL = 0;
+bool nextSample = 0;
+uint8_t volume = DEFAULTVOLUME;
 
-/*
- * set_volume
+volatile uint32_t ram = 0;
+
+uint8_t wavData1[512] = {0};
+uint8_t wavData2[512] = {0};
+
+
+uint32_t	secteur_read;		// Le secteur en lecture
+uint32_t	cluster_read = 0;		// Le cluster en lecture
+uint32_t	clt_sec;
+uint32_t	inter1, inter2, inter3, inter4;		// Variables intermédiaires
+uint32_t	retry;				// Pour éviter un blocage
+uint32_t	lecture = 0;		// Position dans la lecture du fichier
+uint8_t		slow = 0;
+
+// Pour l'affichage de la progression
+uint32_t	taille = 0;
+uint32_t	progression = 0;
+
+uint8_t	*	pt;
+uint32_t	end_secteur;
+uint8_t		division;
+
+
+bool audio_firstCall = false;
+
+
+
+/************************************************************************/
+/* FONCTIONS                                                            */
+/************************************************************************/
+
+bool _findFirstSector(uint8_t fileNumber);
+
+
+/* audio_setVolume
  *
  * This function sends 2 bytes to N4: AD5300BRMZ to set its analog output.
  * The analog output sets in turn the volume of the N7: TPA6012A4 audio
@@ -58,7 +107,7 @@ uint16_t audioL = 0;
  * Last modified 13.11.17 MLN
  */
 
-void audio_set_volume (uint8_t volume){
+void audio_setVolume (uint8_t volume){
 	
 	// Selecting DAC1
 	spi_selectChip((volatile struct avr32_spi_t*)DAC1_SPI, DAC1_SPI_NPCS);
@@ -95,7 +144,7 @@ void audio_set_volume (uint8_t volume){
  * Last modified 08.11.17 MLN
  */
 
-void audio_set_output (uint16_t inputA, uint16_t inputB){
+void _setOutput (uint16_t inputA, uint16_t inputB){
 	
 	// First we update DA0-9 parallel inputs
 	
@@ -161,7 +210,7 @@ void audio_set_output (uint16_t inputA, uint16_t inputB){
 
 
 
-void freq_start (uint16_t freq){
+void audio_freqStart (uint16_t freq){
 	// Writes value to RC such that interrupt occurs at 2*freq Hz
 	tc_write_rc(&AVR32_TC, TC0_CHANNEL, (BOARD_OSC0_HZ/8)/(2*freq) );
 	// Starts timer0
@@ -171,7 +220,7 @@ void freq_start (uint16_t freq){
 
 
 
-void freq_stop (void){
+void audio_freqStop (void){
 	tc_stop(&AVR32_TC, TC0_CHANNEL);
 }
 
@@ -184,7 +233,8 @@ void freq_stop (void){
  *
  */
 __attribute__((__interrupt__)) void tc1_irq( void ){
-	audio_set_output(audioR, audioL);
+	_setOutput(audioR, audioL);
+	nextSample = 1;
 }
 
 
@@ -200,9 +250,62 @@ __attribute__((__interrupt__)) void tc0_irq( void ){
 		audioR = 0;
 		audioL = 0;
 	}
-	audio_set_output(audioR, audioL);
+	_setOutput(audioR, audioL);
 }
 
 
 
-//uint32_t audio_findFirstSector()
+
+uint8_t audio_playFile(uint8_t fileNumber){
+	static uint32_t sampleCounter = 0;
+	static uint8_t currentVolume = DEFAULTVOLUME;
+	
+
+	
+	
+	
+	// If called upon for the first time, initalize .wav reading
+	if (audio_firstCall == true){
+		// If no SD card, return specific error code
+		if (sdcard_CheckPresence() == false){
+			return ERROR_NO_SD;
+		}
+		if (_findFirstSector(fileNumber) == 0){
+			return ERROR_NO_FILE;
+		}
+	}
+	
+	// Volume setting, optimized to be as light as possible
+	if (currentVolume != volume){
+		currentVolume = volume;
+		audio_setVolume(volume);
+	}
+	
+	if (nextSample == true){
+		// Update audioL and audioR values accordingly
+		// Raise tc0 update flag
+	}
+	
+	
+}
+
+
+bool _findFirstSector(uint8_t fileNumber){
+	Root_directory(fileNumber);
+	
+	if (FAT == 1) {
+		end_secteur = END_SECTEUR_32;
+		division = DIV_32;
+	}
+	else {
+		end_secteur = END_SECTEUR_16;
+		division = DIV_16;
+	}
+
+	//détermine le premier secteur du fichier. ! Important la zone res2 est utilisée comme first_cluster FAT32
+	cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
+	+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
+	secteur_read = ((cluster_read - 2) * sector_boot.structure.sec_cluster[0]) + secteur_data;
+	clt_sec = secteur_read;
+	
+}
