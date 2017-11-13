@@ -17,17 +17,21 @@
 void mainCentre(void){
 	sysclk_init();
 	
-	screen_Init();
-	gui_loadingScreen();
+	irq_initialize_vectors();
+	cpu_irq_enable();
 	
-	cpu_delay_ms(1500,BOARD_OSC0_HZ);
+	screen_Init();
+	//gui_loadingScreen();
+	
+	//cpu_delay_ms(1500,BOARD_OSC0_HZ);
 	
 	sdcard_Init();
-	gui_InitMenus();
+	sdcard_Mount();
+	gui_Init();
 	
-	menus[0].draw(true);
+	menus[currentMenuId](true);
 	
 	while(1){
-		//menus[0].draw(false);
+		menus[currentMenuId](menuChanged);
 	}
 }

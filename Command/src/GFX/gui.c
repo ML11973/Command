@@ -12,8 +12,9 @@
 
 #include <asf.h>
 
-#include "gui.h"
+#include "GFX/gui.h"
 #include "GFX/gfx.h"
+#include "SDCard/sdcard.h"
 
 
 /************************************************************************/
@@ -25,32 +26,59 @@
 #define MAINMENU_ID 0
 
 /************************************************************************/
+/* TYPEDEF                                                              */
+/************************************************************************/
+
+typedef enum menu_id{
+	MAIN,
+	MUSIC,
+	SETTINGS
+}MENU_ID;
+
+/************************************************************************/
+/* GUI FUNCTIONS PROTOTYPES                                             */
+/************************************************************************/
+
+void mainMenu(bool firstDraw);
+void musicMenu(bool firstDraw);
+
+__attribute__((__interrupt__)) void switchISR(void);
+
+/************************************************************************/
 /* VARIABLES                                                            */
 /************************************************************************/
 
-Menu *menus;
+guiMenu menus = {mainMenu, musicMenu};
+	
+Color textColor = {GREEN};
+	
+bool menuChanged = false;
+uint8_t currentMenuId = 0;
+
+static uint8_t switchState = 0;
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
 /************************************************************************/
 
-void mainMenu(bool firstDraw);
+void gui_Init(void){
+	gpio_enable_pin_glitch_filter(PIN_SWITCH0);
+	gpio_enable_pin_pull_up(PIN_SWITCH0);
+	gpio_enable_pin_interrupt(PIN_SWITCH0, GPIO_RISING_EDGE);
 
-bool gui_InitMenus(){
-	menus = (Menu *) malloc(NBR_OF_MENU * sizeof(Menu));
+	gpio_enable_pin_glitch_filter(PIN_SWITCH1);
+	gpio_enable_pin_pull_up(PIN_SWITCH1);
+	gpio_enable_pin_interrupt(PIN_SWITCH1, GPIO_RISING_EDGE);
+
+	gpio_enable_pin_glitch_filter(PIN_SWITCH2);
+	gpio_enable_pin_pull_up(PIN_SWITCH2);
+	gpio_enable_pin_interrupt(PIN_SWITCH2, GPIO_RISING_EDGE);
+
+	gpio_enable_pin_glitch_filter(PIN_SWITCH3);
+	gpio_enable_pin_pull_up(PIN_SWITCH3);
+	gpio_enable_pin_interrupt(PIN_SWITCH3, GPIO_RISING_EDGE);
 	
-	if(menus == NULL){
-		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
-		gfx_Label((Vector2){120,120},"gui_InitMenus();",16,Small, (Color){RED});
-		gfx_Label((Vector2){110,120},"malloc failed",16,Small, (Color){RED});
-		return false;
-	}
-	
-	for(uint8_t n = 0; n < NBR_OF_MENU; n++){
-		menus[n].draw = mainMenu;
-		menus[n].input = NULL;
-	}
-	return true;
+	INTC_register_interrupt(&switchISR, AVR32_GPIO_IRQ7, AVR32_INTC_INT0);
 }
 
 void gui_loadingScreen(void){
@@ -78,34 +106,78 @@ void gui_loadingScreen(void){
 void mainMenu(bool firstDraw){
 	if(firstDraw){
 		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
+	
+		gfx_DrawTerminalButton((Vector2){4,4},"<","Back",4,textColor);
+		gfx_DrawTerminalButton((Vector2){82,4},"v","Down",4,textColor);
+		gfx_DrawTerminalButton((Vector2){160,4},"^","Up",4,textColor);
+		gfx_DrawTerminalButton((Vector2){238,4},">","Ok",4,textColor);
+		menuChanged = false;
 	}
 	
-	//Shortcut Highlight
-	screen_SetPixels(Rect(2,2,12,14),(Color){WHITE});
-	screen_SetPixels(Rect(80,2,92,14),(Color){WHITE});
-	screen_SetPixels(Rect(158,2,170,14),(Color){WHITE});
-	screen_SetPixels(Rect(236,2,248,14),(Color){WHITE});
-	//Shortcut
-	gfx_Label((Vector2){4,4},"<", 7, Small, (Color){BLACK});
-	gfx_Label((Vector2){82,4},"v", 7, Small, (Color){BLACK});
-	gfx_Label((Vector2){160,4},"^", 7, Small, (Color){BLACK});
-	gfx_Label((Vector2){238,4},"!", 7, Small, (Color){BLACK});
-	//Button Description
-	gfx_Label((Vector2){14,4},"Back", 7, Small, (Color){WHITE});
-	gfx_Label((Vector2){94,4},"Down", 7, Small, (Color){WHITE});
-	gfx_Label((Vector2){172,4},"Up", 7, Small, (Color){WHITE});
-	gfx_Label((Vector2){250,4},"Ok", 7, Small, (Color){WHITE});
+	gfx_BeginNewTerminal((Vector2){20,220});
 		
-	//Time
-	gfx_Label((Vector2){20, 240 - 20}, "status --complete", 17, Small, (Color){WHITE});
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
-	gfx_Label((Vector2){20, 240 - 40}, "> Vendredi", 10, Small, (Color){WHITE});
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
-	gfx_Label((Vector2){20, 240 - 60}, "> 10/11/17", 10, Small, (Color){WHITE});
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
-	gfx_Label((Vector2){20, 240 - 80}, "> 15h 30m" ,  9, Small, (Color){WHITE});
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
-	gfx_Label((Vector2){20, 240 - 100}, "> Alarme 1 disabled" ,  28, Small, (Color){WHITE});
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
-	gfx_Label((Vector2){20, 240 - 120}, "> Alarme 2 enabled" ,  27, Small, (Color){WHITE});
+	gfx_AddLineToTerminal("status --complete", 17, textColor);
+	gfx_AddLineToTerminal("> Vendredi", 10, textColor);
+	gfx_AddLineToTerminal("> 10/11/17", 10, textColor);
+	gfx_AddLineToTerminal("> 15h 30m" ,  9, textColor);
+	gfx_AddLineToTerminal("> Alarme 1 disabled" ,  28, textColor);
+	gfx_AddLineToTerminal("> Alarme 2 enabled" ,  27, textColor);
+	
+	if(switchState == 4){
+		currentMenuId = MUSIC;
+		menuChanged = true;
+		switchState = 0;
+	}
+}
+
+/* mainMenu
+ *
+ * Draw the main menu, if firstDraw is true, all the menu is drawn 
+ * otherwise only dynamic part are drawn
+ *
+ * Created 10.11.17 QVT
+ * Last modified 10.11.17 QVT
+ */
+void musicMenu(bool firstDraw){
+	if(firstDraw){
+		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
+	
+		gfx_DrawTerminalButton((Vector2){4,4},"<","Back",4,textColor);
+		gfx_DrawTerminalButton((Vector2){82,4},"v","Down",4,textColor);
+		gfx_DrawTerminalButton((Vector2){160,4},"^","Up",4,textColor);
+		gfx_DrawTerminalButton((Vector2){238,4},">","Ok",4,textColor);
+		menuChanged = false;
+	}
+	
+	gfx_BeginNewTerminal((Vector2){20,220});
+		
+	gfx_AddLineToTerminal("ls | grep .wave", 15, textColor);
+	if(sdcard_CheckPresence()){
+		gfx_AddLineToTerminal((char*)(file_menu[0].name),25,textColor);
+	}
+	else{
+		gfx_AddLineToTerminal("No results",10,(Color){RED});
+	}
+	
+	if(switchState == 1){
+		currentMenuId = MAIN;
+		menuChanged = true;
+		switchState = 0;
+	}
+}
+
+__attribute__((__interrupt__)) void switchISR(void){
+	if 	(gpio_get_pin_interrupt_flag(PIN_SWITCH0))	{
+		switchState = 1;
+	}
+	else if (gpio_get_pin_interrupt_flag(PIN_SWITCH1)){
+		switchState = 2;
+	}
+	else if (gpio_get_pin_interrupt_flag(PIN_SWITCH2)){
+		switchState = 3;
+	}
+	else if (gpio_get_pin_interrupt_flag(PIN_SWITCH3)){
+		switchState = 4;
+	}
+	AVR32_GPIO.port[1].ifrc = 0xFF000000;
 }

@@ -16,41 +16,31 @@
 #include <asf.h>
 
 
-
 /************************************************************************/
 /* DEFINITIONS                                                          */
 /************************************************************************/
 
-typedef void (*guiMenuFunc)(bool);
-typedef void (*inputFunc)(void);
-typedef struct{
-	guiMenuFunc draw;
-	inputFunc input;
-}Menu;
+typedef void (*guiMenu[])(bool);
 
 
 /************************************************************************/
 /* VARIABLES                                                            */
 /************************************************************************/
 
-extern Menu *menus;
+extern guiMenu menus;
+
+extern bool menuChanged;
+extern uint8_t currentMenuId;
 
 /************************************************************************/
 /* FUNCTIONS	                                                        */
 /************************************************************************/
 
-/* gui_InitMenus
- *
- * Called to initialise "menus" using malloc
- *
- * Created 10.11.17 QVT
- * Last modified 10.11.17 QVT
- */
-bool gui_InitMenus();
+void gui_Init(void);
 
 /* gui_loadingScreen
  *
- * Draw the main menu
+ * Draw the loading screen
  *
  * Created 10.11.17 QVT
  * Last modified 10.11.17 QVT

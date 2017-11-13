@@ -8,6 +8,8 @@
 #include "gfx.h"
 #include "fonts.h"
 
+Vector2 newLinePosition = {0,0};
+
 void gfx_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
 	/*uint16_t progress = 0;
 	uint16_t deltaX = abs(start.x - end.x);
@@ -191,4 +193,23 @@ void gfx_Label(Vector2 position, char *content, uint8_t contentSize,TextSize tex
 			}
 		}
 	}
+}
+
+void gfx_BeginNewTerminal(Vector2 topLeft){
+	newLinePosition = topLeft;
+}
+
+void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color){
+	gfx_Label(newLinePosition, content, contentSize, Small, color);
+	newLinePosition.y -= 20;
+	//for animations purpose only
+	cpu_delay_ms(100,BOARD_OSC0_HZ);
+}
+
+void gfx_DrawTerminalButton(Vector2 position, char* shortcut, char *description, uint8_t size, Color color){
+	
+	screen_SetPixels(Rect(position.x,position.y-2,position.x+8,position.y+10),color);
+	gfx_Label(position,shortcut, 1, Small, (Color){BLACK});
+	position.x += 10;
+	gfx_Label(position,description, 7, Small, color);
 }
