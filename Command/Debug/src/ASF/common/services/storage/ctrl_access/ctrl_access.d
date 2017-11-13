@@ -1,6 +1,8 @@
-src/ASF/avr32/drivers/usart/usart.d src/ASF/avr32/drivers/usart/usart.o \
- src/ASF/avr32/drivers/usart/usart.o: \
- ../src/ASF/avr32/drivers/usart/usart.c ../src/ASF/avr32/utils/compiler.h \
+src/ASF/common/services/storage/ctrl_access/ctrl_access.d \
+ src/ASF/common/services/storage/ctrl_access/ctrl_access.o \
+ src/ASF/common/services/storage/ctrl_access/ctrl_access.o: \
+ ../src/ASF/common/services/storage/ctrl_access/ctrl_access.c \
+ ../src/ASF/avr32/utils/compiler.h \
  ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/utils/preprocessor/stringz.h \
@@ -55,7 +57,12 @@ src/ASF/avr32/drivers/usart/usart.d src/ASF/avr32/drivers/usart/usart.o \
  ../src/ASF/common/utils/interrupt/interrupt_avr32.h \
  ../src/ASF/avr32/utils/preprocessor/tpaste.h \
  ../src/ASF/avr32/drivers/intc/intc.h \
- ../src/ASF/avr32/drivers/usart/usart.h
+ ../src/ASF/common/services/storage/ctrl_access/ctrl_access.h \
+ ../src/config/conf_access.h ../src/ASF/common/boards/board.h \
+ ../src/ASF/common/boards/user_board/user_board.h \
+ ../src/config/conf_board.h \
+ ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h \
+ ../src/ASF/common/services/storage/ctrl_access/ctrl_access.h
 
 ../src/ASF/avr32/utils/compiler.h:
 
@@ -167,4 +174,16 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/ASF/avr32/drivers/intc/intc.h:
 
-../src/ASF/avr32/drivers/usart/usart.h:
+../src/ASF/common/services/storage/ctrl_access/ctrl_access.h:
+
+../src/config/conf_access.h:
+
+../src/ASF/common/boards/board.h:
+
+../src/ASF/common/boards/user_board/user_board.h:
+
+../src/config/conf_board.h:
+
+../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h:
+
+../src/ASF/common/services/storage/ctrl_access/ctrl_access.h:

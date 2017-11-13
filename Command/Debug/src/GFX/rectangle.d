@@ -1,5 +1,5 @@
-src/GFX/Rectangle.d src/GFX/Rectangle.o src/GFX/Rectangle.o: \
- ../src/GFX/Rectangle.c ../src/GFX/Rectangle.h ../src/asf.h \
+src/GFX/rectangle.d src/GFX/rectangle.o src/GFX/rectangle.o: \
+ ../src/GFX/rectangle.c ../src/GFX/rectangle.h ../src/asf.h \
  ../src/ASF/avr32/drivers/cpu/cycle_counter/cycle_counter.h \
  ../src/ASF/avr32/utils/compiler.h \
  ../src/ASF/avr32/utils/preprocessor/preprocessor.h \
@@ -60,13 +60,17 @@ src/GFX/Rectangle.d src/GFX/Rectangle.o src/GFX/Rectangle.o: \
  ../src/config/conf_board.h ../src/ASF/avr32/utils/status_codes.h \
  ../src/ASF/avr32/drivers/flashc/flashc.h \
  ../src/ASF/avr32/drivers/gpio/gpio.h ../src/ASF/common/boards/board.h \
+ ../src/ASF/common/services/storage/ctrl_access/ctrl_access.h \
+ ../src/config/conf_access.h \
+ ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h \
  ../src/ASF/avr32/drivers/pm/power_clocks_lib.h \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
+ ../src/ASF/avr32/drivers/pwm/pwm.h \
+ ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
- ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
- ../src/ASF/avr32/drivers/usart/usart.h ../src/GFX/Vector2.h
+ ../src/GFX/vector2.h
 
-../src/GFX/Rectangle.h:
+../src/GFX/rectangle.h:
 
 ../src/asf.h:
 
@@ -194,20 +198,24 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/ASF/common/boards/board.h:
 
+../src/ASF/common/services/storage/ctrl_access/ctrl_access.h:
+
+../src/config/conf_access.h:
+
+../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h:
+
 ../src/ASF/avr32/drivers/pm/power_clocks_lib.h:
 
 ../src/ASF/avr32/drivers/pm/pm.h:
 
 ../src/ASF/avr32/drivers/pm/sleep.h:
 
+../src/ASF/avr32/drivers/pwm/pwm.h:
+
+../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h:
+
 ../src/ASF/avr32/drivers/spi/spi.h:
 
 ../src/ASF/avr32/drivers/tc/tc.h:
 
-../src/ASF/avr32/drivers/twi/twi.h:
-
-../src/config/conf_twi.h:
-
-../src/ASF/avr32/drivers/usart/usart.h:
-
-../src/GFX/Vector2.h:
+../src/GFX/vector2.h:

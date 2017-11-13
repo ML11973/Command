@@ -59,11 +59,15 @@ src/mainGauche.d src/mainGauche.o src/mainGauche.o: ../src/mainGauche.c \
  ../src/config/conf_board.h ../src/ASF/avr32/utils/status_codes.h \
  ../src/ASF/avr32/drivers/flashc/flashc.h \
  ../src/ASF/avr32/drivers/gpio/gpio.h ../src/ASF/common/boards/board.h \
+ ../src/ASF/common/services/storage/ctrl_access/ctrl_access.h \
+ ../src/config/conf_access.h \
+ ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h \
  ../src/ASF/avr32/drivers/pm/power_clocks_lib.h \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
+ ../src/ASF/avr32/drivers/pwm/pwm.h \
+ ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
- ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
- ../src/ASF/avr32/drivers/usart/usart.h ../src/audio/audio.h
+ ../src/audio/audio.h ../src/mainGauche.h
 
 ../src/asf.h:
 
@@ -191,20 +195,26 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/ASF/common/boards/board.h:
 
+../src/ASF/common/services/storage/ctrl_access/ctrl_access.h:
+
+../src/config/conf_access.h:
+
+../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h:
+
 ../src/ASF/avr32/drivers/pm/power_clocks_lib.h:
 
 ../src/ASF/avr32/drivers/pm/pm.h:
 
 ../src/ASF/avr32/drivers/pm/sleep.h:
 
+../src/ASF/avr32/drivers/pwm/pwm.h:
+
+../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h:
+
 ../src/ASF/avr32/drivers/spi/spi.h:
 
 ../src/ASF/avr32/drivers/tc/tc.h:
 
-../src/ASF/avr32/drivers/twi/twi.h:
-
-../src/config/conf_twi.h:
-
-../src/ASF/avr32/drivers/usart/usart.h:
-
 ../src/audio/audio.h:
+
+../src/mainGauche.h:

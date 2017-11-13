@@ -1,7 +1,10 @@
-/**
+/*****************************************************************************
+ *
  * \file
  *
- * \brief TWI Configuration File for AVR32 UC3.
+ * \brief SD/MMC configuration file.
+ *
+ * This file contains the possible external configuration of the SD/MMC.
  *
  * Copyright (c) 2014-2015 Atmel Corporation. All rights reserved.
  *
@@ -39,16 +42,46 @@
  *
  * \asf_license_stop
  *
- */
+ ******************************************************************************/
 /*
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
-#ifndef _CONF_TWI_H
-#define _CONF_TWI_H
+#ifndef _CONF_SD_MMC_SPI_H_
+#define _CONF_SD_MMC_SPI_H_
 
 #include "board.h"
+#include "conf_access.h"
+
+#if SD_MMC_SPI_MEM == DISABLE
+  #error conf_sd_mmc_spi.h is #included although SD_MMC_SPI_MEM is disabled
+#endif
+
+#include "sd_mmc_spi.h"
 
 
-#define CONF_TWI_IRQ_LEVEL         3
+//_____ D E F I N I T I O N S ______________________________________________
 
-#endif // _CONF_TWI_H
+//! SPI master speed in Hz.
+#define SD_MMC_SPI_MASTER_SPEED     12000000
+
+//! Number of bits in each SPI transfer.
+#define SD_MMC_SPI_BITS             8
+
+
+#if !defined(SD_MMC_SPI)
+//! Set SD_MMC_SPI, default SPI register address if this is a user board
+#warning "Using a default SD_MMC_SPI define value. Edit the conf_sd_mmc_spi.h file to modify that define value according to the current board."
+#if (UC3L || UC3B || UC3D)
+#define SD_MMC_SPI                 (&AVR32_SPI)
+#else
+#define SD_MMC_SPI                 (&AVR32_SPI0)
+#endif
+#endif
+
+#if !defined(SD_MMC_SPI_NPCS)
+//! Set SD_MMC_SPI_NPCS, default chip select if this is a user board
+#warning "Using a default SD_MMC_SPI_NPCS define value. Edit the conf_sd_mmc_spi.h file to modify that define value according to the current board."
+#define SD_MMC_SPI_NPCS            0
+#endif
+
+#endif  // _CONF_SD_MMC_SPI_H_

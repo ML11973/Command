@@ -23,15 +23,15 @@
 //#define AVIS_POLITIQUE GAUCHE
 
 #include <asf.h>
-#include <init.h>
+#include "init.h"
 #include "audio/audio.h"
 
-#define AVIS_POLITIQUE
+//#define AVIS_POLITIQUE
 
 #ifdef AVIS_POLITIQUE
-	#include "mainGauche.c"
+	#include "mainGauche.h"
 #else
-	#include "mainCentre.c"
+	#include "mainCentre.h"
 #endif
 
 

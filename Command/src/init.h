@@ -5,7 +5,8 @@
  *  Author: leemannma
  */ 
 
-
+#ifndef INIT_H
+#define INIT_H
 #define TC1_CHANNEL 1
 #define TC0_CHANNEL 0
 /************************************************************************/
@@ -16,7 +17,7 @@
 #include <board.h>
 #include <conf_board.h>
 #include <conf_cpu.h>
-#include "../../../../audio/audio.h"
+#include "audio/audio.h"
 
 
 
@@ -28,3 +29,5 @@ void board_init(void);
 void spi_init(void);
 void tc1_init(void);
 void tc0_init(void);
+
+#endif /* INIT_H */

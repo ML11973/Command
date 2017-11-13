@@ -14,7 +14,7 @@
 #define				AVR32_GPIO_IRQ7			71		// Groupe 2 , line 7 (32 * 2) + 7 = 71 (int PB24..27)
 #define				AVR32_GPIO_IRQ3			67		// Groupe 2 , line 3 (32 * 2) + 3 = 67 (int PA28)
 
-#define SD_MMC_SPI AVR32_SPI1_ADDRESS
+#define SD_MMC_SPI ((volatile avr32_spi_t*) &AVR32_SPI1)
 #define SD_MMC_SPI_NPCS 1
 
 #define DAC1_SPI AVR32_SPI1_ADDRESS

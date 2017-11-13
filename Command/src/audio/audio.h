@@ -20,10 +20,6 @@
 /* DEFINITIONS                                                          */
 /************************************************************************/
 
-
-// DAC1 SPI address
-#define DAC1_SPI_NPCS 2
-
 // Default volume
 #define DEFAULTVOLUME 0x40
 

@@ -4,9 +4,16 @@
  * Created: 10.11.2017 15:27:45
  *  Author: voletqu
  */ 
+
+#ifndef MAIN_GAUCHE_C
+#define MAIN_GAUCHE_C
+
 #include <asf.h>
 
 #include "audio/audio.h"
+
+#include "mainGauche.h"
+
 
 void mainGauche(void){
 	board_init();
@@ -23,3 +30,4 @@ void mainGauche(void){
 		}
 	}
 }
+#endif /* MAIN_GAUCHE_C */

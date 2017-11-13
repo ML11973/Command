@@ -8,9 +8,11 @@
 #include <asf.h>
 #include <init.h>
 
+#include "mainCentre.h"
 #include "SDCard/sdcard.h"
 #include "GFX/screen.h"
 #include "GFX/gui.h"
+
 
 void mainCentre(void){
 	sysclk_init();
