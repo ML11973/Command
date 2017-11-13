@@ -163,7 +163,7 @@ void audio_set_output (uint16_t inputA, uint16_t inputB){
 
 void freq_start (uint16_t freq){
 	// Writes value to RC such that interrupt occurs at 2*freq Hz
-	tc_write_rc(&AVR32_TC, TC0_CHANNEL, (BOARD_OSC0_HZ/4)*freq);
+	tc_write_rc(&AVR32_TC, TC0_CHANNEL, (BOARD_OSC0_HZ/8)/(2*freq) );
 	// Starts timer0
 	tc_start(&AVR32_TC, TC0_CHANNEL);
 }
@@ -202,3 +202,7 @@ __attribute__((__interrupt__)) void tc0_irq( void ){
 	}
 	audio_set_output(audioR, audioL);
 }
+
+
+
+uint32_t audio_findFirstSector()
