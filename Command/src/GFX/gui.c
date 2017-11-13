@@ -21,9 +21,9 @@
 /* DEFINITIONS                                                          */
 /************************************************************************/
 
-#define NBR_OF_MENU 1
+#define NBR_OF_MENU 3
 
-#define MAINMENU_ID 0
+
 
 /************************************************************************/
 /* TYPEDEF                                                              */
@@ -32,15 +32,18 @@
 typedef enum menu_id{
 	MAIN,
 	MUSIC,
-	SETTINGS
+	SETTINGS,
+	ALARM
 }MENU_ID;
 
 /************************************************************************/
 /* GUI FUNCTIONS PROTOTYPES                                             */
 /************************************************************************/
 
-void mainMenu(bool firstDraw);
-void musicMenu(bool firstDraw);
+void _mainMenu(bool firstDraw);
+void _musicMenu(bool firstDraw);
+void _settingsMenu(bool firstDraw);
+void _alarmMenu(bool firstDraw);
 
 __attribute__((__interrupt__)) void switchISR(void);
 
@@ -48,7 +51,7 @@ __attribute__((__interrupt__)) void switchISR(void);
 /* VARIABLES                                                            */
 /************************************************************************/
 
-guiMenu menus = {mainMenu, musicMenu};
+guiMenu menus = {_mainMenu, _musicMenu, _settingsMenu, _alarmMenu};
 	
 Color textColor = {GREEN};
 	
@@ -56,6 +59,10 @@ bool menuChanged = false;
 uint8_t currentMenuId = 0;
 
 static uint8_t switchState = 0;
+static uint8_t selectedCommand = 0;
+static bool commandChanged = true;
+static uint8_t compteur = 0;
+static uint8_t selectedOption = 1;
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
@@ -95,39 +102,11 @@ void gui_loadingScreen(void){
 	gfx_Label((Vector2){40,40}, text, sizeof(text)/sizeof(*text), Small, (Color){WHITE});
 }
 
-/* mainMenu
- *
- * Draw the main menu, if firstDraw is true, all the menu is drawn 
- * otherwise only dynamic part are drawn
- *
- * Created 10.11.17 QVT
- * Last modified 10.11.17 QVT
- */
-void mainMenu(bool firstDraw){
-	if(firstDraw){
-		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
-	
-		gfx_DrawTerminalButton((Vector2){4,4},"<","Back",4,textColor);
-		gfx_DrawTerminalButton((Vector2){82,4},"v","Down",4,textColor);
-		gfx_DrawTerminalButton((Vector2){160,4},"^","Up",4,textColor);
-		gfx_DrawTerminalButton((Vector2){238,4},">","Ok",4,textColor);
-		menuChanged = false;
-	}
-	
-	gfx_BeginNewTerminal((Vector2){20,220});
-		
-	gfx_AddLineToTerminal("status --complete", 17, textColor);
-	gfx_AddLineToTerminal("> Vendredi", 10, textColor);
-	gfx_AddLineToTerminal("> 10/11/17", 10, textColor);
-	gfx_AddLineToTerminal("> 15h 30m" ,  9, textColor);
-	gfx_AddLineToTerminal("> Alarme 1 disabled" ,  28, textColor);
-	gfx_AddLineToTerminal("> Alarme 2 enabled" ,  27, textColor);
-	
-	if(switchState == 4){
-		currentMenuId = MUSIC;
-		menuChanged = true;
-		switchState = 0;
-	}
+void _drawButton(void){
+	gfx_DrawTerminalButton((Vector2){4,4},"<","Back",4,textColor);
+	gfx_DrawTerminalButton((Vector2){82,4},"^","Up",4,textColor);
+	gfx_DrawTerminalButton((Vector2){160,4},"v","Down",4,textColor);
+	gfx_DrawTerminalButton((Vector2){238,4},">","Ok",4,textColor);
 }
 
 /* mainMenu
@@ -138,30 +117,150 @@ void mainMenu(bool firstDraw){
  * Created 10.11.17 QVT
  * Last modified 10.11.17 QVT
  */
-void musicMenu(bool firstDraw){
+void _mainMenu(bool firstDraw){
 	if(firstDraw){
 		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
 	
-		gfx_DrawTerminalButton((Vector2){4,4},"<","Back",4,textColor);
-		gfx_DrawTerminalButton((Vector2){82,4},"v","Down",4,textColor);
-		gfx_DrawTerminalButton((Vector2){160,4},"^","Up",4,textColor);
-		gfx_DrawTerminalButton((Vector2){238,4},">","Ok",4,textColor);
+		_drawButton();
+		menuChanged = false;
+		
+		gfx_BeginNewTerminal((Vector2){20,220});
+		
+		gfx_AddLineToTerminal("status --complete", 17, textColor, firstDraw);
+	}
+	
+	gfx_BeginNewTerminal((Vector2){20,200});
+	gfx_AddOptionToTerminal("Vendredi",8,textColor,false,firstDraw,firstDraw);
+	gfx_AddOptionToTerminal("10/11/17", 8, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("15h 30m" ,  7, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Alarme 1 disabled" ,  26, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Alarme 2 enabled" ,  25, textColor,false,firstDraw, firstDraw);
+	
+	if(selectedCommand == 0){
+		gfx_cmdLine("ls | grep .wave", 15, textColor,commandChanged);
+		commandChanged = false;
+	}
+	else if(selectedCommand == 1){
+		gfx_cmdLine("sudo settings -h", 16, textColor,commandChanged);
+		commandChanged = false;
+	}
+	else {
+		gfx_cmdLine("alarm -info", 11, textColor,commandChanged);
+		commandChanged = false;
+	}
+	
+	if(switchState == 4){
+		if(selectedCommand == 0)
+			currentMenuId = MUSIC;
+		else if(selectedCommand == 1)
+			currentMenuId = SETTINGS;
+		else
+			currentMenuId = ALARM;
+			
+		menuChanged = true;
+		switchState = 0;
+	}
+	else if(switchState == 2){
+		selectedCommand = (selectedCommand == NBR_OF_MENU - 1)?(0):(selectedCommand+1);
+		commandChanged = true;
+		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
+		switchState = 0;
+	}
+	else if(switchState == 3){
+		selectedCommand = (selectedCommand == 0)?(NBR_OF_MENU - 1):(selectedCommand-1);
+		commandChanged = true;
+		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
+		switchState = 0;
+	}
+}
+
+/* mainMenu
+ *
+ * Draw the music menu, if firstDraw is true, all the menu is drawn 
+ * otherwise only dynamic part are drawn
+ *
+ * Created 13.11.17 QVT
+ * Last modified 13.11.17 QVT
+ */
+void _musicMenu(bool firstDraw){
+	if(firstDraw){
+		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
+	
+		_drawButton();
 		menuChanged = false;
 	}
 	
 	gfx_BeginNewTerminal((Vector2){20,220});
 		
-	gfx_AddLineToTerminal("ls | grep .wave", 15, textColor);
+	gfx_AddLineToTerminal("ls | grep .wave", 15, textColor, firstDraw);
+	
 	if(sdcard_CheckPresence()){
-		gfx_AddLineToTerminal((char*)(file_menu[0].name),25,textColor);
+		gfx_AddLineToTerminal((char*)(file_menu[0].name),25,textColor, firstDraw);
 	}
 	else{
-		gfx_AddLineToTerminal("No results",10,(Color){RED});
+		gfx_AddLineToTerminal("> No results",12,(Color){RED}, firstDraw);
 	}
 	
 	if(switchState == 1){
 		currentMenuId = MAIN;
 		menuChanged = true;
+		commandChanged = true;
+		switchState = 0;
+	}
+}
+
+void _settingsMenu(bool firstDraw){
+	if(firstDraw){
+		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
+		
+		_drawButton();
+		menuChanged = false;
+		
+		gfx_BeginNewTerminal((Vector2){20,220});
+		gfx_AddLineToTerminal("sudo settings -h", 16, textColor, firstDraw);
+		gfx_AddLineToTerminal("> textColor = Green", 20, textColor, firstDraw);
+		gfx_AddLineToTerminal("> Heure : 10h 30m", 18, textColor, firstDraw);
+		gfx_AddLineToTerminal("> Date : 09h 35m", 17, textColor, firstDraw);
+	}
+	
+	if(switchState == 1){
+		currentMenuId = MAIN;
+		menuChanged = true;
+		commandChanged = true;
+		switchState = 0;
+	}
+}
+
+void _alarmMenu(bool firstDraw){
+	if(firstDraw){
+		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
+		
+		_drawButton();
+		menuChanged = false;
+		
+		gfx_BeginNewTerminal((Vector2){20,220});
+		gfx_AddLineToTerminal("alarme -info", 12, textColor, firstDraw);
+		
+	}
+
+	gfx_BeginNewTerminal((Vector2){20,200});
+	gfx_AddOptionToTerminal("Alarme 1 : 18h 00m", 18,textColor, selectedOption & (1<<0), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Alarme 2 : 09h 35m", 18,textColor, selectedOption & (1<<1), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Alarme 3 : 12h 00m", 18,textColor, selectedOption & (1<<2), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Alarme 4 : 06h 18m", 18,textColor, selectedOption & (1<<3), firstDraw, firstDraw);
+	
+	if(switchState == 1){
+		currentMenuId = MAIN;
+		menuChanged = true;
+		commandChanged = true;
+		switchState = 0;
+	}
+	else if(switchState == 2){
+		(selectedOption &(1<<0))?(selectedOption = (1<<3)):(selectedOption>>=1);
+		switchState = 0;
+	}
+	else if (switchState == 3){
+		(selectedOption &(1<<3))?(selectedOption = (1<<0)):(selectedOption<<=1);
 		switchState = 0;
 	}
 }

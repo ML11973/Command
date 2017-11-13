@@ -205,4 +205,4 @@ __attribute__((__interrupt__)) void tc0_irq( void ){
 
 
 
-uint32_t audio_findFirstSector()
+//uint32_t audio_findFirstSector()

@@ -7,45 +7,11 @@
 
 #include "gfx.h"
 #include "fonts.h"
+#include <string.h>
 
-Vector2 newLinePosition = {0,0};
+static Vector2 newLinePosition = {0,0};
 
 void gfx_DrawLine(Vector2 start, Vector2 end, Color color, uint8_t width){
-	/*uint16_t progress = 0;
-	uint16_t deltaX = abs(start.x - end.x);
-	uint16_t deltaY = abs(start.y - end.y);
-	uint16_t left = width * 0.5f;
-	uint16_t right = (width - 1) * 0.5f;
-
-	if(deltaX == 0){
-		Screen_SetPixels(Rect(start.x - left, start.y, end.x + right, end.y),color);
-	}
-	else if(deltaY == 0){
-		Screen_SetPixels(Rect(start.x, start.y - left, end.x, end.y + right),color);
-	}
-	else if(deltaX > deltaY) {
-		float slope = deltaX / (float)(deltaY);
-		uint16_t segmentLength = (uint16_t)slope;
-
-		uint16_t longerSegmentFrequency = 1/(slope-segmentLength);
-
-		for(uint8_t i = 0; i < deltaX; i++) {
-			uint16_t distance = (i%longerSegmentFrequency == 0)?(segmentLength):(segmentLength + 1);
-			Screen_SetPixels(Rect(start.x + progress - left, start.y + i, distance + right, start.y + i),color);
-			progress += distance;
-		}
-	}
-	else {
-		volatile float slope = (deltaY) /(float) (deltaX);
-		uint16_t segmentLength = (uint16_t)slope;
-		volatile uint16_t longerSegmentFrequency = 1/(slope-segmentLength);
-
-		for(uint8_t i = 0; i < deltaY; i++) {
-			uint16_t distance = (i%longerSegmentFrequency == 0)?(segmentLength):(segmentLength + 1);
-			Screen_SetPixels(Rect(start.x + i, start.y + progress - left, start.x + i, start.y + distance + right),color);
-			progress += distance;
-		}
-	}*/
 	// Compute deltas, ie. "width" and "height" of line, then
 	// compute x and y direction, and make deltas positive for later use.
 	S16 xinc = 1; // Start off assuming direction is positive, ie. right.
@@ -199,11 +165,34 @@ void gfx_BeginNewTerminal(Vector2 topLeft){
 	newLinePosition = topLeft;
 }
 
-void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color){
+void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color, bool isDelayed){
 	gfx_Label(newLinePosition, content, contentSize, Small, color);
 	newLinePosition.y -= 20;
-	//for animations purpose only
-	cpu_delay_ms(100,BOARD_OSC0_HZ);
+	if(isDelayed){
+		//for animations purpose only
+		cpu_delay_ms(100,BOARD_OSC0_HZ);
+	}
+}
+
+void gfx_AddOptionToTerminal(char *content, uint8_t contentSize, Color color, bool isSelected, bool firstDraw, bool isDelayed){
+	if(isSelected){
+		gfx_Label(newLinePosition, ">", 1, Small, color);
+	}
+	else{
+		screen_SetPixels(Rect(newLinePosition.x,newLinePosition.y, newLinePosition.x + 8, newLinePosition.y + 8), (Color){BLACK});
+	}
+	
+	if(firstDraw){
+		newLinePosition.x += 20;
+		gfx_Label(newLinePosition, content, contentSize, Small, color);
+		newLinePosition.x -= 20;
+	}
+	
+	newLinePosition.y -= 20;
+	if(isDelayed){
+		//for animations purpose only
+		cpu_delay_ms(100,BOARD_OSC0_HZ);
+	}
 }
 
 void gfx_DrawTerminalButton(Vector2 position, char* shortcut, char *description, uint8_t size, Color color){
@@ -212,4 +201,21 @@ void gfx_DrawTerminalButton(Vector2 position, char* shortcut, char *description,
 	gfx_Label(position,shortcut, 1, Small, (Color){BLACK});
 	position.x += 10;
 	gfx_Label(position,description, 7, Small, color);
+}
+
+void gfx_cmdLine(char *content, uint8_t contentSize, Color color, bool firstDraw){
+	static uint32_t counter = 0;
+	counter ++;
+	
+	if(firstDraw){
+		counter = 0;
+		gfx_Label((Vector2){20,40}, content, contentSize, Small, color);
+	}
+	else if(counter == 128000){
+		gfx_Label((Vector2){20 + contentSize * 10, 40}, "|", 2, Small, color);
+	}
+	else if (counter == 256000){
+		screen_SetPixels(Rect((contentSize) * 10 + 20,40,(contentSize + 2) * 10 + 20,50),(Color){BLACK});
+			counter = 0;
+	}
 }

@@ -39,8 +39,16 @@ void gfx_Label(Vector2 position, char *content, uint8_t contentSize, TextSize te
 
 void gfx_BeginNewTerminal(Vector2 topLeft);
 
-void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color);
+void gfx_AddLineToTerminal(char *content, uint8_t contentSize, Color color, bool isDelayed);
+
+void gfx_AddOptionToTerminal(char *content, uint8_t contentSize, Color color, bool isSelected, bool firstDraw, bool isDelayed);
 
 void gfx_DrawTerminalButton(Vector2 position, char *shortcut, char *description, uint8_t size, Color color);
+
+void gfx_StartNonStaticArea(void);
+
+void gfx_EndNonStaticArea(void);
+
+void gfx_cmdLine(char *content, uint8_t contentSize, Color color, bool fisrtDraw);
 
 #endif /* GFX_H_ */

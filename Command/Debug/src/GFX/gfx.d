@@ -69,7 +69,9 @@ src/GFX/gfx.d src/GFX/gfx.o src/GFX/gfx.o: ../src/GFX/gfx.c \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/GFX/vector2.h ../src/GFX/rectangle.h ../src/GFX/color.h \
- ../src/GFX/screen.h ../src/GFX/fonts.h
+ ../src/GFX/screen.h ../src/GFX/fonts.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h \
+ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h
 
 ../src/GFX/gfx.h:
 
@@ -228,3 +230,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/GFX/screen.h:
 
 ../src/GFX/fonts.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/string.h:
+
+c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\../lib/gcc/avr32/4.4.7/../../../../avr32/include/sys/string.h:
