@@ -371,6 +371,7 @@
     <Folder Include="src\config\" />
     <Folder Include="src\audio" />
     <Folder Include="src\GFX" />
+    <Folder Include="src\RTC" />
     <Folder Include="src\SDCard" />
   </ItemGroup>
   <ItemGroup>
@@ -573,6 +574,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\mainGauche.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\RTC\rtc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\RTC\rtc.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\SDCard\sdcard.c">

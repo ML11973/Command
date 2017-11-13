@@ -116,7 +116,7 @@ void tc1_init(void){
 
 
 // 8 MHz clock connected to PBA/8
-void tc0_init (void){
+void tc0_init(void){
 	// Options for waveform generation.
 	static const tc_waveform_opt_t WAVEFORM_OPT0 = {
 		.channel  = TC0_CHANNEL,         // Canal selection.
@@ -158,4 +158,10 @@ void tc0_init (void){
 	tc_write_rc(&AVR32_TC, TC0_CHANNEL, 36364);  // Set RC value for 880 Hz interrupt.
 	tc_configure_interrupts(&AVR32_TC, TC0_CHANNEL, &TC0_INTERRUPT);
 	INTC_register_interrupt (&tc0_irq, AVR32_TC_IRQ0, AVR32_INTC_INT1);
+}
+
+
+// RTC TWI configuration
+void twi_init(void){
+	
 }
