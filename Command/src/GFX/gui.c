@@ -89,14 +89,14 @@ void gui_Init(void){
 }
 
 void gui_loadingScreen(void){
-	screen_SetPixels(Rect(0,0,320,240), (Color){RED});
+	screen_SetPixels(Rect(0,0,320,240), textColor);
 	screen_SetPixels((Rectangle){.bottomLeft={10,10},.topRight={310,230}}, (Color){BLACK});
 
 	gfx_DrawCircle((Vector2){150,129},58,1,(Color){WHITE});
-	gfx_DrawCircle((Vector2){200,100},50,50,(Color){RED});
+	gfx_DrawCircle((Vector2){200,100},50,50,textColor);
 	gfx_DrawLine((Vector2){100,100}, (Vector2){200,100}, (Color){WHITE}, 3);
 	gfx_DrawLine((Vector2){150, 186}, (Vector2){200,100}, (Color){WHITE}, 1);
-	gfx_DrawCircle((Vector2){100,100},40,5,(Color){RED});
+	gfx_DrawCircle((Vector2){100,100},40,5,textColor);
 	gfx_DrawLine((Vector2){99,99}, (Vector2){150, 186}, (Color){WHITE}, 15);
 	char text[] = "LogoRetro.pixel";
 	gfx_Label((Vector2){40,40}, text, sizeof(text)/sizeof(*text), Small, (Color){WHITE});

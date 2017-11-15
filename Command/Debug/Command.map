@@ -26,7 +26,12 @@ r2                  0x2               src/ASF/avr32/components/memory/sd_mmc/sd_
 card_type           0x1               src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
 inter4              0x4               src/audio/audio.o
 clt_sec             0x4               src/audio/audio.o
+<<<<<<< HEAD
 currentTime         0x6               src/RTC/rtc.o
+=======
+secteur_data        0x4               src/SDCard/sdcard.o
+sector_boot         0x3d              src/SDCard/sdcard.o
+>>>>>>> master
 division            0x1               src/audio/audio.o
 inter3              0x4               src/audio/audio.o
 csd                 0x10              src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
@@ -590,13 +595,30 @@ Discarded input sections
  .text          0x00000000        0x0 src/audio/audio.o
  .data          0x00000000        0x0 src/audio/audio.o
  .bss           0x00000000        0x0 src/audio/audio.o
+<<<<<<< HEAD
  .text._findFirstSector
                 0x00000000       0x80 src/audio/audio.o
+=======
+ .debug_abbrev  0x00000000      0x1ef src/audio/audio.o
+ .debug_info    0x00000000     0x1758 src/audio/audio.o
+ .debug_line    0x00000000      0x983 src/audio/audio.o
+ .debug_macinfo
+                0x00000000    0xe4322 src/audio/audio.o
+ .text._findFirstSector
+                0x00000000        0x2 src/audio/audio.o
+>>>>>>> master
  .text.audio_freqStop
                 0x00000000       0x14 src/audio/audio.o
  .text.audio_freqStart
                 0x00000000       0x34 src/audio/audio.o
+<<<<<<< HEAD
  .text.tc0_irq  0x00000000       0x50 src/audio/audio.o
+=======
+ .text._setOutput
+                0x00000000       0x98 src/audio/audio.o
+ .text.tc0_irq  0x00000000       0x50 src/audio/audio.o
+ .text.tc1_irq  0x00000000       0x28 src/audio/audio.o
+>>>>>>> master
  .text.audio_setVolume
                 0x00000000       0x58 src/audio/audio.o
  .text.audio_playFile
@@ -604,6 +626,7 @@ Discarded input sections
  .bss.i         0x00000000        0x2 src/audio/audio.o
  .bss.j         0x00000000        0x2 src/audio/audio.o
  .data.volume   0x00000000        0x1 src/audio/audio.o
+<<<<<<< HEAD
  .bss.slow      0x00000000        0x1 src/audio/audio.o
  .bss.wavData2  0x00000000      0x200 src/audio/audio.o
  .bss.progression
@@ -612,14 +635,44 @@ Discarded input sections
                 0x00000000        0x1 src/audio/audio.o
  .bss.cluster_read
                 0x00000000        0x4 src/audio/audio.o
+=======
+ .bss.cluster_read
+                0x00000000        0x4 src/audio/audio.o
+ .bss.slow      0x00000000        0x1 src/audio/audio.o
+ .bss.audioL    0x00000000        0x2 src/audio/audio.o
+ .bss.progression
+                0x00000000        0x4 src/audio/audio.o
+ .data.currentVolume.11411
+                0x00000000        0x1 src/audio/audio.o
+ .bss.audioR    0x00000000        0x2 src/audio/audio.o
+>>>>>>> master
  .bss.taille    0x00000000        0x4 src/audio/audio.o
  .bss.ram       0x00000000        0x4 src/audio/audio.o
  .bss.audio_firstCall
                 0x00000000        0x1 src/audio/audio.o
+<<<<<<< HEAD
  .rodata.sineTable
                 0x00000000      0x19e src/audio/audio.o
  .bss.wavData1  0x00000000      0x200 src/audio/audio.o
  .bss.lecture   0x00000000        0x4 src/audio/audio.o
+=======
+ .bss.nextSample
+                0x00000000        0x1 src/audio/audio.o
+ .rodata.sineTable
+                0x00000000      0x19e src/audio/audio.o
+ .bss.wavData1  0x00000000      0x200 src/audio/audio.o
+ .bss.wavData2  0x00000000      0x200 src/audio/audio.o
+ .bss.lecture   0x00000000        0x4 src/audio/audio.o
+ .debug_frame   0x00000000       0xd4 src/audio/audio.o
+ .debug_loc     0x00000000      0x182 src/audio/audio.o
+ .debug_pubnames
+                0x00000000      0x1d4 src/audio/audio.o
+ .debug_aranges
+                0x00000000       0x58 src/audio/audio.o
+ .debug_ranges  0x00000000       0x50 src/audio/audio.o
+ .debug_str     0x00000000      0x64e src/audio/audio.o
+ .comment       0x00000000       0x31 src/audio/audio.o
+>>>>>>> master
  COMMON         0x00000000       0x28 src/audio/audio.o
  .text          0x00000000        0x0 src/GFX/fonts.o
  .data          0x00000000        0x0 src/GFX/fonts.o
@@ -637,6 +690,7 @@ Discarded input sections
                 0x00000000        0x2 src/GFX/gfx.o
  .text.gfx_FillScreen
                 0x00000000        0x2 src/GFX/gfx.o
+<<<<<<< HEAD
  .text.gfx_BeginNewTerminal
                 0x00000000       0x1c src/GFX/gfx.o
  .text.gfx_cmdLine
@@ -709,6 +763,13 @@ Discarded input sections
                 0x00000000        0x1 src/GFX/gui.o
  .rodata.C.61.11524
                 0x00000000        0x4 src/GFX/gui.o
+=======
+ .text.gfx_DrawPixel
+                0x00000000       0x20 src/GFX/gfx.o
+ .text          0x00000000        0x0 src/GFX/gui.o
+ .data          0x00000000        0x0 src/GFX/gui.o
+ .bss           0x00000000        0x0 src/GFX/gui.o
+>>>>>>> master
  .text          0x00000000        0x0 src/GFX/rectangle.o
  .data          0x00000000        0x0 src/GFX/rectangle.o
  .bss           0x00000000        0x0 src/GFX/rectangle.o
@@ -729,12 +790,49 @@ Discarded input sections
  .text          0x00000000        0x0 src/init.o
  .data          0x00000000        0x0 src/init.o
  .bss           0x00000000        0x0 src/init.o
+<<<<<<< HEAD
  .text.tc0_init
                 0x00000000       0x50 src/init.o
  .rodata.TC0_INTERRUPT.11386
                 0x00000000        0x4 src/init.o
  .rodata.WAVEFORM_OPT0.11385
                 0x00000000        0x8 src/init.o
+=======
+ .debug_abbrev  0x00000000      0x188 src/init.o
+ .debug_info    0x00000000     0x1777 src/init.o
+ .debug_line    0x00000000      0x943 src/init.o
+ .debug_macinfo
+                0x00000000    0xe430e src/init.o
+ .text.tc0_init
+                0x00000000       0x50 src/init.o
+ .text.tc1_init
+                0x00000000       0x60 src/init.o
+ .text.spi_init
+                0x00000000       0x88 src/init.o
+ .text.board_init
+                0x00000000       0x38 src/init.o
+ .rodata.WAVEFORM_OPT0.11362
+                0x00000000        0x8 src/init.o
+ .rodata.C.47.11352
+                0x00000000       0x20 src/init.o
+ .rodata.WAVEFORM_OPT1.11357
+                0x00000000        0x8 src/init.o
+ .rodata.C.48.11353
+                0x00000000       0x10 src/init.o
+ .rodata.TC0_INTERRUPT.11363
+                0x00000000        0x4 src/init.o
+ .rodata.TC1_INTERRUPT.11358
+                0x00000000        0x4 src/init.o
+ .debug_frame   0x00000000       0x74 src/init.o
+ .debug_loc     0x00000000       0x88 src/init.o
+ .debug_pubnames
+                0x00000000       0x48 src/init.o
+ .debug_aranges
+                0x00000000       0x38 src/init.o
+ .debug_ranges  0x00000000       0x30 src/init.o
+ .debug_str     0x00000000      0x5b6 src/init.o
+ .comment       0x00000000       0x31 src/init.o
+>>>>>>> master
  .text          0x00000000        0x0 src/mainCentre.o
  .data          0x00000000        0x0 src/mainCentre.o
  .bss           0x00000000        0x0 src/mainCentre.o
@@ -757,6 +855,7 @@ Discarded input sections
  .text          0x00000000        0x0 src/mainGauche.o
  .data          0x00000000        0x0 src/mainGauche.o
  .bss           0x00000000        0x0 src/mainGauche.o
+<<<<<<< HEAD
  .text          0x00000000        0x0 src/RTC/rtc.o
  .data          0x00000000        0x0 src/RTC/rtc.o
  .bss           0x00000000        0x0 src/RTC/rtc.o
@@ -787,6 +886,24 @@ Discarded input sections
  .debug_str     0x00000000      0x3c4 src/RTC/rtc.o
  .comment       0x00000000       0x31 src/RTC/rtc.o
  COMMON         0x00000000       0x4c src/RTC/rtc.o
+=======
+ .debug_abbrev  0x00000000       0x59 src/mainGauche.o
+ .debug_info    0x00000000       0xb4 src/mainGauche.o
+ .debug_line    0x00000000      0x915 src/mainGauche.o
+ .debug_macinfo
+                0x00000000    0xe42cb src/mainGauche.o
+ .text.mainGauche
+                0x00000000       0x50 src/mainGauche.o
+ .debug_frame   0x00000000       0x30 src/mainGauche.o
+ .debug_loc     0x00000000       0x1f src/mainGauche.o
+ .debug_pubnames
+                0x00000000       0x21 src/mainGauche.o
+ .debug_aranges
+                0x00000000       0x20 src/mainGauche.o
+ .debug_ranges  0x00000000       0x18 src/mainGauche.o
+ .debug_str     0x00000000      0x102 src/mainGauche.o
+ .comment       0x00000000       0x31 src/mainGauche.o
+>>>>>>> master
  .text          0x00000000        0x0 src/SDCard/sdcard.o
  .data          0x00000000        0x0 src/SDCard/sdcard.o
  .bss           0x00000000        0x0 src/SDCard/sdcard.o
@@ -1024,7 +1141,11 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
 .plt
  *(.plt)
 
+<<<<<<< HEAD
 .text           0x80002004     0x1bd0
+=======
+.text           0x80002004     0x30cc
+>>>>>>> master
  *(.text .stub .text.* .gnu.linkonce.t.*)
  .text.flashc_set_wait_state
                 0x80002004        0xe src/ASF/avr32/drivers/flashc/flashc.o
@@ -1147,6 +1268,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x80002888                twi_master_init
  .text._stext   0x80002924       0x3c src/ASF/avr32/utils/startup/startup_uc3.o
                                  0x50 (size before relaxing)
+<<<<<<< HEAD
                 0x80002924                _stext
  .text._setOutput
                 0x80002960       0x98 src/audio/audio.o
@@ -1286,6 +1408,195 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x80007290       0x10 src/init.o
  .rodata.C.48.11376
                 0x800072a0       0x10 src/init.o
+=======
+                0x80002e70                _stext
+ .text.gfx_BeginNewTerminal
+                0x80002eac       0x1c src/GFX/gfx.o
+                0x80002eac                gfx_BeginNewTerminal
+ .text.gfx_DrawCircle
+                0x80002ec8      0x2a0 src/GFX/gfx.o
+                0x80002ec8                gfx_DrawCircle
+ .text.gfx_Label
+                0x80003168      0x180 src/GFX/gfx.o
+                0x80003168                gfx_Label
+ .text.gfx_cmdLine
+                0x800032e8       0xc0 src/GFX/gfx.o
+                0x800032e8                gfx_cmdLine
+ .text.gfx_DrawTerminalButton
+                0x800033a8       0x80 src/GFX/gfx.o
+                0x800033a8                gfx_DrawTerminalButton
+ .text.gfx_AddOptionToTerminal
+                0x80003428       0xec src/GFX/gfx.o
+                0x80003428                gfx_AddOptionToTerminal
+ .text.gfx_AddLineToTerminal
+                0x80003514       0x70 src/GFX/gfx.o
+                0x80003514                gfx_AddLineToTerminal
+ .text.gfx_DrawLine
+                0x80003584      0x19c src/GFX/gfx.o
+                0x80003584                gfx_DrawLine
+ .text.switchISR
+                0x80003720       0x58 src/GFX/gui.o
+                0x80003720                switchISR
+ .text._drawButton
+                0x80003778       0xe4 src/GFX/gui.o
+                0x80003778                _drawButton
+ .text._alarmMenu
+                0x8000385c      0x1cc src/GFX/gui.o
+                0x8000385c                _alarmMenu
+ .text._settingsMenu
+                0x80003a28      0x110 src/GFX/gui.o
+                0x80003a28                _settingsMenu
+ .text._musicMenu
+                0x80003b38      0x110 src/GFX/gui.o
+                0x80003b38                _musicMenu
+ .text._mainMenu
+                0x80003c48      0x2c4 src/GFX/gui.o
+                0x80003c48                _mainMenu
+ .text.gui_loadingScreen
+                0x80003f0c      0x1d4 src/GFX/gui.o
+                0x80003f0c                gui_loadingScreen
+ .text.gui_Init
+                0x800040e0       0x74 src/GFX/gui.o
+                0x800040e0                gui_Init
+ .text.rectangle_GetArea
+                0x80004154       0x2a src/GFX/rectangle.o
+                0x80004154                rectangle_GetArea
+ .text.rectangle_VerifySize
+                0x8000417e       0x2a src/GFX/rectangle.o
+                0x8000417e                rectangle_VerifySize
+ .text.Rect     0x800041a8        0xe src/GFX/rectangle.o
+                0x800041a8                Rect
+ *fill*         0x800041b6        0x2 d703d703
+ .text._writeRegister
+                0x800041b8       0x80 src/GFX/screen.o
+ .text._setStart
+                0x80004238       0x20 src/GFX/screen.o
+ .text._setLimits
+                0x80004258       0x30 src/GFX/screen.o
+ .text._selectRegister
+                0x80004288       0x48 src/GFX/screen.o
+ .text._writeRAM
+                0x800042d0       0x4c src/GFX/screen.o
+ .text.screen_SetPixels
+                0x8000431c       0xa0 src/GFX/screen.o
+                0x8000431c                screen_SetPixels
+ .text.screen_SetPixel
+                0x800043bc       0x3c src/GFX/screen.o
+                0x800043bc                screen_SetPixel
+ .text.screen_Init
+                0x800043f8      0x3dc src/GFX/screen.o
+                0x800043f8                screen_Init
+ .text.vector2_Add
+                0x800047d4       0x22 src/GFX/vector2.o
+                0x800047d4                vector2_Add
+ *fill*         0x800047f6        0x2 d703d703
+ .text.mainCentre
+                0x800047f8       0xa0 src/mainCentre.o
+                0x800047f8                mainCentre
+ .text.sdcard_ReadSector
+                0x80004898      0x124 src/SDCard/sdcard.o
+                0x80004898                sdcard_ReadSector
+ .text.sdcard_CheckPresence
+                0x800049bc        0xc src/SDCard/sdcard.o
+                0x800049bc                sdcard_CheckPresence
+ .text.sdcard_Mount
+                0x800049c8      0x498 src/SDCard/sdcard.o
+                0x800049c8                sdcard_Mount
+ .text.sdcard_Init
+                0x80004e60       0x88 src/SDCard/sdcard.o
+                0x80004e60                sdcard_Init
+ .text.sysclk_init
+                0x80004ee8       0x94 src/config/conf_cpu.o
+                0x80004ee8                sysclk_init
+ .text.main     0x80004f7c        0xc src/main.o
+                0x80004f7c                main
+ .text          0x80004f88      0x148 c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../lib/gcc/avr32/4.4.7/../../../../avr32/lib/ucr2\libc.a(lib_a-memcpy.o)
+                0x80004f88                memcpy
+ *(.text.*personality*)
+ *(.gnu.warning)
+
+.exception      0x80005200      0x200
+ .exception     0x80005200      0x200 src/ASF/avr32/drivers/intc/exception.o
+                0x80005200                _evba
+                0x80005304                _int0
+                0x80005312                _int1
+                0x80005320                _int2
+                0x8000532e                _int3
+
+.fini
+ *(.fini)
+                0x80005400                PROVIDE (__etext, .)
+                0x80005400                PROVIDE (_etext, .)
+                0x80005400                PROVIDE (etext, .)
+
+.rodata         0x80005400     0x34a8
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata._int_handler_table
+                0x80005400       0xa0 src/ASF/avr32/drivers/intc/intc.o
+ .rodata.FONT8x8
+                0x800054a0      0x308 src/GFX/fonts.o
+                0x800054a0                FONT8x8
+ .rodata.FONT16x12
+                0x800057a8     0x2ee0 src/GFX/fonts.o
+                0x800057a8                FONT16x12
+ .rodata.str1.4
+                0x80008688        0x6 src/GFX/gfx.o
+                                  0x8 (size before relaxing)
+ .rodata.C.60.11830
+                0x8000868e        0x4 src/GFX/gfx.o
+ .rodata.C.47.11482
+                0x80008692        0x8 src/GFX/gui.o
+ .rodata.C.50.11485
+                0x8000869a        0x4 src/GFX/gui.o
+ .rodata.C.54.11489
+                0x8000869e        0x4 src/GFX/gui.o
+ .rodata.C.71.11579
+                0x800086a2        0x4 src/GFX/gui.o
+ .rodata.C.69.11561
+                0x800086a6        0x4 src/GFX/gui.o
+ .rodata.C.55.11490
+                0x800086aa        0x4 src/GFX/gui.o
+ .rodata.C.48.11483
+                0x800086ae        0x4 src/GFX/gui.o
+ .rodata.C.51.11486
+                0x800086b2        0x4 src/GFX/gui.o
+ .rodata.C.63.11517
+                0x800086b6        0x4 src/GFX/gui.o
+ .rodata.C.60.11502
+                0x800086ba        0x4 src/GFX/gui.o
+ *fill*         0x800086be        0x2 
+ .rodata.str1.4
+                0x800086c0      0x16c src/GFX/gui.o
+                                0x170 (size before relaxing)
+ .rodata.C.49.11484
+                0x8000882c        0x4 src/GFX/gui.o
+ .rodata.C.52.11487
+                0x80008830        0x4 src/GFX/gui.o
+ .rodata.C.58.11500
+                0x80008834        0x4 src/GFX/gui.o
+ .rodata.C.61.11503
+                0x80008838        0x4 src/GFX/gui.o
+ .rodata.C.73.11593
+                0x8000883c        0x4 src/GFX/gui.o
+ .rodata.C.56.11491
+                0x80008840        0x4 src/GFX/gui.o
+ .rodata.C.53.11488
+                0x80008844        0x4 src/GFX/gui.o
+ .rodata.C.74.11595
+                0x80008848        0x4 src/GFX/gui.o
+ .rodata.C.57.11492
+                0x8000884c        0x4 src/GFX/gui.o
+ .rodata.C.59.11501
+                0x80008850        0x4 src/GFX/gui.o
+ .rodata.C.62.11515
+                0x80008854        0x4 src/GFX/gui.o
+ .rodata.C.47.11308
+                0x80008858       0x20 src/GFX/screen.o
+ .rodata.C.48.11309
+                0x80008878       0x10 src/GFX/screen.o
+ .rodata.C.47.11347
+                0x80008888       0x20 src/SDCard/sdcard.o
+>>>>>>> master
 
 .rodata1
  *(.rodata1)
@@ -1300,9 +1611,15 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  *(.gcc_except_table)
  *(.gcc_except_table.*)
 
+<<<<<<< HEAD
 .dalign         0x800072b0        0x0
                 0x800072b0                . = ALIGN (0x8)
                 0x800072b0                PROVIDE (_data_lma, .)
+=======
+.dalign         0x800088a8        0x0
+                0x800088a8                . = ALIGN (0x8)
+                0x800088a8                PROVIDE (_data_lma, .)
+>>>>>>> master
                 0x00000004                PROVIDE (_data, ORIGIN (CPUSRAM))
                 0x00000004                . = ORIGIN (CPUSRAM)
 
@@ -1361,13 +1678,18 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  *(.got.plt)
  *(.got)
 
+<<<<<<< HEAD
 .data
+=======
+.data           0x00000004       0x2c load address 0x800088a8
+>>>>>>> master
  *(.data .data.* .gnu.linkonce.d.*)
  *(.gnu.linkonce.d.*personality*)
 
 .data1
  *(.data1)
 
+<<<<<<< HEAD
 .balign         0x00000004        0x4 load address 0x800072b0
                 0x00000008                . = ALIGN (0x8)
  *fill*         0x00000004        0x4 
@@ -1377,6 +1699,16 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x00000008                __bss_start = .
 
 .bss            0x00000008      0x100 load address 0x800072b0
+=======
+.balign         0x00000030        0x0 load address 0x800088d4
+                0x00000030                . = ALIGN (0x8)
+                0x00000030                _edata = .
+                0x00000030                _edata = .
+                0x00000030                PROVIDE (edata, .)
+                0x00000030                __bss_start = .
+
+.bss            0x00000030     0x1238 load address 0x800088d4
+>>>>>>> master
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
  .bss._int_line_handler_table_6
@@ -1418,6 +1750,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .bss._int_line_handler_table_4
                 0x000000d8        0x4 src/ASF/avr32/drivers/intc/intc.o
  .bss._int_line_handler_table_5
+<<<<<<< HEAD
                 0x000000dc        0x4 src/ASF/avr32/drivers/intc/intc.o
  .bss.twi_busy  0x000000e0        0x1 src/ASF/avr32/drivers/twi/twi.o
  .bss.twi_nack  0x000000e1        0x1 src/ASF/avr32/drivers/twi/twi.o
@@ -1448,6 +1781,55 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x00000108                _end = .
                 0x00000108                PROVIDE (end, .)
                 0x00000108                __heap_start__ = ALIGN (0x8)
+=======
+                0x0000011c        0x4 src/ASF/avr32/drivers/intc/intc.o
+ .bss.counter.11821
+                0x00000120        0x4 src/GFX/gfx.o
+ .bss.newLinePosition
+                0x00000124        0x4 src/GFX/gfx.o
+ .bss.selectedCommand
+                0x00000128        0x1 src/GFX/gui.o
+ .bss.menuChanged
+                0x00000129        0x1 src/GFX/gui.o
+                0x00000129                menuChanged
+ .bss.switchState
+                0x0000012a        0x1 src/GFX/gui.o
+ .bss.currentMenuId
+                0x0000012b        0x1 src/GFX/gui.o
+                0x0000012b                currentMenuId
+ .bss.secteur_FAT
+                0x0000012c        0x4 src/SDCard/sdcard.o
+ .bss.data_mem  0x00000130      0x204 src/SDCard/sdcard.o
+ .bss.master_boot
+                0x00000334       0x10 src/SDCard/sdcard.o
+ .bss.secteur_RDE
+                0x00000344        0x4 src/SDCard/sdcard.o
+ .bss.sectors   0x00000348        0x4 src/SDCard/sdcard.o
+ *(COMMON)
+ COMMON         0x0000034c      0x229 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
+                0x0000034c                data_mem
+                0x00000550                capacity
+                0x00000558                capacity_mult
+                0x0000055a                erase_group_size
+                0x0000055c                sd_mmc_spi_last_block_address
+                0x00000560                r2
+                0x00000562                card_type
+                0x00000564                csd
+                0x00000574                r1
+ *fill*         0x00000575        0x3 
+ COMMON         0x00000578      0xce9 src/SDCard/sdcard.o
+                0x00000578                file_menu
+                0x000011f8                file_name
+                0x0000121c                FAT
+                0x00001220                secteur_data
+                0x00001224                sector_boot
+                0x00001268                . = ALIGN (0x8)
+ *fill*         0x00001261        0x7 
+                0x00001268                . = ALIGN (0x8)
+                0x00001268                _end = .
+                0x00001268                PROVIDE (end, .)
+                0x00001268                __heap_start__ = ALIGN (0x8)
+>>>>>>> master
                 0x0000f000                . = ((ORIGIN (CPUSRAM) + 0xfffc) - _stack_size)
                 0x0000f000                __heap_end__ = .
 
@@ -1550,7 +1932,11 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x000009c0       0x20 src/main.o
 
 .debug_pubnames
+<<<<<<< HEAD
                 0x00000000     0x18de
+=======
+                0x00000000     0x190a
+>>>>>>> master
  *(.debug_pubnames)
  .debug_pubnames
                 0x00000000      0x771 src/ASF/avr32/drivers/flashc/flashc.o
@@ -1585,6 +1971,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_pubnames
                 0x0000182b       0x55 src/init.o
  .debug_pubnames
+<<<<<<< HEAD
                 0x00001880       0x21 src/mainGauche.o
  .debug_pubnames
                 0x000018a1       0x22 src/config/conf_cpu.o
@@ -1667,6 +2054,84 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_line    0x0000a621      0x936 src/main.o
 
 .debug_frame    0x00000000     0x1ab4
+=======
+                0x00001813       0xba src/SDCard/sdcard.o
+ .debug_pubnames
+                0x000018cd       0x22 src/config/conf_cpu.o
+ .debug_pubnames
+                0x000018ef       0x1b src/main.o
+
+.debug_info     0x00000000     0xb889
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000     0x12d6 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
+ .debug_info    0x000012d6     0x1c74 src/ASF/avr32/drivers/flashc/flashc.o
+ .debug_info    0x00002f4a      0xb1b src/ASF/avr32/drivers/gpio/gpio.o
+ .debug_info    0x00003a65       0x86 src/ASF/avr32/drivers/intc/exception.o
+ .debug_info    0x00003aeb      0x5b3 src/ASF/avr32/drivers/intc/intc.o
+ .debug_info    0x0000409e     0x1a59 src/ASF/avr32/drivers/pm/pm.o
+ .debug_info    0x00005af7      0xa08 src/ASF/avr32/drivers/pwm/pwm.o
+ .debug_info    0x000064ff     0x1090 src/ASF/avr32/drivers/spi/spi.o
+ .debug_info    0x0000758f       0x85 src/ASF/avr32/utils/startup/startup_uc3.o
+ .debug_info    0x00007614       0x8c src/ASF/avr32/utils/startup/trampoline_uc3.o
+ .debug_info    0x000076a0      0x184 src/GFX/fonts.o
+ .debug_info    0x00007824      0x8b3 src/GFX/gfx.o
+ .debug_info    0x000080d7      0x715 src/GFX/gui.o
+ .debug_info    0x000087ec      0x23d src/GFX/rectangle.o
+ .debug_info    0x00008a29      0x92f src/GFX/screen.o
+ .debug_info    0x00009358      0x10d src/GFX/vector2.o
+ .debug_info    0x00009465      0x267 src/mainCentre.o
+ .debug_info    0x000096cc     0x12e5 src/SDCard/sdcard.o
+ .debug_info    0x0000a9b1      0xe2c src/config/conf_cpu.o
+ .debug_info    0x0000b7dd       0xac src/main.o
+
+.debug_abbrev   0x00000000     0x2059
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x2a4 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
+ .debug_abbrev  0x000002a4      0x331 src/ASF/avr32/drivers/flashc/flashc.o
+ .debug_abbrev  0x000005d5      0x28b src/ASF/avr32/drivers/gpio/gpio.o
+ .debug_abbrev  0x00000860       0x14 src/ASF/avr32/drivers/intc/exception.o
+ .debug_abbrev  0x00000874      0x1f2 src/ASF/avr32/drivers/intc/intc.o
+ .debug_abbrev  0x00000a66      0x2d1 src/ASF/avr32/drivers/pm/pm.o
+ .debug_abbrev  0x00000d37      0x19d src/ASF/avr32/drivers/pwm/pwm.o
+ .debug_abbrev  0x00000ed4      0x281 src/ASF/avr32/drivers/spi/spi.o
+ .debug_abbrev  0x00001155       0x12 src/ASF/avr32/utils/startup/startup_uc3.o
+ .debug_abbrev  0x00001167       0x14 src/ASF/avr32/utils/startup/trampoline_uc3.o
+ .debug_abbrev  0x0000117b       0x86 src/GFX/fonts.o
+ .debug_abbrev  0x00001201      0x24f src/GFX/gfx.o
+ .debug_abbrev  0x00001450      0x1f5 src/GFX/gui.o
+ .debug_abbrev  0x00001645       0xf5 src/GFX/rectangle.o
+ .debug_abbrev  0x0000173a      0x356 src/GFX/screen.o
+ .debug_abbrev  0x00001a90       0x88 src/GFX/vector2.o
+ .debug_abbrev  0x00001b18      0x13a src/mainCentre.o
+ .debug_abbrev  0x00001c52      0x2ac src/SDCard/sdcard.o
+ .debug_abbrev  0x00001efe      0x10d src/config/conf_cpu.o
+ .debug_abbrev  0x0000200b       0x4e src/main.o
+
+.debug_line     0x00000000     0x9efa
+ *(.debug_line)
+ .debug_line    0x00000000      0xadc src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
+ .debug_line    0x00000adc      0xbc1 src/ASF/avr32/drivers/flashc/flashc.o
+ .debug_line    0x0000169d      0x8aa src/ASF/avr32/drivers/gpio/gpio.o
+ .debug_line    0x00001f47      0x109 src/ASF/avr32/drivers/intc/exception.o
+ .debug_line    0x00002050      0x678 src/ASF/avr32/drivers/intc/intc.o
+ .debug_line    0x000026c8      0x9ad src/ASF/avr32/drivers/pm/pm.o
+ .debug_line    0x00003075      0x6a9 src/ASF/avr32/drivers/pwm/pwm.o
+ .debug_line    0x0000371e      0x7b4 src/ASF/avr32/drivers/spi/spi.o
+ .debug_line    0x00003ed2       0xf2 src/ASF/avr32/utils/startup/startup_uc3.o
+ .debug_line    0x00003fc4       0x67 src/ASF/avr32/utils/startup/trampoline_uc3.o
+ .debug_line    0x0000402b      0x89a src/GFX/fonts.o
+ .debug_line    0x000048c5      0xaa4 src/GFX/gfx.o
+ .debug_line    0x00005369      0xa41 src/GFX/gui.o
+ .debug_line    0x00005daa      0x915 src/GFX/rectangle.o
+ .debug_line    0x000066bf      0xa62 src/GFX/screen.o
+ .debug_line    0x00007121      0x8bb src/GFX/vector2.o
+ .debug_line    0x000079dc      0x98a src/mainCentre.o
+ .debug_line    0x00008366      0x9d5 src/SDCard/sdcard.o
+ .debug_line    0x00008d3b      0x8bd src/config/conf_cpu.o
+ .debug_line    0x000095f8      0x902 src/main.o
+
+.debug_frame    0x00000000     0x1b18
+>>>>>>> master
  *(.debug_frame)
  .debug_frame   0x00000000      0x6a4 src/ASF/avr32/drivers/flashc/flashc.o
  .debug_frame   0x000006a4      0x204 src/ASF/avr32/drivers/gpio/gpio.o
@@ -1719,6 +2184,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                                 0x3cc (size before relaxing)
  .debug_str     0x00002ead       0x21 src/GFX/vector2.o
                                 0x11e (size before relaxing)
+<<<<<<< HEAD
  .debug_str     0x00002ece       0xae src/init.o
                                 0x761 (size before relaxing)
  .debug_str     0x00002f7c       0x1f src/mainGauche.o
@@ -1750,6 +2216,37 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_loc     0x00003df3       0x1f src/main.o
 
 .debug_macinfo  0x00000000  0x10d66e9
+=======
+ .debug_str     0x00002a70       0x27 src/mainCentre.o
+                                0x1d8 (size before relaxing)
+ .debug_str     0x00002a97      0x2a2 src/SDCard/sdcard.o
+                                0x615 (size before relaxing)
+ .debug_str     0x00002d39       0x25 src/config/conf_cpu.o
+                                0x463 (size before relaxing)
+ .debug_str     0x00002d5e        0xe src/main.o
+                                 0xf1 (size before relaxing)
+
+.debug_loc      0x00000000     0x3fe4
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x924 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
+ .debug_loc     0x00000924     0x10f4 src/ASF/avr32/drivers/flashc/flashc.o
+ .debug_loc     0x00001a18      0x368 src/ASF/avr32/drivers/gpio/gpio.o
+ .debug_loc     0x00001d80       0xd3 src/ASF/avr32/drivers/intc/intc.o
+ .debug_loc     0x00001e53      0x559 src/ASF/avr32/drivers/pm/pm.o
+ .debug_loc     0x000023ac       0xb4 src/ASF/avr32/drivers/pwm/pwm.o
+ .debug_loc     0x00002460      0x3bd src/ASF/avr32/drivers/spi/spi.o
+ .debug_loc     0x0000281d      0xae1 src/GFX/gfx.o
+ .debug_loc     0x000032fe      0x5e4 src/GFX/gui.o
+ .debug_loc     0x000038e2       0x88 src/GFX/rectangle.o
+ .debug_loc     0x0000396a      0x29f src/GFX/screen.o
+ .debug_loc     0x00003c09       0x1f src/GFX/vector2.o
+ .debug_loc     0x00003c28       0x3d src/mainCentre.o
+ .debug_loc     0x00003c65      0x311 src/SDCard/sdcard.o
+ .debug_loc     0x00003f76       0x4f src/config/conf_cpu.o
+ .debug_loc     0x00003fc5       0x1f src/main.o
+
+.debug_macinfo  0x00000000   0xf11dd4
+>>>>>>> master
  *(.debug_macinfo)
  .debug_macinfo
                 0x00000000    0xe0b49 src/ASF/avr32/drivers/flashc/flashc.o
@@ -1778,6 +2275,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_macinfo
                 0x00a9843b    0xe4364 src/GFX/rectangle.o
  .debug_macinfo
+<<<<<<< HEAD
                 0x00b7c79f    0xe4a90 src/GFX/screen.o
  .debug_macinfo
                 0x00c6122f    0xe4350 src/GFX/vector2.o
@@ -1789,6 +2287,15 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x00f0dee0    0xe43d4 src/config/conf_cpu.o
  .debug_macinfo
                 0x00ff22b4    0xe4435 src/main.o
+=======
+                0x00b81131    0xe4451 src/mainCentre.o
+ .debug_macinfo
+                0x00c65582    0xe4255 src/SDCard/sdcard.o
+ .debug_macinfo
+                0x00d497d7    0xe42da src/config/conf_cpu.o
+ .debug_macinfo
+                0x00e2dab1    0xe4323 src/main.o
+>>>>>>> master
 
 .debug_weaknames
  *(.debug_weaknames)

@@ -20,7 +20,7 @@
 
 #define		END_SECTEUR_16		0x0000FFEF		//  Fin de fichier dans la FAT16
 #define		END_SECTEUR_32		0x0FFFFFF8		//  Fin de fichier dans la FAT32
-#define		DIV_16				8				//  Décalage nombre de secteurs par bloc
+#define		DIV_16				8				//  Dï¿½calage nombre de secteurs par bloc
 #define		DIV_32				7				//  Idem pour la Fat32
 
 
@@ -72,8 +72,8 @@ uint8_t wavData2[512] = {0};
 uint32_t	secteur_read;		// Le secteur en lecture
 uint32_t	cluster_read = 0;		// Le cluster en lecture
 uint32_t	clt_sec;
-uint32_t	inter1, inter2, inter3, inter4;		// Variables intermédiaires
-uint32_t	retry;				// Pour éviter un blocage
+uint32_t	inter1, inter2, inter3, inter4;		// Variables intermï¿½diaires
+uint32_t	retry;				// Pour ï¿½viter un blocage
 uint32_t	lecture = 0;		// Position dans la lecture du fichier
 uint8_t		slow = 0;
 
@@ -291,21 +291,21 @@ uint8_t audio_playFile(uint8_t fileNumber){
 
 
 bool _findFirstSector(uint8_t fileNumber){
-	Root_directory(fileNumber);
-	
-	if (FAT == 1) {
-		end_secteur = END_SECTEUR_32;
-		division = DIV_32;
-	}
-	else {
-		end_secteur = END_SECTEUR_16;
-		division = DIV_16;
-	}
-
-	//détermine le premier secteur du fichier. ! Important la zone res2 est utilisée comme first_cluster FAT32
-	cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
-	+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
+	//Root_directory(fileNumber);
+	//
+	//if (FAT == 1) {
+		//end_secteur = END_SECTEUR_32;
+		//division = DIV_32;
+	//}
+	//else {
+		//end_secteur = END_SECTEUR_16;
+		//division = DIV_16;
+	//}
+//
+	////dï¿½termine le premier secteur du fichier. ! Important la zone res2 est utilisï¿½e comme first_cluster FAT32
+	//cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
+	//+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
 	//secteur_read = ((cluster_read - 2) * sector_boot.structure.sec_cluster[0]) + secteur_data;
-	clt_sec = secteur_read;
+	//clt_sec = secteur_read;
 	
 }

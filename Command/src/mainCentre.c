@@ -21,9 +21,9 @@ void mainCentre(void){
 	cpu_irq_enable();
 	
 	screen_Init();
-	//gui_loadingScreen();
+	gui_loadingScreen();
 	
-	//cpu_delay_ms(1500,BOARD_OSC0_HZ);
+	cpu_delay_ms(500,BOARD_OSC0_HZ);
 	
 	sdcard_Init();
 	sdcard_Mount();
