@@ -67,7 +67,8 @@ src/mainGauche.d src/mainGauche.o src/mainGauche.o: ../src/mainGauche.c \
  ../src/ASF/avr32/drivers/pwm/pwm.h \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
- ../src/audio/audio.h ../src/SDCard/sdcard.h ../src/mainGauche.h
+ ../src/audio/audio.h ../src/audio/../SDCard/sdcard.h \
+ ../src/SDCard/sdcard.h ../src/mainGauche.h
 
 ../src/asf.h:
 
@@ -216,6 +217,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/avr32/drivers/tc/tc.h:
 
 ../src/audio/audio.h:
+
+../src/audio/../SDCard/sdcard.h:
 
 ../src/SDCard/sdcard.h:
 

@@ -291,21 +291,21 @@ uint8_t audio_playFile(uint8_t fileNumber){
 
 
 bool _findFirstSector(uint8_t fileNumber){
-	Root_directory(fileNumber);
-	
-	if (FAT == 1) {
-		end_secteur = END_SECTEUR_32;
-		division = DIV_32;
-	}
-	else {
-		end_secteur = END_SECTEUR_16;
-		division = DIV_16;
-	}
-
-	//détermine le premier secteur du fichier. ! Important la zone res2 est utilisée comme first_cluster FAT32
-	cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
-	+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
-	secteur_read = ((cluster_read - 2) * sector_boot.structure.sec_cluster[0]) + secteur_data;
-	clt_sec = secteur_read;
+	//Root_directory(fileNumber);
+	//
+	//if (FAT == 1) {
+		//end_secteur = END_SECTEUR_32;
+		//division = DIV_32;
+	//}
+	//else {
+		//end_secteur = END_SECTEUR_16;
+		//division = DIV_16;
+	//}
+//
+	////détermine le premier secteur du fichier. ! Important la zone res2 est utilisée comme first_cluster FAT32
+	//cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
+	//+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
+	//secteur_read = ((cluster_read - 2) * sector_boot.structure.sec_cluster[0]) + secteur_data;
+	//clt_sec = secteur_read;
 	
 }

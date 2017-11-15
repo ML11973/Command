@@ -22,35 +22,6 @@ typedef union {
 	} structure;
 } MBE_t;
 
-// Boot Sector Entry
-typedef union {
-	struct {
-		uint8_t	SBE[61];			// Boot Sector Entry.
-	} tableau;
-	struct	{
-		uint8_t	jump[3];			// Instruction de saut.
-		uint8_t OEM[8];				// OEM Nom (MSDOS 5.0)
-		uint8_t sec_octets[2];		// Nombre d'octets par secteur.
-		uint8_t sec_cluster[1];		// Nombre de secteurs par cluster.
-		uint8_t	sec_reserved[2];	// Nombre de secteurs réservés.
-		uint8_t fat_copie[1];		// Nombre de copies de fat.
-		uint8_t	rep_entry[2];		// Nombre d'entrées possibles dans répertoire racine.
-		uint8_t sec_number[2];		// Nombre de secteur pour des capacité < 32MBytes
-		uint8_t type[1];			// Type de support.
-		uint8_t	fat_size[2];		// Taille d'une FAT en secteurs.
-		uint8_t	sec_track[2];		// Nombre de secteurs par piste.
-		uint8_t	head[2];			// Nombre de tête.
-		uint8_t sec_hide[4];		// Nombre de secteurs cachés.
-		uint8_t sec_size[4];		// Nombre de secteurs de la partition.
-		uint8_t	disk[1];			// disque physique.
-		uint8_t active_head[1];		// Tête active.
-		uint8_t boot_sig[1];		// Boot signature.
-		uint8_t	serial_number[4];	// Numéro de série.
-		uint8_t volume_name[11];	// Nom du volume.
-	} structure;
-} SBE_t;
-
-
 static spi_options_t sdOptions = {
 	.reg			=	1,			// NPCS1 pour la carte SD.
 	.baudrate		=   1000000,   	// Vitesse de transmission.
@@ -64,10 +35,10 @@ static spi_options_t sdOptions = {
 
 volatile bool FAT;
 static MBE_t master_boot;
-static SBE_t sector_boot;
+SBE_t sector_boot;
 volatile RDE_t file_name;
 static uint32_t	sectors;
-static uint32_t	secteur_data;	//premier secteur des données.
+uint32_t	secteur_data;	//premier secteur des données.
 static uint32_t	secteur_RDE;	//premier secteur de la Root Directory.
 static uint32_t	secteur_FAT;
 static uint8_t data_mem[513]; 

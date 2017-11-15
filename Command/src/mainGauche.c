@@ -15,7 +15,7 @@
 
 #include "mainGauche.h"
 
-volatile uint32_t ram = 0;
+//volatile uint32_t ram = 0;
 
 void mainGauche(void){
 	
@@ -25,7 +25,7 @@ void mainGauche(void){
 	sdcard_Init();
 	sdcard_Mount();
 	// Setting amplifier volume
-	audio_set_volume(DEFAULTVOLUME);
+	audio_setVolume(DEFAULTVOLUME);
 	
 	if(sdcard_CheckPresence()){
 		play = 1;
@@ -37,9 +37,9 @@ void mainGauche(void){
 	
 	while(1){
 		if (gpio_get_pin_value(PIN_SWITCH0)){
-			audio_set_volume(0);
+			audio_setVolume(0);
 			} else {
-			audio_set_volume(DEFAULTVOLUME);
+			audio_setVolume(DEFAULTVOLUME);
 		}
 		
 		

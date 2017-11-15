@@ -67,7 +67,8 @@ src/init.d src/init.o src/init.o: ../src/init.c ../src/init.h \
  ../src/ASF/avr32/drivers/pwm/pwm.h \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
- ../src/config/conf_cpu.h ../src/audio/audio.h
+ ../src/config/conf_cpu.h ../src/audio/audio.h \
+ ../src/audio/../SDCard/sdcard.h
 
 ../src/init.h:
 
@@ -220,3 +221,5 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/config/conf_cpu.h:
 
 ../src/audio/audio.h:
+
+../src/audio/../SDCard/sdcard.h:
