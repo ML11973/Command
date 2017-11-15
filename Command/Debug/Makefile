@@ -50,6 +50,7 @@ SUBDIRS :=  \
 ../src/ASF/avr32/drivers/pwm/ \
 ../src/ASF/avr32/drivers/spi/ \
 ../src/ASF/avr32/drivers/tc/ \
+../src/ASF/avr32/drivers/twi/ \
 ../src/ASF/avr32/utils/ \
 ../src/ASF/avr32/utils/header_files/ \
 ../src/ASF/avr32/utils/make/ \
@@ -66,6 +67,7 @@ SUBDIRS :=  \
 ../src/config/ \
 ../src/audio \
 ../src/GFX \
+../src/RTC \
 ../src/SDCard
 
 
@@ -82,6 +84,7 @@ C_SRCS +=  \
 ../src/ASF/avr32/drivers/pwm/pwm.c \
 ../src/ASF/avr32/drivers/spi/spi.c \
 ../src/ASF/avr32/drivers/tc/tc.c \
+../src/ASF/avr32/drivers/twi/twi.c \
 ../src/ASF/common/services/storage/ctrl_access/ctrl_access.c \
 ../src/audio/audio.c \
 ../src/GFX/fonts.c \
@@ -93,6 +96,7 @@ C_SRCS +=  \
 ../src/init.c \
 ../src/mainCentre.c \
 ../src/mainGauche.c \
+../src/RTC/rtc.c \
 ../src/SDCard/sdcard.c \
 ../src/syntax.c \
 ../src/config/conf_cpu.c \
@@ -121,6 +125,7 @@ src/ASF/avr32/drivers/pm/power_clocks_lib.o \
 src/ASF/avr32/drivers/pwm/pwm.o \
 src/ASF/avr32/drivers/spi/spi.o \
 src/ASF/avr32/drivers/tc/tc.o \
+src/ASF/avr32/drivers/twi/twi.o \
 src/ASF/avr32/utils/startup/startup_uc3.o \
 src/ASF/avr32/utils/startup/trampoline_uc3.o \
 src/ASF/common/services/storage/ctrl_access/ctrl_access.o \
@@ -134,6 +139,7 @@ src/GFX/vector2.o \
 src/init.o \
 src/mainCentre.o \
 src/mainGauche.o \
+src/RTC/rtc.o \
 src/SDCard/sdcard.o \
 src/syntax.o \
 src/config/conf_cpu.o \
@@ -152,6 +158,7 @@ src/ASF/avr32/drivers/pm/power_clocks_lib.o \
 src/ASF/avr32/drivers/pwm/pwm.o \
 src/ASF/avr32/drivers/spi/spi.o \
 src/ASF/avr32/drivers/tc/tc.o \
+src/ASF/avr32/drivers/twi/twi.o \
 src/ASF/avr32/utils/startup/startup_uc3.o \
 src/ASF/avr32/utils/startup/trampoline_uc3.o \
 src/ASF/common/services/storage/ctrl_access/ctrl_access.o \
@@ -165,6 +172,7 @@ src/GFX/vector2.o \
 src/init.o \
 src/mainCentre.o \
 src/mainGauche.o \
+src/RTC/rtc.o \
 src/SDCard/sdcard.o \
 src/syntax.o \
 src/config/conf_cpu.o \
@@ -183,6 +191,7 @@ src/ASF/avr32/drivers/pm/power_clocks_lib.d \
 src/ASF/avr32/drivers/pwm/pwm.d \
 src/ASF/avr32/drivers/spi/spi.d \
 src/ASF/avr32/drivers/tc/tc.d \
+src/ASF/avr32/drivers/twi/twi.d \
 src/ASF/avr32/utils/startup/startup_uc3.d \
 src/ASF/avr32/utils/startup/trampoline_uc3.d \
 src/ASF/common/services/storage/ctrl_access/ctrl_access.d \
@@ -196,6 +205,7 @@ src/GFX/vector2.d \
 src/init.d \
 src/mainCentre.d \
 src/mainGauche.d \
+src/RTC/rtc.d \
 src/SDCard/sdcard.d \
 src/syntax.d \
 src/config/conf_cpu.d \
@@ -214,6 +224,7 @@ src/ASF/avr32/drivers/pm/power_clocks_lib.d \
 src/ASF/avr32/drivers/pwm/pwm.d \
 src/ASF/avr32/drivers/spi/spi.d \
 src/ASF/avr32/drivers/tc/tc.d \
+src/ASF/avr32/drivers/twi/twi.d \
 src/ASF/avr32/utils/startup/startup_uc3.d \
 src/ASF/avr32/utils/startup/trampoline_uc3.d \
 src/ASF/common/services/storage/ctrl_access/ctrl_access.d \
@@ -227,6 +238,7 @@ src/GFX/vector2.d \
 src/init.d \
 src/mainCentre.d \
 src/mainGauche.d \
+src/RTC/rtc.d \
 src/SDCard/sdcard.d \
 src/syntax.d \
 src/config/conf_cpu.d \
@@ -299,101 +311,119 @@ LINKER_SCRIPT_DEP+=
 
 
 
+
+
+
+
 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/%.o: ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/flashc/%.o: ../src/ASF/avr32/drivers/flashc/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/gpio/%.o: ../src/ASF/avr32/drivers/gpio/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/intc/%.o: ../src/ASF/avr32/drivers/intc/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/pm/%.o: ../src/ASF/avr32/drivers/pm/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/pwm/%.o: ../src/ASF/avr32/drivers/pwm/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/spi/%.o: ../src/ASF/avr32/drivers/spi/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/tc/%.o: ../src/ASF/avr32/drivers/tc/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+src/ASF/avr32/drivers/twi/%.o: ../src/ASF/avr32/drivers/twi/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/common/services/storage/ctrl_access/%.o: ../src/ASF/common/services/storage/ctrl_access/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/audio/%.o: ../src/audio/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/GFX/%.o: ../src/GFX/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/%.o: ../src/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+src/RTC/%.o: ../src/RTC/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/SDCard/%.o: ../src/SDCard/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/config/%.o: ../src/config/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU C Compiler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE)  -x c -DDEBUG -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE  -I"C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I"../src/ASF/common/boards/user_board" -I"../src" -I"../src/config" -I"../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I"../src/ASF/avr32/drivers/cpu/cycle_counter" -I"../src/ASF/avr32/drivers/flashc" -I"../src/ASF/avr32/drivers/gpio" -I"../src/ASF/avr32/drivers/spi" -I"../src/ASF/common/boards" -I"../src/ASF/common/services/storage/ctrl_access" -I"../src/ASF/avr32/drivers/pm" -I"../src/ASF/avr32/drivers/pwm" -I"../src/ASF/avr32/utils" -I"../src/ASF/avr32/utils/preprocessor" -I"../src/ASF/common/utils" -I"../src/ASF/avr32/drivers/intc" -I"../src/ASF/avr32/drivers/tc" -I"../src/ASF/avr32/drivers/twi"  -O1 -fdata-sections -ffunction-sections -masm-addr-pseudos -g3 -Wall -mpart=uc3a1256 -c -std=gnu99 -fno-strict-aliasing -Wstrict-prototypes -Wmissing-prototypes -Werror-implicit-function-declaration -Wpointer-arith -mrelax -mno-cond-exec-before-reload -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
@@ -404,56 +434,56 @@ src/config/%.o: ../src/config/%.c
 src/ASF/avr32/drivers/intc/%.o: ../src/ASF/avr32/drivers/intc/%.S
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/intc/%.o: ../src/ASF/avr32/drivers/intc/%.x
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/intc/%.o: ../src/ASF/avr32/drivers/intc/%.X
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/drivers/intc/%.o: ../src/ASF/avr32/drivers/intc/%.sx
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/utils/startup/%.o: ../src/ASF/avr32/utils/startup/%.S
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/utils/startup/%.o: ../src/ASF/avr32/utils/startup/%.x
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/utils/startup/%.o: ../src/ASF/avr32/utils/startup/%.X
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 
 src/ASF/avr32/utils/startup/%.o: ../src/ASF/avr32/utils/startup/%.sx
 	@echo Building file: $<
 	@echo Invoking: AVR32/GNU Preprocessing Assembler : 4.4.7
-	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
+	$(QUOTE)C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bin\avr32-gcc.exe$(QUOTE) -x assembler-with-cpp -c -mpart=uc3a1256 -mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE -I "C:\Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\UC3A_DFP\1.0.53\include\AT32UC3A1256" -I "../src/ASF/common/boards/user_board" -I "../src" -I "../src/config" -I "../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi" -I "../src/ASF/avr32/drivers/cpu/cycle_counter" -I "../src/ASF/avr32/drivers/flashc" -I "../src/ASF/avr32/drivers/gpio" -I "../src/ASF/avr32/drivers/spi" -I "../src/ASF/common/boards" -I "../src/ASF/common/services/storage/ctrl_access" -I "../src/ASF/avr32/drivers/pm" -I "../src/ASF/avr32/drivers/pwm" -I "../src/ASF/avr32/utils" -I "../src/ASF/avr32/utils/preprocessor" -I "../src/ASF/common/utils" -I "../src/ASF/avr32/drivers/intc" -I "../src/ASF/avr32/drivers/tc" -I "../src/ASF/avr32/drivers/twi"  -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)" -Wa,-g   -o "$@" "$<" 
 	@echo Finished building: $<
 	
 

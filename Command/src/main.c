@@ -20,13 +20,12 @@
  *
  */
 
-//#define AVIS_POLITIQUE GAUCHE
+#define AVIS_POLITIQUE GAUCHE
 
 #include <asf.h>
 #include "init.h"
 #include "audio/audio.h"
 
-//#define AVIS_POLITIQUE
 
 #ifdef AVIS_POLITIQUE
 	#include "mainGauche.h"

@@ -67,7 +67,8 @@ src/SDCard/sdcard.d src/SDCard/sdcard.o src/SDCard/sdcard.o: \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
  ../src/ASF/avr32/drivers/pwm/pwm.h \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
- ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h
+ ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
+ ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h
 
 ../src/SDCard/sdcard.h:
 
@@ -216,3 +217,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/ASF/avr32/drivers/spi/spi.h:
 
 ../src/ASF/avr32/drivers/tc/tc.h:
+
+../src/ASF/avr32/drivers/twi/twi.h:
+
+../src/config/conf_twi.h:

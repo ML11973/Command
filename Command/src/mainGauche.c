@@ -12,43 +12,29 @@
 
 #include "audio/audio.h"
 #include "SDCard/sdcard.h"
-
+#include "GFX/screen.h"
+#include "GFX/gfx.h"
+#include "GFX/gui.h"
+#include "RTC/rtc.h"
 #include "mainGauche.h"
 
-volatile uint32_t ram = 0;
+//volatile uint32_t ram = 0;
 
 void mainGauche(void){
 	
-	bool play = 0;
-	
 	board_init();
-	sdcard_Init();
-	sdcard_Mount();
-	// Setting amplifier volume
-	audio_set_volume(DEFAULTVOLUME);
-	
-	if(sdcard_CheckPresence()){
-		play = 1;
-	}
-	else {
-		play = 0;
-	}
-	
-	
+	screen_Init();
+	gui_loadingScreen();
+	//screen_SetPixels(Rect(0,0,320,240), (Color){BLACK});
+	//
+	//gfx_BeginNewTerminal((Vector2){20,220});
+	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
+	//rtc_getTime();
 	while(1){
-		if (gpio_get_pin_value(PIN_SWITCH0)){
-			audio_set_volume(0);
-			} else {
-			audio_set_volume(DEFAULTVOLUME);
-		}
-		
-		
-		
-		if (play){
-			
-		}
+		//cpu_delay_ms(1, BOARD_OSC0_HZ);
 		
 		
 	}
+	
 }
 #endif /* MAIN_GAUCHE_C */

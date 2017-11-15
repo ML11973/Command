@@ -10,6 +10,8 @@
 
 #include "init.h"
 
+#define TWI_MASTER_SPEED 100000
+#define RTC_ADDRESS_WRITE 0xD0
 
 
 
@@ -22,6 +24,7 @@ void board_init(void) {
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	
+	twi_init();
 	spi_init();
 	//tc0_init();
 	tc1_init();
@@ -163,5 +166,19 @@ void tc0_init(void){
 
 // RTC TWI configuration
 void twi_init(void){
-	
+	// Master mode
+	twi_options_t i2c_options =
+	{
+		.pba_hz = BOARD_OSC0_HZ,		// Vitesse du microcontrôleur 
+		.speed = TWI_MASTER_SPEED,		// Vitesse de transmission 100-400KHz
+		.chip = (RTC_ADDRESS_WRITE >> 1)// Adresse du slave
+	};
+	// Assign I/Os to TWI.
+	const gpio_map_t TWI_GPIO_MAP =
+	{
+		{PIN_SCL, FCT_SCL},	// TWI Clock.
+		{PIN_SDA, FCT_SDA}	// TWI Data.
+	};
+	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
+	twi_master_init (&AVR32_TWI, &i2c_options);
 }

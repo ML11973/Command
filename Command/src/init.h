@@ -29,5 +29,6 @@ void board_init(void);
 void spi_init(void);
 void tc1_init(void);
 void tc0_init(void);
+void twi_init(void);
 
 #endif /* INIT_H */

@@ -71,6 +71,9 @@
 // From module: Generic board support
 #include <board.h>
 
+// From module: INTC - Interrupt Controller
+#include <intc.h>
+
 // From module: Interrupt management - UC3 implementation
 #include <interrupt.h>
 
@@ -96,5 +99,8 @@
 
 // From module: TC - Timer/Counter
 #include <tc.h>
+
+// From module: TWI - Two-Wire Interface
+#include <twi.h>
 
 #endif // ASF_H

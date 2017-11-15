@@ -35,8 +35,9 @@
           <option id="avr32.drivers.pm" value="Add" config="" content-id="Atmel.ASF" />
           <option id="avr32.drivers.pwm" value="Add" config="" content-id="Atmel.ASF" />
           <option id="avr32.drivers.spi" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
           <option id="avr32.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.boards" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="avr32.drivers.twi" value="Add" config="" content-id="Atmel.ASF" />
         </options>
         <configurations>
           <configuration key="config.avr32.utils.trampoline" value="yes" default="yes" content-id="Atmel.ASF" />
@@ -95,6 +96,9 @@
           <file path="src/ASF/common/utils/parts.h" framework="" version="3.34.1" source="common\utils\parts.h" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/avr32/drivers/tc/tc.c" framework="" version="3.34.1" source="avr32\drivers\tc\tc.c" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/avr32/drivers/tc/tc.h" framework="" version="3.34.1" source="avr32\drivers\tc\tc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/avr32/drivers/twi/twi.c" framework="" version="3.34.1" source="avr32\drivers\twi\twi.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/avr32/drivers/twi/twi.h" framework="" version="3.34.1" source="avr32\drivers\twi\twi.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_twi.h" framework="" version="3.34.1" source="avr32\drivers\twi\module_config\conf_twi.h" changed="False" content-id="Atmel.ASF" />
         </files>
         <documentation help="http://asf.atmel.com/docs/3.34.1/common.applications.user_application.user_board.uc3a/html/index.html" />
         <offline-documentation help="" />
@@ -106,7 +110,7 @@
       </framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.jtagice3plus</avrtool>
-    <avrtoolserialnumber>J30200041981</avrtoolserialnumber>
+    <avrtoolserialnumber>J30200041926</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x0</avrdeviceexpectedsignature>
     <avrtoolinterface>JTAG</avrtoolinterface>
     <com_atmel_avrdbg_tool_jtagice3plus>
@@ -127,7 +131,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.jtagice3plus</ToolType>
-      <ToolNumber>J30200041981</ToolNumber>
+      <ToolNumber>J30200041926</ToolNumber>
       <ToolName>JTAGICE3</ToolName>
     </com_atmel_avrdbg_tool_jtagice3plus>
     <avrtoolinterfaceclock>7500000</avrtoolinterfaceclock>
@@ -166,6 +170,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.compiler.directories.IncludePaths>
         <avr32gcc.compiler.optimization.level>Optimize for size (-Os)</avr32gcc.compiler.optimization.level>
@@ -205,6 +210,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.assembler.general.IncludePaths>
         <avr32gcc.preprocessingassembler.general.AssemblerFlags>-mrelax -DBOARD=USER_BOARD -DSD_MMC_SPI_ENABLE</avr32gcc.preprocessingassembler.general.AssemblerFlags>
@@ -228,6 +234,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.preprocessingassembler.general.IncludePaths>
       </Avr32Gcc>
@@ -267,6 +274,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.compiler.directories.IncludePaths>
         <avr32gcc.compiler.optimization.level>Optimize (-O1)</avr32gcc.compiler.optimization.level>
@@ -307,6 +315,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.assembler.general.IncludePaths>
         <avr32gcc.assembler.debugging.DebugLevel>Default (-g)</avr32gcc.assembler.debugging.DebugLevel>
@@ -331,6 +340,7 @@
             <Value>../src/ASF/common/utils</Value>
             <Value>../src/ASF/avr32/drivers/intc</Value>
             <Value>../src/ASF/avr32/drivers/tc</Value>
+            <Value>../src/ASF/avr32/drivers/twi</Value>
           </ListValues>
         </avr32gcc.preprocessingassembler.general.IncludePaths>
         <avr32gcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</avr32gcc.preprocessingassembler.debugging.DebugLevel>
@@ -355,6 +365,7 @@
     <Folder Include="src\ASF\avr32\drivers\pwm\" />
     <Folder Include="src\ASF\avr32\drivers\spi\" />
     <Folder Include="src\ASF\avr32\drivers\tc\" />
+    <Folder Include="src\ASF\avr32\drivers\twi\" />
     <Folder Include="src\ASF\avr32\utils\" />
     <Folder Include="src\ASF\avr32\utils\header_files\" />
     <Folder Include="src\ASF\avr32\utils\make\" />
@@ -471,6 +482,12 @@
     <None Include="src\ASF\avr32\drivers\tc\tc.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\ASF\avr32\drivers\twi\twi.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\avr32\drivers\twi\twi.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\ASF\avr32\utils\startup\startup_uc3.S">
       <SubType>compile</SubType>
     </Compile>
@@ -517,6 +534,9 @@
       <SubType>compile</SubType>
     </None>
     <None Include="src\config\conf_access.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_twi.h">
       <SubType>compile</SubType>
     </None>
     <Compile Include="src\GFX\color.h">
