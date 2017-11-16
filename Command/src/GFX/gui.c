@@ -194,8 +194,10 @@ void _musicMenu(bool firstDraw){
 		
 	gfx_AddLineToTerminal("ls | grep .wave", 15, textColor, firstDraw);
 	
-	if(sdcard_CheckPresence()){
-		gfx_AddLineToTerminal((char*)(file_menu[0].name),25,textColor, firstDraw);
+	if(sdcard_checkPresence()){
+		for(uint8_t i = 0; i < 6; i++){
+			gfx_AddLineToTerminal((char*)(files[i].name),25,textColor, firstDraw);
+		}
 	}
 	else{
 		gfx_AddLineToTerminal("> No results",12,(Color){RED}, firstDraw);
