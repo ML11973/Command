@@ -21,17 +21,17 @@
 // Parameters already defined in init.c, redefined as a precaution
 #ifndef RTC_ADDRESS_WRITE
 #define TWI_MASTER_SPEED 100000
-#define RTC_ADDRESS_WRITE 0xD0
+#define RTC_ADDRESS_WRITE 0xD0>>1
 #endif
 
 #define		RTC_TWI						&AVR32_TWI			//! TWIM Module Used
-#define		RTC_ADDRESS_READ 			0xD1		        //! Target's TWI address
+#define		RTC_ADDRESS_READ 			0xD1>>1		        //! Target's TWI address
 #define		RTC_ADDR_LGT				0					//! Internal Address length
 #define		VIRTUALMEM_ADDR1			0x00				//! Internal Address
 #define		VIRTUALMEM_ADDR2			0x00				//! Internal Address
 #define		VIRTUALMEM_ADDR3			0x00				//! Internal Address
 
-#define		BUFFER_SIZE					10
+#define		BUFFER_SIZE					14
 
 // Timekeeping registers addresses
 #define		RTC_SECONDS				0x00
@@ -74,8 +74,6 @@
 // Le 7ème bit AxMx
 #define		BitE						7					// Enable Alarm
 
-
-
 /************************************************************************/
 /* VARIABLES                                                            */
 /************************************************************************/
@@ -83,17 +81,12 @@
 Time currentTime;
 Alarm alarm[MAXALARMNUMBER];
 	
-uint8_t buffer [] = {0, 0, 0};
+uint8_t sentData [BUFFER_SIZE] = {0};
+uint8_t buffer [BUFFER_SIZE] = {0};
 
-twi_package_t packet = {
-	.chip = RTC_ADDRESS_READ,
-	.addr[0] = VIRTUALMEM_ADDR1,
-	.addr[1] = VIRTUALMEM_ADDR2,
-	.addr[2] = VIRTUALMEM_ADDR3,
-	.addr_length = RTC_ADDR_LGT,
-	.buffer = &buffer,
-	.length = sizeof(buffer)/sizeof(uint8_t),
-};
+
+
+
 
 
 
@@ -101,17 +94,60 @@ twi_package_t packet = {
 /* FUNCTIONS                                                            */
 /************************************************************************/
 
-/* rtc_setAddress
+
+/* rtc_read
  *
- * Description
+ * Reads registers from firstRegister to firstRegister + dataNumber.
+ * Stores data in buffer file-restricted global array.
  *
  * Created 15.11.17 MLN
- * Last modified 15.11.17 MLN
+ * Last modified 16.11.17 MLN
  */
-void rtc_setAddress(uint8_t address){
+void rtc_read(uint8_t firstRegister, uint8_t dataNumber){
 	
+	// Clearing buffer table
+	for (uint8_t i = 0; i < dataNumber; i++){
+		buffer[i] = 0;
+	}
 	
+	// Packet for read ASF library function
+	twi_package_t readPacket = {
+		.chip = RTC_ADDRESS_READ,
+		.addr[0] = firstRegister,	// DS2323 RTC automatically increments registers
+		.addr[1] = 0,
+		.addr[2] = 0,
+		.addr_length = 1,
+		.buffer = &buffer,			// Data is stored in this table
+		.length = dataNumber,		// Number of bytes to store
+	};
 	
+	twi_master_read(RTC_TWI, &readPacket);
+}
+
+
+
+/* rtc_write
+ *
+ * Writes registers from firstRegister to firstRegister + dataNumber.
+ * Uses data from sentData file-restricted global array.
+ *
+ * Created 16.11.17 MLN
+ * Last modified 16.11.17 MLN
+ */
+void rtc_write(uint8_t firstRegister, uint8_t dataNumber){
+	
+	// Packet for write ASF library function
+	twi_package_t writePacket = {
+		.chip = RTC_ADDRESS_WRITE,
+		.addr[0] = firstRegister,	// DS2323 RTC automatically increments registers
+		.addr[1] = 0,
+		.addr[2] = 0,
+		.addr_length = 1,
+		.buffer = &sentData,		// Modify sentData before calling function
+		.length = dataNumber,		// Number of bytes to send
+	};
+	
+	twi_master_write(RTC_TWI, &writePacket);
 }
 
 
@@ -123,66 +159,38 @@ void rtc_setAddress(uint8_t address){
  * Created 15.11.17 MLN
  * Last modified 15.11.17 MLN
  */
-void rtc_setTime(Time time){
-	twi_master_enable(RTC_TWI);
+void rtc_setTime(void){
 	
-	
-	
-	twi_master_disable(RTC_TWI);
 }
 
 
 
 /* rtc_getTime
  *
- * Description
+ * TO BE MODIFIED, test function
  *
  * Created 15.11.17 MLN
  * Last modified 15.11.17 MLN
  */
 void rtc_getTime(void){
-	
-	char stringOutput[6];
+	volatile uint8_t status = 0;
+	char stringOutput[7];
 	
 	twi_master_enable(RTC_TWI);
-	/*// Clearing buffer
-	buffer[0] = 0;
-	buffer[1] = 0;
-	buffer[2] = 0;*/
-	// Fetching data from Seconds, Minutes and Hours RTC registers 
-	packet.addr[0] = RTC_SECONDS;
-	packet.addr[1] = RTC_MINUTES;
-	packet.addr[2] = RTC_HOURS;
-	twi_master_read(RTC_TWI, &packet);
+	sentData[0] = 0x10;
+	sentData[1] = 0x17;
+	sentData[2] = 0x19;
+	sentData[3] = 0x03;
+	rtc_write(RTC_SECONDS, 4);
+	rtc_read(RTC_SECONDS, 4);
 	
-	// Copying fetched data to current time value
-	currentTime.seconds = packet.addr[0];
-	currentTime.minutes = packet.addr[1];
-	currentTime.hours	= packet.addr[2];
+	currentTime.seconds = buffer[0];
+	currentTime.minutes = buffer[1];
+	currentTime.hours	= buffer[2];
+	currentTime.day		= buffer[3];
 	
-	// Fetching data from Day, Date and Month RTC registers
-	packet.addr[0] = RTC_DAY;
-	packet.addr[1] = RTC_DATE;
-	packet.addr[2] = RTC_MONTH;
-	twi_master_read(RTC_TWI, &packet);
-	
-	// Copying fetched data to current time value
-	currentTime.day		= packet.addr[0];
-	currentTime.date	= packet.addr[1];
-	currentTime.month	= packet.addr[2];
-	
-	// Fetching data from Year RTC register
-	packet.addr[0] = RTC_YEAR;
-	packet.addr[1] = 0;
-	packet.addr[2] = 0;
-	twi_master_read(RTC_TWI, &packet);
-	
-	// Copying fetched data to current time value
-	currentTime.year	= packet.addr[0];
-	
-	twi_master_disable(RTC_TWI);
-	
-	//Converting fetched data to decimal
+	// KEEP THIS PART
+	// Converting fetched data to decimal
 	currentTime.seconds = 10 * (currentTime.seconds >> 4) + (currentTime.seconds & 0x0F);
 	
 	currentTime.minutes = 10 * (currentTime.minutes >> 4) + (currentTime.minutes & 0x0F);
@@ -194,15 +202,18 @@ void rtc_getTime(void){
 	currentTime.year	= 100 * ((currentTime.month & 0x80) >> 7) * (currentTime.year >> 4) + (currentTime.year & 0x0F);
 	
 	currentTime.month	= 10 * ((currentTime.month & 0x10) >> 4) + (currentTime.month & 0x0F);
+	// END KEEP
+	
 	
 	stringOutput[0] = currentTime.hours / 10 + 48;
 	stringOutput[1] = currentTime.hours % 10 + 48;
 	stringOutput[2] = currentTime.minutes / 10 + 48;
 	stringOutput[3] = currentTime.minutes % 10 + 48;
-	stringOutput[4] = currentTime.date / 10 + 48;
-	stringOutput[5] = currentTime.date % 10 + 48;
+	stringOutput[4] = currentTime.seconds / 10 + 48;
+	stringOutput[5] = currentTime.seconds % 10 + 48;
+	stringOutput[6] = currentTime.day + 48;
 	
-	gfx_AddLineToTerminal(stringOutput, 6, (Color){WHITE}, 0);
+	gfx_AddLineToTerminal(stringOutput, 7, (Color){WHITE}, 0);
 }
 
 

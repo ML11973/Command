@@ -23,8 +23,8 @@
 #define AVIS_POLITIQUE GAUCHE
 
 #include <asf.h>
-#include "init.h"
-#include "audio/audio.h"
+//#include "init.h"
+//#include "audio/audio.h"
 
 
 #ifdef AVIS_POLITIQUE

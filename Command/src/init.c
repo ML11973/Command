@@ -27,7 +27,7 @@ void board_init(void) {
 	twi_init();
 	spi_init();
 	//tc0_init();
-	tc1_init();
+	//tc1_init();
 	// Configuring PB0-15
 	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
 }
@@ -166,6 +166,10 @@ void tc0_init(void){
 
 // RTC TWI configuration
 void twi_init(void){
+	gpio_set_gpio_pin(PIN_RTC_RST);
+	gpio_set_gpio_pin(PIN_SDA);
+	//cpu_delay_ms(500, BOARD_OSC0_HZ); // Test function
+	gpio_clr_gpio_pin(PIN_RTC_RST);
 	// Master mode
 	twi_options_t i2c_options =
 	{
@@ -180,5 +184,5 @@ void twi_init(void){
 		{PIN_SDA, FCT_SDA}	// TWI Data.
 	};
 	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
-	twi_master_init (&AVR32_TWI, &i2c_options);
+	twi_master_init(&AVR32_TWI, &i2c_options);
 }

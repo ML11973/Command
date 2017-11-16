@@ -25,15 +25,16 @@ void mainGauche(void){
 	board_init();
 	screen_Init();
 	gui_loadingScreen();
-	//screen_SetPixels(Rect(0,0,320,240), (Color){BLACK});
-	//
-	//gfx_BeginNewTerminal((Vector2){20,220});
-	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
-	//rtc_getTime();
+	screen_SetPixels(Rect(0,0,320,240), (Color){BLACK});
+	
+	
+	gfx_BeginNewTerminal((Vector2){20,220});
+	gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
 	while(1){
-		//cpu_delay_ms(1, BOARD_OSC0_HZ);
 		
+		rtc_getTime();
 		
+		cpu_delay_ms(1000, BOARD_OSC0_HZ);
 	}
 	
 }
