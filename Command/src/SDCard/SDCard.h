@@ -90,8 +90,7 @@ bool scdcard_setFileToRead(uint8_t fileId);
  *
  * Automaticaly change sectors and clusters.
  *
- * Return false if there is no more sector to read
- * or if the sector cannot be read.
+ * Return false if there is no more sector to read.
  * Otherwise return true.
  *
  * Created 16.11.17 QVT

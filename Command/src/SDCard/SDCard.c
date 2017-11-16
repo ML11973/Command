@@ -180,11 +180,14 @@ bool scdcard_setFileToRead(uint8_t fileId){
 }
 
 bool sdcard_getNextSector(uint8_t *d){
-	if(!_readSector(d, sector))
+	if (sector == sectorsEnd)
 		return false;
+		
+	_readSector(d, sector);
 	
 	//next sector and next cluster
 	if(sector > clustersFirstSector + sectorPerClusters){
+		//FUNKY FANKY'S CODE
 		_readSector(&data, (cluster >> division) + FATSector);
 		if(isFAT32){
 			cluster = data[0x01FF & (cluster * 4)]
@@ -196,6 +199,7 @@ bool sdcard_getNextSector(uint8_t *d){
 			cluster = data[0x01FF & (cluster * 2)]
 					+(data[0x01FF & (cluster * 2 + 1)] << 8);
 		}
+		//NORMAL
 		sector = (cluster - 2) * sectorPerClusters + dataSector;
 		clustersFirstSector = sector;
 	}
