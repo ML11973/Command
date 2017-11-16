@@ -267,7 +267,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	// If called upon for the first time, initalize .wav reading
 	if (audio_firstCall == true){
 		// If no SD card, return specific error code
-		if (sdcard_CheckPresence() == false){
+		if (sdcard_checkPresence() == false){
 			return ERROR_NO_SD;
 		}
 		if (_findFirstSector(fileNumber) == 0){

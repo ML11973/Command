@@ -18,6 +18,9 @@
 #define SECTOR_OFFSET 8	
 #define TYPE_OFFSET 4 
 
+#define FILE_END_32	0x0FFFFFF8
+#define FILE_END_16	0x0000FFEF
+
 
 /************************************************************************/
 /* TYPEDEF                                                              */
@@ -50,12 +53,25 @@ typedef union BiosParameterBlock{
 	}components;
 }BPB;
 
-typedef struct file
-{
-	uint8_t id;
-	char name[25];
-	uint32_t firstSector;
-}File;
+typedef union DirectoryEntry{
+	uint8_t de[32];
+	struct{
+		uint8_t shortName[8];
+		uint8_t sortExtension[3];
+		uint8_t fileAttributes[1];
+		uint8_t unusedData[2];
+		uint8_t creationTime[2];
+		uint8_t creationDate[2];
+		uint8_t lastAccessDate[2];
+		uint8_t msbCluster[2];
+		uint8_t lastModifiedTime[2];
+		uint8_t lastModifiedDate[2];
+		uint8_t lsbCluster[2];
+		uint8_t fileSize[4];
+	}components;
+}DE;
+
+
 
 /************************************************************************/
 /* VARIABLES                                                            */
@@ -80,12 +96,28 @@ uint32_t FATSector;
 uint32_t rootSector;
 uint32_t dataSector;
 
+File files[100];
+
+//data is a global variable as we need it in multiple functions
+//this way we spare time creating it only once
+uint8_t data[512];
+
+uint32_t cluster;
+uint32_t sector;
+uint32_t clustersFirstSector;
+uint8_t division;
+uint32_t sectorsEnd;
+
+
+
 /************************************************************************/
 /* PROTOTYPES                                                           */
 /************************************************************************/
 
-bool _initFat();
-void _getFilesInfos();
+static bool _initFat();
+static void _getFilesInfos();
+uint32_t _getFirstCluster(uint8_t fileId);
+static bool _readSector(void *ram, uint32_t sector);
 
 
 
@@ -93,7 +125,7 @@ void _getFilesInfos();
 /* FUNCTIONS                                                            */
 /************************************************************************/
 
-void sdcard_Init(void){
+void sdcard_init(void){
 	gpio_map_t sdGPIO={
 		{PIN_NPCS_SD,	FCT_NPCS_SD	  },
 		{PIN_SCK_SPI1,	FCT_SCK_SPI1  },
@@ -113,20 +145,71 @@ void sdcard_Init(void){
 	spi_enable((volatile struct avr32_spi_t*) SD_MMC_SPI);
 }
 
-bool sdcard_Mount(void){
-	if(!sdcard_CheckPresence())
+bool sdcard_mount(void){
+	if(!sdcard_checkPresence())
 		return false;
 	if(!sd_mmc_spi_init(sdOptions, BOARD_OSC0_HZ))
 		return false;
+	if(!_initFat())
+		return false;
+	_getFilesInfos();
 
 	return true;
 }
 
-bool sdcard_CheckPresence(void){
+bool sdcard_checkPresence(void){
 	return sd_mmc_spi_check_presence(); 
 }
 
-bool sdcard_ReadSector(void *ram, uint32_t sector){
+bool scdcard_setFileToRead(uint8_t fileId){
+	cluster = _getFirstCluster(fileId);
+	if(cluster == 0)
+		return false;
+	sector = (cluster - 2) * sectorPerClusters + dataSector;
+	clustersFirstSector = sector;
+	
+	if(isFAT32){
+		division = 7;
+		sectorsEnd = FILE_END_32;
+	}
+	else{
+		division = 8;
+		sectorsEnd = FILE_END_16;
+	}
+	return true;
+}
+
+bool sdcard_getNextSector(uint8_t *d){
+	if(!_readSector(d, sector))
+		return false;
+	
+	//next sector and next cluster
+	if(sector > clustersFirstSector + sectorPerClusters){
+		_readSector(&data, (cluster >> division) + FATSector);
+		if(isFAT32){
+			cluster = data[0x01FF & (cluster * 4)]
+					+(data[0x01FF & (cluster * 4 + 1)] << 8)
+					+(data[0x01FF & (cluster * 4 + 2)] << 16)
+					+(data[0x01FF & (cluster * 4 + 3)] << 24);
+		}
+		else{
+			cluster = data[0x01FF & (cluster * 2)]
+					+(data[0x01FF & (cluster * 2 + 1)] << 8);
+		}
+		sector = (cluster - 2) * sectorPerClusters + dataSector;
+		clustersFirstSector = sector;
+	}
+	return true;
+}
+
+/* _readSector
+ *
+ * function from sd_mmc adapted to our needs
+ *
+ * Created 16.11.17 QVT
+ * Last modified 16.11.17 QVT
+ */
+static bool _readSector(void *ram, uint32_t sector){
 	uint8_t *_ram = ram;
 	uint16_t  i;
 	uint16_t  read_time_out;
@@ -196,12 +279,14 @@ bool sdcard_ReadSector(void *ram, uint32_t sector){
 	return true;   // Read done.
 }
 
-/*
+/* _initFat
  *
+ * Initialise all the required informations to read the SDCard properly
  *
+ * Created 16.11.17 QVT
+ * Last modified 16.11.17 QVT
  */
-bool _initFat(){
-	uint8_t data[512];
+static bool _initFat(){
 	uint32_t sector = 0;
 	
 	BPB bpb;
@@ -212,7 +297,7 @@ bool _initFat(){
 	uint16_t rootSize;
 	uint32_t FATSize;
 	
-	if(sdcard_ReadSector(&data, 0)){
+	if(_readSector(&data, 0)){
 		
 		sector  = data[FIRST_PARTITION_OFFSET + SECTOR_OFFSET + 0];
 		sector += data[FIRST_PARTITION_OFFSET + SECTOR_OFFSET + 1] << 8;
@@ -224,7 +309,7 @@ bool _initFat(){
 		else 
 			isFAT32 = false;
 			
-		if(!sdcard_ReadSector(&data, sector))
+		if(!_readSector(&data, sector))
 			return false;
 		
 		for(int i = 0; i < 48; i++){ //48 = BPB length
@@ -258,24 +343,90 @@ bool _initFat(){
 	return true;
 }
 
-/*
+/* _getFilesInfos
  *
+ * go through the first 100 files and store 
+ * their name, directory sector, and in-sector offset
  *
+ * Created 16.11.17 QVT
+ * Last modified 16.11.17 QVT
  */
-void _getFilesInfos(){
-	uint8_t id;
-	uint16_t entry;
+static void _getFilesInfos(){
+	uint8_t id = 0;
+	uint16_t entry = 0;
+	uint32_t relativeEntry = 0;
 	uint32_t sector = rootSector;
-	uint32_t data[512];
 	
-	while(1){
+	while(entry < 512 && id < 100){
+		relativeEntry = (entry % 16) * 32;
 		if(entry % 16 == 0){
-			if(sdcard_ReadSector(&data, sector))
+			if(_readSector(&data, sector))
 				sector++;
 			else 
 				return;
 		}
-		
-		if
+		if((data[relativeEntry + 11] == 0x00 || data[relativeEntry + 11] == 0x01 || data[relativeEntry + 11] == 0x20) && data[relativeEntry] != 0xE5){
+			if(data[relativeEntry + 8] == 'W' && data[relativeEntry + 9] == 'A' && data[relativeEntry + 10] == 'V'){
+				//files[id].id = id;
+				if(files[id].name[0] == 0){
+					for(uint8_t  i = 0; i < 11; i++){
+						files[id].name[i] = data[relativeEntry + i];
+					}
+				}
+				files[id].sector = sector;
+				files[id].offset = relativeEntry;
+				id++;
+			}
+		}
+		else if(data[relativeEntry + 11] == 0x0F){
+			if(data[relativeEntry] & 0x01 || data[relativeEntry] == 0x41){
+				for(uint8_t i = 0; i < 5; i++){
+					files[id].name[i] = data[i*2 + relativeEntry + 1];
+				}
+				for(uint8_t i = 0; i < 7; i++){
+					files[id].name[i+5] = data[i*2 + relativeEntry + 14];
+				}
+				for(uint8_t i = 0; i < 2; i++){
+					files[id].name[i+11] = data[i*2 + relativeEntry + 28];
+				}
+			}
+			else if(data[relativeEntry] == 0x02 || data[relativeEntry] == 0x42){
+				for(uint8_t i = 0; i < 5; i++){
+					files[id].name[i+13] = data[i*2 + relativeEntry + 1];
+				}
+				for(uint8_t i = 0; i < 5; i++){ // 5 instead of 7 as we only store the first 25 characters
+					files[id].name[i+18] = data[i*2 + relativeEntry + 14];
+				}
+			}
+		}
+		entry++;
 	}
+}
+
+/* _getFirstCluster
+ *
+ * return the first cluster of the desired file
+ *
+ * Created 16.11.17 QVT
+ * Last modified 16.11.17 QVT
+ */
+uint32_t _getFirstCluster(uint8_t fileId){
+	uint32_t returnValue;
+	DE *de;
+	
+	if(fileId > 99)
+		fileId = 99;
+		
+	if(files[fileId].sector == 0 || !_readSector(&data, files[fileId].sector))
+		return 0;
+		
+	de = (DE *)&(data[files[fileId].offset]);
+	
+	returnValue = de->components.lsbCluster[0] + (de->components.lsbCluster[1] << 8);
+	if(isFAT32){
+		returnValue += de->components.msbCluster[0] << 16;
+		returnValue += de->components.msbCluster[1] << 24;
+	}
+	
+	return returnValue;
 }

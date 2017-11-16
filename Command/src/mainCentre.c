@@ -25,8 +25,8 @@ void mainCentre(void){
 	
 	cpu_delay_ms(500,BOARD_OSC0_HZ);
 	
-	sdcard_Init();
-	sdcard_Mount();
+	sdcard_init();
+	sdcard_mount();
 	gui_Init();
 	
 	menus[currentMenuId](true);
