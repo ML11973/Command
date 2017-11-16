@@ -18,11 +18,6 @@
 #define AUDIOOUTPUTMASK 0x000003FF
 #define AUDIOMAXINPUT 0x3FF
 
-#define		END_SECTEUR_16		0x0000FFEF		//  Fin de fichier dans la FAT16
-#define		END_SECTEUR_32		0x0FFFFFF8		//  Fin de fichier dans la FAT32
-#define		DIV_16				8				//  D�calage nombre de secteurs par bloc
-#define		DIV_32				7				//  Idem pour la Fat32
-
 
 
 /************************************************************************/
@@ -67,26 +62,6 @@ volatile uint32_t ram = 0;
 
 uint8_t wavData1[512] = {0};
 uint8_t wavData2[512] = {0};
-
-
-uint32_t	secteur_read;		// Le secteur en lecture
-uint32_t	cluster_read = 0;		// Le cluster en lecture
-uint32_t	clt_sec;
-uint32_t	inter1, inter2, inter3, inter4;		// Variables interm�diaires
-uint32_t	retry;				// Pour �viter un blocage
-uint32_t	lecture = 0;		// Position dans la lecture du fichier
-uint8_t		slow = 0;
-
-// Pour l'affichage de la progression
-uint32_t	taille = 0;
-uint32_t	progression = 0;
-
-uint8_t	*	pt;
-uint32_t	end_secteur;
-uint8_t		division;
-
-
-bool audio_firstCall = false;
 
 
 
