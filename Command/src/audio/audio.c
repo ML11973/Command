@@ -60,8 +60,12 @@ uint8_t volume = DEFAULTVOLUME;
 
 volatile uint32_t ram = 0;
 
+uint16_t wavDataIndex = 0;
+
 uint8_t wavData1[512] = {0};
 uint8_t wavData2[512] = {0};
+
+AudioInfo fileData;
 
 
 
@@ -69,7 +73,7 @@ uint8_t wavData2[512] = {0};
 /* FONCTIONS                                                            */
 /************************************************************************/
 
-bool _findFirstSector(uint8_t fileNumber);
+uint8_t _fileVerification();
 
 
 /* audio_setVolume
@@ -206,6 +210,8 @@ void audio_freqStop (void){
  *
  * This interruption occurs at 44.1 kHz for .wav playback
  *
+ * Created 09.11.17 MLN
+ * Last modified 17.11.17 MLN
  */
 __attribute__((__interrupt__)) void tc1_irq( void ){
 	_setOutput(audioR, audioL);
@@ -230,30 +236,47 @@ __attribute__((__interrupt__)) void tc0_irq( void ){
 
 
 
-
+/* audio_playFile
+ *
+ * Plays a file from the SD card. Must be put in while(1) loop.
+ * Loads file first sector, puts file info in a global variable
+ * and loads next sector when finished sector flag is raised from
+ * timer 1 interruption.
+ *
+ * Created 17.11.17 MLN
+ * Last modified 17.11.17 MLN
+ */
 uint8_t audio_playFile(uint8_t fileNumber){
 	static uint32_t sampleCounter = 0;
 	static uint8_t currentVolume = DEFAULTVOLUME;
-	
-
-	
+	static audio_firstCall = 1;
 	
 	
 	// If called upon for the first time, initalize .wav reading
 	if (audio_firstCall == true){
 		// If no SD card, return specific error code
-		if (sdcard_checkPresence() == false){
+		if (sdcard_mount() == false){
 			return ERROR_NO_SD;
 		}
-		if (_findFirstSector(fileNumber) == 0){
+		// If no file, return specific error code
+		if (sdcard_setFileToRead(fileNumber) == false){
 			return ERROR_NO_FILE;
 		}
+		
+		sdcard_getNextSector(wavData1);
+		sdcard_getNextSector(wavData2);
+		
+		if ( _fileVerification(wavData1) == true ){
+			audio_firstCall = 0;
+		}
+		
+		
 	}
 	
 	// Volume setting, optimized to be as light as possible
 	if (currentVolume != volume){
 		currentVolume = volume;
-		audio_setVolume(volume);
+		audio_setVolume(currentVolume);
 	}
 	
 	if (nextSample == true){
@@ -265,22 +288,107 @@ uint8_t audio_playFile(uint8_t fileNumber){
 }
 
 
-bool _findFirstSector(uint8_t fileNumber){
-	//Root_directory(fileNumber);
-	//
-	//if (FAT == 1) {
-		//end_secteur = END_SECTEUR_32;
-		//division = DIV_32;
-	//}
-	//else {
-		//end_secteur = END_SECTEUR_16;
-		//division = DIV_16;
-	//}
-//
-	////d�termine le premier secteur du fichier. ! Important la zone res2 est utilis�e comme first_cluster FAT32
-	//cluster_read = file_name.structure.First_cluster[0] + (file_name.structure.First_cluster[1] << 8)
-	//+ (file_name.structure.res2[0] << 16) +(file_name.structure.res2[1] << 24);
-	//secteur_read = ((cluster_read - 2) * sector_boot.structure.sec_cluster[0]) + secteur_data;
-	//clt_sec = secteur_read;
+
+/* _fileVerification
+ *
+ * http://soundfile.sapp.org/doc/WaveFormat/
+ *http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html more detailed
+ * Checks validity of audio parameters and loads relevant ones in fileData.
+ * Returns program-wide error codes as defined in audio.h
+ *
+ * Created 17.11.17 MLN
+ * Last modified 17.11.17 MLN
+ */
+uint8_t _fileVerification(){
+	uint16_t headerIndex = 8;
+	// Verifying file format ID in RIFF header
+	if (wavData1[headerIndex] != 'W' || wavData1[headerIndex + 1] != 'A' || wavData1[headerIndex + 2] != 'V' || wavData1[headerIndex + 3] != 'E'){
+		return ERROR_FORMAT;
+	}
 	
+	
+	// Beginning fetch AudioInfo routine
+	
+	// Finding "fmt " subchunk in header, then jumping to next relevant block
+	while (wavData1[headerIndex] != 'f' && wavData1[headerIndex + 1] != 'm' && wavData1[headerIndex + 2] != 't' && wavData1[headerIndex + 3] != ' ') {
+		headerIndex++;
+		if (headerIndex > SECTOR_SIZE){
+			return ERROR_NO_FMT_SUBCHUNK;
+		}
+	}
+	// Jumps to Subchuk1Size block
+	headerIndex += 4;
+	// Jumps to AudioFormat block
+	headerIndex += 4;
+	
+	if (wavData1[headerIndex + 1] != 1) {
+		return ERROR_FILE_COMPRESSED;
+	}
+	
+	// Jumps to NumChannels block
+	headerIndex += 2;
+	fileData.channelNumber = wavData1[headerIndex + 1];
+	
+	// Jumps to SampleRate block
+	headerIndex += 2;
+	// Puts 4 SampleRate bytes on a single 32-bit integer before assigning it to fileData.sampleRate
+	fileData.sampleRate = 
+		(wavData1[headerIndex] << 24) |
+		(wavData1[headerIndex + 1] << 16) |
+		(wavData1[headerIndex + 2] << 8) |
+		(wavData1[headerIndex + 3])
+	;
+	
+	// Jumps to ByteRate block
+	headerIndex += 4;
+	
+	// Jumps to BlockAlign block
+	headerIndex += 4;
+	// Assigns fileData.blockAlign value
+	fileData.blockAlign = 
+		(wavData1[headerIndex] << 8) |
+		(wavData1[headerIndex + 1])
+	;
+	
+	// Jumps to BitsPerSample block
+	headerIndex += 2;
+	fileData.bitsPerSample =
+		(wavData1[headerIndex] << 8) |
+		(wavData1[headerIndex + 1])
+	;
+	
+	// Finding "data" chunk
+	while (wavData1[headerIndex] != 'f' && wavData1[headerIndex + 1] != 'm' && wavData1[headerIndex + 2] != 't' && wavData1[headerIndex + 3] != ' ') {
+		headerIndex++;
+		if (headerIndex > SECTOR_SIZE){
+			return ERROR_NO_DATA_SUBCHUNK;
+		}
+	}
+	
+	// Jumps to Subchunk2Size
+	headerIndex += 4;
+	fileData.audioSampleBytes =
+		(wavData1[headerIndex] << 24) |
+		(wavData1[headerIndex + 1] << 16) |
+		(wavData1[headerIndex + 2] << 8) |
+		(wavData1[headerIndex + 3])
+	;
+	
+	// Jumps to Data
+	headerIndex += 4;
+	fileData.firstDataByteIndex = headerIndex;
+	
+	// Ending fetch AudioInfo routine
+	
+	
+	// Verifying fileData parameters
+	if (
+		(fileData.channelNumber != AUDIO_CHANNELS) ||
+		(fileData.sampleRate != AUDIO_SAMPLERATE) ||
+		(fileData.blockAlign != AUDIO_BLOCKALIGN) ||
+		(fileData.bitsPerSample != AUDIO_BPS)
+	) {
+		return ERROR_INCOMPATIBLE_FILE;
+	}
+	return true;
 }

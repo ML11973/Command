@@ -102,7 +102,7 @@ File files[100];
 //this way we spare time creating it only once
 uint8_t data[512];
 
-uint32_t cluster;
+volatile uint32_t cluster;
 uint32_t sector;
 uint32_t clustersFirstSector;
 uint8_t division;
@@ -161,7 +161,7 @@ bool sdcard_checkPresence(void){
 	return sd_mmc_spi_check_presence(); 
 }
 
-bool scdcard_setFileToRead(uint8_t fileId){
+bool sdcard_setFileToRead(uint8_t fileId){
 	cluster = _getFirstCluster(fileId);
 	if(cluster == 0)
 		return false;

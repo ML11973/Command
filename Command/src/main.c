@@ -20,7 +20,7 @@
  *
  */
 
-//#define AVIS_POLITIQUE GAUCHE
+#define AVIS_POLITIQUE GAUCHE
 
 #include <asf.h>
 //#include "init.h"

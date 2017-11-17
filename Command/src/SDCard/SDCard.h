@@ -80,7 +80,7 @@ bool sdcard_checkPresence(void);
  * Created 16.11.17 QVT
  * Last modified 16.11.17 QVT
  */
-bool scdcard_setFileToRead(uint8_t fileId);
+bool sdcard_setFileToRead(uint8_t fileId);
 
 /* sdcard_getNextSector
  *
@@ -88,7 +88,7 @@ bool scdcard_setFileToRead(uint8_t fileId);
  * sdcard_setFileToRead has to be called first 
  * in order for this function to work.
  *
- * Automaticaly change sectors and clusters.
+ * Automatically change sectors and clusters.
  *
  * Return false if there is no more sector to read.
  * Otherwise return true.
