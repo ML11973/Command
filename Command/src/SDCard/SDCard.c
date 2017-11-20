@@ -102,7 +102,7 @@ File files[100];
 //this way we spare time creating it only once
 uint8_t data[512];
 
-volatile uint32_t cluster;
+uint32_t cluster;
 uint32_t sector;
 uint32_t clustersFirstSector;
 uint8_t division;
@@ -162,7 +162,7 @@ bool sdcard_checkPresence(void){
 }
 
 bool sdcard_setFileToRead(uint8_t fileId){
-	cluster = _getFirstCluster(fileId);
+	cluster = files[fileId].sector;//_getFirstCluster(fileId);
 	if(cluster == 0)
 		return false;
 	sector = (cluster - 2) * sectorPerClusters + dataSector;
@@ -267,7 +267,6 @@ static bool _readSector(void *ram, uint32_t sector){
 		spi_read(SD_MMC_SPI,&data_read);
 		*_ram++=data_read;
 	}
-	//gl_ptr_mem += 512;     // Update the memory pointer.
 
 	// load 16-bit CRC (ignored)
 	spi_write(SD_MMC_SPI,0xFF);
@@ -358,8 +357,8 @@ static bool _initFat(){
 static void _getFilesInfos(){
 	uint8_t id = 0;
 	uint16_t entry = 0;
+	volatile uint32_t sector = rootSector;
 	uint32_t relativeEntry = 0;
-	uint32_t sector = rootSector;
 	
 	while(entry < 512 && id < 100){
 		relativeEntry = (entry % 16) * 32;
@@ -377,7 +376,11 @@ static void _getFilesInfos(){
 						files[id].name[i] = data[relativeEntry + i];
 					}
 				}
-				files[id].sector = sector;
+				//files[id].sector = sector;
+				files[id].sector = data[relativeEntry + 25]
+								+(data[relativeEntry + 26] << 8)
+								+(data[relativeEntry + 19] << 16)
+								+(data[relativeEntry + 20] << 24);
 				files[id].offset = relativeEntry;
 				id++;
 			}
@@ -415,22 +418,23 @@ static void _getFilesInfos(){
  * Last modified 16.11.17 QVT
  */
 uint32_t _getFirstCluster(uint8_t fileId){
-	uint32_t returnValue;
 	DE *de;
 	
 	if(fileId > 99)
 		fileId = 99;
 		
-	if(files[fileId].sector == 0 || !_readSector(&data, files[fileId].sector))
+	if(/*files[fileId].sector == 0 || */!_readSector(&data,files[fileId].sector))
 		return 0;
 		
-	de = (DE *)&(data[files[fileId].offset]);
-	
-	returnValue = de->components.lsbCluster[0] + (de->components.lsbCluster[1] << 8);
-	if(isFAT32){
-		returnValue += de->components.msbCluster[0] << 16;
-		returnValue += de->components.msbCluster[1] << 24;
-	}
-	
-	return returnValue;
+	//de = (DE *)(data + files[fileId].offset);
+	//
+	//returnValue = de->components.lsbCluster[0] 
+				//+ (de->components.lsbCluster[1] << 8) 
+				//+ (de->components.msbCluster[0] << 16) 
+				//+ (de->components.msbCluster[1] << 24);
+				
+	return data[files[fileId].offset + 25] 
+			+(data[files[fileId].offset + 26] << 8) 
+			+(data[files[fileId].offset + 19] << 16) 
+			+(data[files[fileId].offset + 20] << 24);
 }

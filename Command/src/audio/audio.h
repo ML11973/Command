@@ -13,7 +13,7 @@
 /************************************************************************/
 
 #include <asf.h>
-#include "../SDCard/sdcard.h"
+#include "SDCard/sdcard.h"
 
 
 

@@ -292,7 +292,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 /* _fileVerification
  *
  * http://soundfile.sapp.org/doc/WaveFormat/
- *http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html more detailed
+ * http://www-mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html more detailed
  * Checks validity of audio parameters and loads relevant ones in fileData.
  * Returns program-wide error codes as defined in audio.h
  *

@@ -25,14 +25,14 @@ void mainGauche(void){
 	board_init();
 	screen_Init();
 	sdcard_init();
-	gui_loadingScreen();
+	//gui_loadingScreen();
 	screen_SetPixels(Rect(0,0,320,240), (Color){BLACK});
 	
 	
-	gfx_BeginNewTerminal((Vector2){20,220});
-	gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
+	//gfx_BeginNewTerminal((Vector2){20,220});
+	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
 	while(1){
-		audio_playFile(0);
+		audio_playFile(1);
 	}
 	
 }
