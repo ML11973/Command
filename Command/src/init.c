@@ -27,7 +27,7 @@ void board_init(void) {
 	twi_init();
 	spi_init();
 	//tc0_init();
-	//tc1_init();
+	tc1_init();
 	// Configuring PB0-15
 	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
 }
@@ -114,7 +114,7 @@ void tc1_init(void){
 	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value.
 	tc_configure_interrupts(&AVR32_TC, TC1_CHANNEL, &TC1_INTERRUPT);
 	INTC_register_interrupt (&tc1_irq, AVR32_TC_IRQ1, AVR32_INTC_INT0);
-	tc_start(&AVR32_TC, TC1_CHANNEL);
+	//tc_start(&AVR32_TC, TC1_CHANNEL);
 }
 
 

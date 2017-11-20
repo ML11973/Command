@@ -226,4 +226,12 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/audio/audio.h:
 
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 ../src/SDCard/sdcard.h:
+=======
+../src/audio/../SDCard/sdcard.h:
+>>>>>>> Stashed changes
+=======
+../src/audio/../SDCard/sdcard.h:
+>>>>>>> Stashed changes

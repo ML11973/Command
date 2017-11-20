@@ -2,7 +2,7 @@
  * audio.h
  *
  * Created: 06.11.2017 13:52:58
- *  Author: leemannma
+ *  Author: MLN
  */ 
 
 #ifndef AUDIO_H
@@ -31,13 +31,15 @@
 #define AUDIO_BLOCKALIGN	AUDIO_CHANNELS * AUDIO_BPS / 8
 
 // Audio playback error codes
-#define ERROR_NO_SD					0x02
-#define ERROR_NO_FILE				0x03
-#define ERROR_FORMAT				0x04
-#define ERROR_FILE_COMPRESSED		0x05
-#define ERROR_NO_FMT_SUBCHUNK		0x06
-#define ERROR_NO_DATA_SUBCHUNK		0x07
-#define ERROR_INCOMPATIBLE_FILE		0x08
+#define AUDIO_PLAY_FINISHED			0x01	// Reached end of file
+#define ERROR_NO_SD					0x02	// No SD Card detected
+#define ERROR_NO_FILE				0x03	// Selected file not found
+#define ERROR_FORMAT				0x04	// File format is not .wav
+#define ERROR_FILE_COMPRESSED		0x05	// File is compressed (not supported)
+#define ERROR_NO_FMT_SUBCHUNK		0x06	// Couldn't find Format subchunk (abort)
+#define ERROR_NO_DATA_SUBCHUNK		0x07	// Couldn't find audio Data subchunk (abort)
+#define ERROR_INCOMPATIBLE_FILE		0x08	// File parameters incompatible with basic 
+											// audio playback program. See line 28 above
 
 typedef struct audioInfo {
 	uint8_t channelNumber;		// Number of audio channels (2 for stereo)
@@ -53,65 +55,89 @@ typedef struct audioInfo {
 /************************************************************************/
 /* VARIABLES                                                            */
 /************************************************************************/
-extern const uint16_t sineTable[];
-extern uint16_t i;
-extern uint16_t j;
-extern uint8_t max;
+
 extern uint16_t audioL;
 extern uint16_t audioR;
-extern volatile uint32_t ram;
-extern uint8_t volume;
 extern AudioInfo fileData;
+
 
 
 /************************************************************************/
 /* FUNCTIONS	                                                        */
 /************************************************************************/
 
-
-/* set_volume
+/* audio_setVolume
  *
  * This function sends 2 bytes to N4: AD5300BRMZ to set its analog output.
  * The analog output sets in turn the volume of the N7: TPA6012A4 audio
  * amplifier.
  * 
  * Created 06.11.17 MLN
- * Last modified 08.11.17 MLN
+ * Last modified 13.11.17 MLN
  */
 void audio_setVolume (uint8_t);
 
 
 
-/* audio_set_output
+/* audio_playFile
  *
- * Sets N5: AD5333BRUZ to output input argument on both channels.
- * Input must be 10-bit, right-aligned
- * Timing specifications can be found in AD5333BRUZ datasheet, page 3.
- * 	
- * Channel A corresponds to the right speaker
- * Channel B corresponds to the left speaker 
+ * Plays a file from the SD card. Must be put in while(1) loop.
+ * Loads file first sector, puts file info in a global variable
+ * and loads next sector when finished sector flag is raised from
+ * timer 1 interruption.
  *
- * Created 06.11.17 MLN
- * Last modified 08.11.17 MLN
+ * Created 17.11.17 MLN
+ * Last modified 20.11.17 MLN
  */
-void _setOutput (uint16_t, uint16_t);
+uint8_t audio_playFile(uint8_t);
 
 
 
-void audio_freqStart(uint16_t);
-void audio_freqStop(void);
+/* audio_freqStart
+ *
+ * Starts tc0 to generate a square wave at argument frequency.
+ *
+ * Created 08.11.17 MLN
+ * Last modified 10.11.17 MLN
+ */
+void audio_freqStart (uint16_t);
 
-uint8_t audio_playFile(uint8_t fileNumber);
+
+
+/* audio_freqStop
+ *
+ * Stops previously started tc0.
+ *
+ * Created 08.11.17 MLN
+ * Last modified 10.11.17 MLN
+ */
+void audio_freqStop (void);
+
+
 
 /* Timer 1 interruption
  *
  * This interruption occurs at 44.1 kHz for .wav playback
+ * Uses nextSample flag to tell audio_playFile to load
+ * the next sample, and so that tc1 doesn't refresh
+ * audio output if it has not changed since last interruption
  *
+ * Created 09.11.17 MLN
+ * Last modified 20.11.17 MLN
  */
 void tc1_irq(void);
 
 
 
+/* Timer 0 interruption
+ *
+ * This interruption generates a square wave on audio output.
+ * CURRENTLY NOT WORKING, SEE TIMER INITIALIZATION
+ *
+ * Created 09.11.17 MLN
+ * Last modified 13.11.17 MLN
+ */
 void tc0_irq(void);
+
 
 #endif /* AUDIO_H */

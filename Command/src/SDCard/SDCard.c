@@ -423,7 +423,15 @@ uint32_t _getFirstCluster(uint8_t fileId){
 	if(fileId > 99)
 		fileId = 99;
 		
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	if(/*files[fileId].sector == 0 || */!_readSector(&data,files[fileId].sector))
+=======
+	if(/*files[fileId].sector == 0 || */!_readSector(&data, files[fileId].sector))
+>>>>>>> Stashed changes
+=======
+	if(/*files[fileId].sector == 0 || */!_readSector(&data, files[fileId].sector))
+>>>>>>> Stashed changes
 		return 0;
 		
 	//de = (DE *)(data + files[fileId].offset);
