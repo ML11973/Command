@@ -26,9 +26,9 @@
 /************************************************************************/
 
 void board_init(void);
-void spi_init(void);
-void tc1_init(void);
-void tc0_init(void);
-void twi_init(void);
+void spi_Init(void);
+void tc1_Init(void);
+void tc0_Init(void);
+void twi_Init(void);
 
 #endif /* INIT_H */

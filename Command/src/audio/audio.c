@@ -193,7 +193,19 @@ uint8_t audio_playFile(uint8_t fileNumber){
 		
 		return AUDIO_PLAY_FINISHED;
 	}
-	
+}
+
+
+
+/* audio_pauseFile
+ *
+ * Pauses current .wav file playback
+ *
+ * Created 20.11.17 MLN
+ * Last modified 20.11.17 MLN
+ */
+void audio_pauseFile(void){
+	tc_stop(&AVR32_TC, TC1_CHANNEL);
 }
 
 

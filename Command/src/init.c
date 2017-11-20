@@ -24,17 +24,23 @@ void board_init(void) {
 	irq_initialize_vectors();
 	cpu_irq_enable();
 	
-	twi_init();
-	spi_init();
-	//tc0_init();
-	tc1_init();
-	// Configuring PB0-15
+	twi_Init();
+	spi_Init();
+	//tc0_Init();
+	tc1_Init();
+	// Configuring PB0-15 for audio output
 	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
 }
 
 
-
-void spi_init(void) {
+/* spi_Init
+ *
+ * Initializes SPI transmission for DAC volume control
+ *
+ * Created 06.11.17 MLN
+ * Last modified 06.11.17 MLN
+ */
+void spi_Init(void) {
 	
 	gpio_map_t DA2_SPI1_GPIO_MAP =
 	{
@@ -71,8 +77,16 @@ void spi_init(void) {
 }
 
 
-// 32MHz clock input PBA/2, output checked by scope measure
-void tc1_init(void){
+
+/* tc1_Init
+ *
+ * Initializes Timer/Counter 1 for 44.1 kHz interrupts.
+ * Used as audio sample updater.
+ *
+ * Created 10.11.17 MLN
+ * Last modified 11.11.17 MLN
+ */
+void tc1_Init(void){
 	// Options for waveform generation.
 	static const tc_waveform_opt_t WAVEFORM_OPT1 = {
 		.channel  = TC1_CHANNEL,         // Canal selection.
@@ -95,6 +109,7 @@ void tc1_init(void){
 		.clki     = TC_CLOCK_RISING_EDGE,     // Clock inversion.
 		.tcclks   = TC_CLOCK_SOURCE_TC2          // Int. source clock 1 connected to PBA/2
 	};
+	// 32MHz clock input PBA/2, output checked by scope measure
 	
 	static const tc_interrupt_t TC1_INTERRUPT =
 	{
@@ -118,8 +133,16 @@ void tc1_init(void){
 }
 
 
-// 8 MHz clock connected to PBA/8
-void tc0_init(void){
+
+/* tc0_Init
+ *
+ * Initializes Timer/Counter 0 for 880 Hz interrupts.
+ * Used as a square wave generator
+ *
+ * Created 10.11.17 MLN
+ * Last modified 11.11.17 MLN
+ */
+void tc0_Init(void){
 	// Options for waveform generation.
 	static const tc_waveform_opt_t WAVEFORM_OPT0 = {
 		.channel  = TC0_CHANNEL,         // Canal selection.
@@ -142,7 +165,8 @@ void tc0_init(void){
 		.clki     = TC_CLOCK_RISING_EDGE,     // Clock inversion.
 		.tcclks   = TC_CLOCK_SOURCE_TC3          // Int. source clock 1 connected to PBA/8
 	};
-
+	// 8 MHz clock connected to PBA/8
+	
 	static const tc_interrupt_t TC0_INTERRUPT =
 	{
 		.etrgs = 0, .ldrbs = 0, .ldras = 0, .cpcs  = 1,
@@ -164,11 +188,17 @@ void tc0_init(void){
 }
 
 
-// RTC TWI configuration
-void twi_init(void){
+
+/* twi_Init
+ *
+ * Initializes Two-Wire Interface for communication with external RTC module
+ *
+ * Created 15.11.17 MLN
+ * Last modified 15.11.17 MLN
+ */
+void twi_Init(void){
 	gpio_set_gpio_pin(PIN_RTC_RST);
 	gpio_set_gpio_pin(PIN_SDA);
-	//cpu_delay_ms(500, BOARD_OSC0_HZ); // Test function
 	gpio_clr_gpio_pin(PIN_RTC_RST);
 	// Master mode
 	twi_options_t i2c_options =

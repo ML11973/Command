@@ -93,6 +93,17 @@ uint8_t audio_playFile(uint8_t);
 
 
 
+/* audio_pauseFile
+ *
+ * Pauses current .wav file playback
+ *
+ * Created 20.11.17 MLN
+ * Last modified 20.11.17 MLN
+ */
+void audio_pauseFile(void);
+
+
+
 /* audio_freqStart
  *
  * Starts tc0 to generate a square wave at argument frequency.
