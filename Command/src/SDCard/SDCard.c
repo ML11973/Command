@@ -7,6 +7,8 @@
 
 #include "sdcard.h"
 
+//#include "GFX/gfx.h"
+
 /************************************************************************/
 /* DEFINES                                                              */
 /************************************************************************/
@@ -90,7 +92,7 @@ static spi_options_t sdOptions = {
 
 bool isFAT32 = false;
 
-uint8_t sectorPerClusters;
+uint8_t sectorPerCluster;
 
 uint32_t FATSector;
 uint32_t rootSector;
@@ -153,6 +155,11 @@ bool sdcard_mount(void){
 	if(!_initFat())
 		return false;
 	_getFilesInfos();
+	//
+	//gfx_BeginNewTerminal((Vector2){20,200});
+	//gfx_AddLineToTerminal(files[0].name, 25, (Color){WHITE},false);
+	//gfx_AddLineToTerminal(files[1].name, 25, (Color){WHITE},false);
+	//gfx_AddLineToTerminal(files[2].name, 25, (Color){WHITE},false);
 
 	return true;
 }
@@ -162,10 +169,10 @@ bool sdcard_checkPresence(void){
 }
 
 bool sdcard_setFileToRead(uint8_t fileId){
-	cluster = files[fileId].sector;//_getFirstCluster(fileId);
+	cluster = files[fileId].firstCluster;
 	if(cluster == 0)
 		return false;
-	sector = (cluster - 2) * sectorPerClusters + dataSector;
+	sector = (cluster - 2) * sectorPerCluster + dataSector;
 	clustersFirstSector = sector;
 	
 	if(isFAT32){
@@ -183,10 +190,10 @@ bool sdcard_getNextSector(uint8_t *d){
 	if (sector == sectorsEnd)
 		return false;
 		
-	_readSector(d, sector);
+	_readSector(d, sector++);
 	
 	//next sector and next cluster
-	if(sector > clustersFirstSector + sectorPerClusters){
+	if(sector > clustersFirstSector + sectorPerCluster){
 		//FUNKY FANKY'S CODE
 		_readSector(&data, (cluster >> division) + FATSector);
 		if(isFAT32){
@@ -200,7 +207,7 @@ bool sdcard_getNextSector(uint8_t *d){
 					+(data[0x01FF & (cluster * 2 + 1)] << 8);
 		}
 		//NORMAL
-		sector = (cluster - 2) * sectorPerClusters + dataSector;
+		sector = (cluster - 2) * sectorPerCluster + dataSector;
 		clustersFirstSector = sector;
 	}
 	return true;
@@ -335,6 +342,7 @@ static bool _initFat(){
 					 (bpb.components.FATSizeInSectors[1] << 8);
 		}
 		
+		sectorPerCluster = bpb.components.sectorPerCluster[0];
 		rootSector = sector + nbrOfReservedSectors + (FATSize * nbrOfFAT);
 		FATSector = sector + nbrOfReservedSectors;
 		//directory entrees store on 32 bytes
@@ -377,11 +385,10 @@ static void _getFilesInfos(){
 					}
 				}
 				//files[id].sector = sector;
-				files[id].sector = data[relativeEntry + 25]
-								+(data[relativeEntry + 26] << 8)
-								+(data[relativeEntry + 19] << 16)
-								+(data[relativeEntry + 20] << 24);
-				files[id].offset = relativeEntry;
+				files[id].firstCluster = data[relativeEntry + 26]
+								+(data[relativeEntry + 27] << 8)
+								+(data[relativeEntry + 20] << 16)
+								+(data[relativeEntry + 21] << 24);
 				id++;
 			}
 		}
@@ -408,41 +415,4 @@ static void _getFilesInfos(){
 		}
 		entry++;
 	}
-}
-
-/* _getFirstCluster
- *
- * return the first cluster of the desired file
- *
- * Created 16.11.17 QVT
- * Last modified 16.11.17 QVT
- */
-uint32_t _getFirstCluster(uint8_t fileId){
-	DE *de;
-	
-	if(fileId > 99)
-		fileId = 99;
-		
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-	if(/*files[fileId].sector == 0 || */!_readSector(&data,files[fileId].sector))
-=======
-	if(/*files[fileId].sector == 0 || */!_readSector(&data, files[fileId].sector))
->>>>>>> Stashed changes
-=======
-	if(/*files[fileId].sector == 0 || */!_readSector(&data, files[fileId].sector))
->>>>>>> Stashed changes
-		return 0;
-		
-	//de = (DE *)(data + files[fileId].offset);
-	//
-	//returnValue = de->components.lsbCluster[0] 
-				//+ (de->components.lsbCluster[1] << 8) 
-				//+ (de->components.msbCluster[0] << 16) 
-				//+ (de->components.msbCluster[1] << 24);
-				
-	return data[files[fileId].offset + 25] 
-			+(data[files[fileId].offset + 26] << 8) 
-			+(data[files[fileId].offset + 19] << 16) 
-			+(data[files[fileId].offset + 20] << 24);
 }

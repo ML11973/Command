@@ -19,8 +19,7 @@ typedef struct file
 {
 	//uint8_t id;
 	char name[25];
-	uint32_t sector;
-	uint16_t offset;
+	uint32_t firstCluster;
 }File;
 
 
