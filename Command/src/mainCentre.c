@@ -32,6 +32,10 @@ void mainCentre(void){
 	menus[currentMenuId](true);
 	
 	while(1){
-		menus[currentMenuId](menuChanged);
+		input[currentMenuId]();
+		if(needRepaint){
+			menus[currentMenuId](menuChanged);
+			needRepaint = false;
+		}
 	}
 }

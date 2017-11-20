@@ -21,6 +21,8 @@
 /************************************************************************/
 
 typedef void (*guiMenu[])(bool);
+typedef void (*inputHandler[])();
+typedef void (*inputBinding[])(int);
 
 
 /************************************************************************/
@@ -28,8 +30,10 @@ typedef void (*guiMenu[])(bool);
 /************************************************************************/
 
 extern guiMenu menus;
+extern inputHandler input;
 
 extern bool menuChanged;
+extern bool needRepaint;
 extern uint8_t currentMenuId;
 
 /************************************************************************/

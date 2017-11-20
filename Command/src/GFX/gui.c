@@ -36,6 +36,8 @@ typedef enum menu_id{
 	ALARM
 }MENU_ID;
 
+
+
 /************************************************************************/
 /* GUI FUNCTIONS PROTOTYPES                                             */
 /************************************************************************/
@@ -45,6 +47,11 @@ void _musicMenu(bool firstDraw);
 void _settingsMenu(bool firstDraw);
 void _alarmMenu(bool firstDraw);
 
+void _mainInput();
+void _musicInput();
+void _settingsInput();
+void _alarmInput();
+
 __attribute__((__interrupt__)) void switchISR(void);
 
 /************************************************************************/
@@ -52,10 +59,13 @@ __attribute__((__interrupt__)) void switchISR(void);
 /************************************************************************/
 
 guiMenu menus = {_mainMenu, _musicMenu, _settingsMenu, _alarmMenu};
-	
+inputHandler input = {_mainInput, _musicInput, _settingsInput, _alarmInput};
+inputBinding binding = {};	
+
 Color textColor = {GREEN};
 	
 bool menuChanged = false;
+bool needRepaint = false;
 uint8_t currentMenuId = 0;
 
 static uint8_t switchState = 0;
@@ -86,6 +96,8 @@ void gui_Init(void){
 	gpio_enable_pin_interrupt(PIN_SWITCH3, GPIO_RISING_EDGE);
 	
 	INTC_register_interrupt(&switchISR, AVR32_GPIO_IRQ7, AVR32_INTC_INT0);
+	
+	
 }
 
 void gui_loadingScreen(void){
@@ -148,30 +160,6 @@ void _mainMenu(bool firstDraw){
 		gfx_cmdLine("alarm -info", 11, textColor,commandChanged);
 		commandChanged = false;
 	}
-	
-	if(switchState == 4){
-		if(selectedCommand == 0)
-			currentMenuId = MUSIC;
-		else if(selectedCommand == 1)
-			currentMenuId = SETTINGS;
-		else
-			currentMenuId = ALARM;
-			
-		menuChanged = true;
-		switchState = 0;
-	}
-	else if(switchState == 2){
-		selectedCommand = (selectedCommand == NBR_OF_MENU - 1)?(0):(selectedCommand+1);
-		commandChanged = true;
-		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
-		switchState = 0;
-	}
-	else if(switchState == 3){
-		selectedCommand = (selectedCommand == 0)?(NBR_OF_MENU - 1):(selectedCommand-1);
-		commandChanged = true;
-		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
-		switchState = 0;
-	}
 }
 
 /* mainMenu
@@ -202,13 +190,6 @@ void _musicMenu(bool firstDraw){
 	else{
 		gfx_AddLineToTerminal("> No results",12,(Color){RED}, firstDraw);
 	}
-	
-	if(switchState == 1){
-		currentMenuId = MAIN;
-		menuChanged = true;
-		commandChanged = true;
-		switchState = 0;
-	}
 }
 
 void _settingsMenu(bool firstDraw){
@@ -223,13 +204,6 @@ void _settingsMenu(bool firstDraw){
 		gfx_AddLineToTerminal("> textColor = Green", 20, textColor, firstDraw);
 		gfx_AddLineToTerminal("> Heure : 10h 30m", 18, textColor, firstDraw);
 		gfx_AddLineToTerminal("> Date : 09h 35m", 17, textColor, firstDraw);
-	}
-	
-	if(switchState == 1){
-		currentMenuId = MAIN;
-		menuChanged = true;
-		commandChanged = true;
-		switchState = 0;
 	}
 }
 
@@ -250,7 +224,82 @@ void _alarmMenu(bool firstDraw){
 	gfx_AddOptionToTerminal("Alarme 2 : 09h 35m", 18,textColor, selectedOption & (1<<1), firstDraw, firstDraw);
 	gfx_AddOptionToTerminal("Alarme 3 : 12h 00m", 18,textColor, selectedOption & (1<<2), firstDraw, firstDraw);
 	gfx_AddOptionToTerminal("Alarme 4 : 06h 18m", 18,textColor, selectedOption & (1<<3), firstDraw, firstDraw);
-	
+}
+
+
+/* _mainInput
+ *
+ * Handle input for the main menu
+ *
+ * Created 20.11.17 QVT
+ * Last modified 20.11.17 QVT
+ */
+void _mainInput(){
+	if(switchState == 4){
+		if(selectedCommand == 0)
+			currentMenuId = MUSIC;
+		else if(selectedCommand == 1)
+			currentMenuId = SETTINGS;
+		else
+			currentMenuId = ALARM;
+			
+		menuChanged = true;
+		switchState = 0;
+	}
+	else if(switchState == 2){
+		selectedCommand = (selectedCommand == NBR_OF_MENU - 1)?(0):(selectedCommand+1);
+		commandChanged = true;
+		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
+		switchState = 0;
+	}
+	else if(switchState == 3){
+		selectedCommand = (selectedCommand == 0)?(NBR_OF_MENU - 1):(selectedCommand-1);
+		commandChanged = true;
+		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
+		switchState = 0;
+	}
+}
+
+/* _musicInput
+ *
+ * Handle input for the musics menu
+ *
+ * Created 20.11.17 QVT
+ * Last modified 20.11.17 QVT
+ */
+void _musicInput(){
+	if(switchState == 1){
+		currentMenuId = MAIN;
+		menuChanged = true;
+		commandChanged = true;
+		switchState = 0;
+	}
+}
+
+/* _settingsInput
+ *
+ * Handle input for the settings menu
+ *
+ * Created 20.11.17 QVT
+ * Last modified 20.11.17 QVT
+ */
+void _settingsInput(){
+	if(switchState == 1){
+		currentMenuId = MAIN;
+		menuChanged = true;
+		commandChanged = true;
+		switchState = 0;
+	}
+}
+
+/* _alarmInput
+ *
+ * Handle input for the alarms menu
+ *
+ * Created 20.11.17 QVT
+ * Last modified 20.11.17 QVT
+ */
+void _alarmInput(){
 	if(switchState == 1){
 		currentMenuId = MAIN;
 		menuChanged = true;
@@ -281,4 +330,5 @@ __attribute__((__interrupt__)) void switchISR(void){
 		switchState = 4;
 	}
 	AVR32_GPIO.port[1].ifrc = 0xFF000000;
+	needRepaint = true;
 }
