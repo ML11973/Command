@@ -24,10 +24,30 @@
 // Default volume
 #define DEFAULTVOLUME 0x40
 
-// Audio playback error codes
-#define ERROR_NO_SD 0x02
-#define ERROR_NO_FILE 0x03
+// Default required .wav parameters
+#define AUDIO_SAMPLERATE	44100
+#define AUDIO_CHANNELS		2
+#define AUDIO_BPS			16
+#define AUDIO_BLOCKALIGN	AUDIO_CHANNELS * AUDIO_BPS / 8
 
+// Audio playback error codes
+#define ERROR_NO_SD					0x02
+#define ERROR_NO_FILE				0x03
+#define ERROR_FORMAT				0x04
+#define ERROR_FILE_COMPRESSED		0x05
+#define ERROR_NO_FMT_SUBCHUNK		0x06
+#define ERROR_NO_DATA_SUBCHUNK		0x07
+#define ERROR_INCOMPATIBLE_FILE		0x08
+
+typedef struct audioInfo {
+	uint8_t channelNumber;		// Number of audio channels (2 for stereo)
+	uint32_t sampleRate;		// Number of audio samples per second (44100)
+	uint16_t blockAlign;		// Number of bytes per sample per channel
+	uint16_t bitsPerSample;		// Number of bits per sample
+	uint32_t audioSampleBytes;	// Number of bytes to read
+	
+	uint8_t firstDataByteIndex;	// Index of first data block in file
+}AudioInfo;
 
 
 /************************************************************************/
@@ -41,8 +61,7 @@ extern uint16_t audioL;
 extern uint16_t audioR;
 extern volatile uint32_t ram;
 extern uint8_t volume;
-extern bool audio_firstCall;
-
+extern AudioInfo fileData;
 
 
 /************************************************************************/
@@ -82,7 +101,7 @@ void _setOutput (uint16_t, uint16_t);
 void audio_freqStart(uint16_t);
 void audio_freqStop(void);
 
-
+uint8_t audio_playFile(uint8_t fileNumber);
 
 /* Timer 1 interruption
  *
