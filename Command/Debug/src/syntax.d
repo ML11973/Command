@@ -62,6 +62,7 @@ src/syntax.d src/syntax.o src/syntax.o: ../src/syntax.c ../src/syntax.h \
  ../src/ASF/common/services/storage/ctrl_access/ctrl_access.h \
  ../src/config/conf_access.h \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h \
+ ../src/ASF/avr32/drivers/pdca/pdca.h \
  ../src/ASF/avr32/drivers/pm/power_clocks_lib.h \
  ../src/ASF/avr32/drivers/pm/pm.h ../src/ASF/avr32/drivers/pm/sleep.h \
  ../src/ASF/avr32/drivers/pwm/pwm.h \
@@ -204,6 +205,8 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/config/conf_access.h:
 
 ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi_mem.h:
+
+../src/ASF/avr32/drivers/pdca/pdca.h:
 
 ../src/ASF/avr32/drivers/pm/power_clocks_lib.h:
 

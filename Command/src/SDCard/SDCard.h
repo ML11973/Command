@@ -97,4 +97,14 @@ bool sdcard_setFileToRead(uint8_t fileId);
  */
 bool sdcard_getNextSector(uint8_t *d);
 
+/* sdcard_getNextSectorFast
+ * 
+ * Same as sdcard_gtNextSector expect this function 
+ * use PDCA to lesser the burden on the cpu
+ * 
+ * Created 20.11.17 QVT
+ * Last modified 20.11.17 QVT
+ */
+bool sdcard_getNextSectorFast(uint8_t *d);
+
 #endif /* SDCARD_H_ */
