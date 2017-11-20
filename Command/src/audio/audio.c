@@ -67,7 +67,7 @@ void audio_setVolume (uint8_t volume){
 		 * Volume has to be in the middle nibbles of a 2-byte integer
 		 * as per AD5300BRMZ datasheet
 		 */
-		spi_write((volatile struct avr32_spi_t*)DAC1_SPI, volume<<4);
+		spi_write((volatile struct avr32_spi_t*)DAC1_SPI, currentVolume<<4);
 	
 		// Deselecting DAC1
 		spi_unselectChip((volatile struct avr32_spi_t*)DAC1_SPI, DAC1_SPI_NPCS);
@@ -97,6 +97,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	static audio_firstCall = true;
 	static uint8_t *wavDataPointer = wavData1;
 	static uint32_t wavDataIndex = 0;
+	volatile uint8_t fileVerif = 0x00;
 	
 	
 	
@@ -120,9 +121,12 @@ uint8_t audio_playFile(uint8_t fileNumber){
 		sdcard_getNextSector(wavData1);
 		sdcard_getNextSector(wavData2);
 		
-		if ( _fileVerification(wavData1) == true ){
+		fileVerif = _fileVerification(wavData1);
+		if (fileVerif == true){
 			audio_firstCall = false;
 		}
+		else
+			return fileVerif;
 		
 		tc_start(&AVR32_TC, TC1_CHANNEL);
 	}
@@ -343,27 +347,27 @@ uint8_t _fileVerification(){
 			return ERROR_NO_FMT_SUBCHUNK;
 		}
 	}
-	// Jumps to Subchuk1Size block
+	// Jumps to Subchunk1Size block
 	headerIndex += 4;
 	// Jumps to AudioFormat block
 	headerIndex += 4;
 	
-	if (wavData1[headerIndex + 1] != 1) {
+	if (wavData1[headerIndex + 0] != 1) {
 		return ERROR_FILE_COMPRESSED;
 	}
 	
 	// Jumps to NumChannels block
 	headerIndex += 2;
-	fileData.channelNumber = wavData1[headerIndex + 1];
+	fileData.channelNumber = wavData1[headerIndex + 0];
 	
 	// Jumps to SampleRate block
 	headerIndex += 2;
 	// Puts 4 SampleRate bytes on a single 32-bit integer before assigning it to fileData.sampleRate
 	fileData.sampleRate = 
-		(wavData1[headerIndex] << 24) |
-		(wavData1[headerIndex + 1] << 16) |
-		(wavData1[headerIndex + 2] << 8) |
-		(wavData1[headerIndex + 3])
+		(wavData1[headerIndex + 3] << 24) |
+		(wavData1[headerIndex + 2] << 16) |
+		(wavData1[headerIndex + 1] << 8) |
+		(wavData1[headerIndex + 0])
 	;
 	
 	// Jumps to ByteRate block
@@ -373,19 +377,19 @@ uint8_t _fileVerification(){
 	headerIndex += 4;
 	// Assigns fileData.blockAlign value
 	fileData.blockAlign = 
-		(wavData1[headerIndex] << 8) |
-		(wavData1[headerIndex + 1])
+		(wavData1[headerIndex + 1] << 8) |
+		(wavData1[headerIndex + 0])
 	;
 	
 	// Jumps to BitsPerSample block
 	headerIndex += 2;
 	fileData.bitsPerSample =
-		(wavData1[headerIndex] << 8) |
-		(wavData1[headerIndex + 1])
+		(wavData1[headerIndex + 1] << 8) |
+		(wavData1[headerIndex + 0])
 	;
 	
 	// Finding "data" chunk
-	while (wavData1[headerIndex] != 'f' && wavData1[headerIndex + 1] != 'm' && wavData1[headerIndex + 2] != 't' && wavData1[headerIndex + 3] != ' ') {
+	while (wavData1[headerIndex] != 'd' && wavData1[headerIndex + 1] != 'a' && wavData1[headerIndex + 2] != 't' && wavData1[headerIndex + 3] != 'a') {
 		headerIndex++;
 		if (headerIndex > SECTOR_SIZE){
 			return ERROR_NO_DATA_SUBCHUNK;
@@ -395,10 +399,10 @@ uint8_t _fileVerification(){
 	// Jumps to Subchunk2Size
 	headerIndex += 4;
 	fileData.audioSampleBytes =
-		(wavData1[headerIndex] << 24) |
-		(wavData1[headerIndex + 1] << 16) |
-		(wavData1[headerIndex + 2] << 8) |
-		(wavData1[headerIndex + 3])
+		(wavData1[headerIndex + 3] << 24) |
+		(wavData1[headerIndex + 2] << 16) |
+		(wavData1[headerIndex + 1] << 8) |
+		(wavData1[headerIndex + 0])
 	;
 	
 	// Jumps to Data

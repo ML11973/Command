@@ -26,13 +26,14 @@ void mainGauche(void){
 	screen_Init();
 	sdcard_init();
 	//gui_loadingScreen();
-	screen_SetPixels(Rect(0,0,320,240), (Color){BLACK});
+	screen_SetPixels(Rect(0,0,320,240), (Color){RED});
 	
 	
-	//gfx_BeginNewTerminal((Vector2){20,220});
+	gfx_BeginNewTerminal((Vector2){20,220});
 	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
 	while(1){
 		audio_playFile(0);
+		//gfx_AddLineToTerminal("Vive le camarade Staline", 24, (Color){YELLOW}, 0);
 	}
 	
 }
