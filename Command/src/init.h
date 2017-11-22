@@ -18,6 +18,7 @@
 #include <conf_board.h>
 #include <conf_cpu.h>
 #include "audio/audio.h"
+#include "SDCard/sdcard.h"
 
 
 
@@ -26,7 +27,7 @@
 /************************************************************************/
 
 void board_init(void);
-void spi_Init(void);
+void spi1_Init(void);
 void tc1_Init(void);
 void tc0_Init(void);
 void twi_Init(void);

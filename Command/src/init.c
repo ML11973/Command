@@ -25,7 +25,7 @@ void board_init(void) {
 	cpu_irq_enable();
 	
 	twi_Init();
-	spi_Init();
+	spi1_Init();
 	//tc0_Init();
 	tc1_Init();
 	// Configuring PB0-15 for audio output
@@ -40,11 +40,12 @@ void board_init(void) {
  * Created 06.11.17 MLN
  * Last modified 06.11.17 MLN
  */
-void spi_Init(void) {
+void spi1_Init(void) {
 	
-	gpio_map_t DA2_SPI1_GPIO_MAP =
+	gpio_map_t SPI1_GPIO_MAP =
 	{
-		{ PIN_NPCS_DA, FCT_NPCS_DA },
+		{ PIN_NPCS_SD,	FCT_NPCS_SD	  },
+		{ PIN_NPCS_DA, FCT_NPCS_DA		},
 		{ PIN_SCK_SPI1, FCT_SCK_SPI1   },
 		{ PIN_MISO_SPI1, FCT_MISO_SPI1 },
 		{ PIN_MOSI_SPI1, FCT_MOSI_SPI1 }
@@ -63,17 +64,29 @@ void spi_Init(void) {
 		.modfdis		=	1					// ?
 	};
 	
+	spi_options_t spiOptionsSD = {
+		.reg			=	1,			// NPCS1 pour la carte SD.
+		.baudrate		=   1000000,   	// Vitesse de transmission.
+		.bits			= 	8,			// 8 bits de long.
+		.spck_delay		= 	0,			// Delay entre CS et SPCK.
+		.trans_delay	= 	0,			// Delay entre deux transfert.
+		.stay_act		=	1,			// ?
+		.spi_mode		= 	0,			// ?
+		.modfdis		=	1			// ?
+	};
+	
 	// Assigning IOs to SPI
-	gpio_enable_module(DA2_SPI1_GPIO_MAP, sizeof (DA2_SPI1_GPIO_MAP)/ sizeof(DA2_SPI1_GPIO_MAP[0]));
+	gpio_enable_module(SPI1_GPIO_MAP, sizeof (SPI1_GPIO_MAP)/ sizeof(SPI1_GPIO_MAP[0]));
 	
 	// Initializing SPI as master
-	spi_initMaster((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS, &spiOptionsDA2);
+	spi_initMaster(SD_MMC_SPI, &spiOptionsDA2);
 	
+	spi_selectionMode(SD_MMC_SPI, 0, 0, 0);
 	// Initializes volume control DAC
-	spi_setupChipReg((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS, &spiOptionsDA2, BOARD_OSC0_HZ);
+	spi_setupChipReg(SD_MMC_SPI, &spiOptionsDA2, BOARD_OSC0_HZ);
+	spi_setupChipReg(SD_MMC_SPI, &spiOptionsSD,  BOARD_OSC0_HZ);
 	
-	spi_enable((volatile avr32_spi_t*)AVR32_SPI1_ADDRESS);
-	
+	spi_enable(SD_MMC_SPI);
 }
 
 
@@ -121,8 +134,8 @@ void tc1_Init(void){
 		{PIN_T1_IOA, FCT_T1_IOA}
 	};
 	
-	gpio_enable_module(T1_GPIO, 1);
-	*/
+	gpio_enable_module(T1_GPIO, 1);*/
+	
 	
 	// Initialize the timer/counter.
 	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);

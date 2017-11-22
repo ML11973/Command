@@ -154,12 +154,16 @@ void rtc_write(uint8_t firstRegister, uint8_t dataNumber){
 
 /* rtc_setTime
  *
- * Description
+ * Converts currentTime to BCD and sends it to RTC.
  *
  * Created 15.11.17 MLN
  * Last modified 15.11.17 MLN
  */
 void rtc_setTime(void){
+	// Time to BCD conversion
+	
+	
+	twi_master_enable(RTC_TWI);
 	
 }
 
@@ -170,7 +174,7 @@ void rtc_setTime(void){
  * TO BE MODIFIED, test function
  *
  * Created 15.11.17 MLN
- * Last modified 15.11.17 MLN
+ * Last modified 22.11.17 MLN
  */
 void rtc_getTime(void){
 	volatile uint8_t status = 0;
@@ -199,7 +203,7 @@ void rtc_getTime(void){
 	// We don't need to convert the day number
 	currentTime.date	= 10 * (currentTime.date >> 4) + (currentTime.date & 0x0F);
 	// Since a bit in the month register indicates the century, we compute years before months
-	currentTime.year	= 100 * ((currentTime.month & 0x80) >> 7) * (currentTime.year >> 4) + (currentTime.year & 0x0F);
+	currentTime.year	= 100 * ((currentTime.month & 0x80) >> 7) * (currentTime.year >> 4) + (currentTime.year & 0x0F) + REFERENCE_YEAR;
 	
 	currentTime.month	= 10 * ((currentTime.month & 0x10) >> 4) + (currentTime.month & 0x0F);
 	// END KEEP
@@ -242,4 +246,60 @@ void rtc_setNextMinuteInterrupt(void){
 void rtc_setNextAlarm(Alarm alarm[]){
 	
 	
+}
+
+
+
+/* _timeToBCD
+ *
+ * Converts a Time variable to BCD (format used by RTC).
+ * Returns table acceptable by RTC.
+ * NOT CHECKED YET
+ *
+ * Created 22.11.17 MLN
+ * Last modified 22.11.17 MLN
+ */
+uint8_t* _timeToBCD(Time timeInput){
+	uint8_t timeBCD[7] = {0};
+	
+	timeBCD[0] = ((timeInput.seconds / 10) << 4) + (timeInput.seconds % 10);
+	timeBCD[1] = ((timeInput.minutes / 10) << 4) + (timeInput.minutes % 10);
+	timeBCD[2] = ((timeInput.hours	 / 10) << 4) + (timeInput.hours   % 10);
+	timeBCD[3] = timeInput.day;
+	timeBCD[4] = ((timeInput.date	 / 10) << 4) + (timeInput.date    % 10);
+	timeBCD[5] = (((timeInput.year - REFERENCE_YEAR) / 100) << 7) + ((timeInput.month / 10) << 4) + (timeInput.month % 10);
+	timeBCD[6] = ((((timeInput.year - REFERENCE_YEAR) % 100) / 10) << 4) + (timeInput.year % 10);
+	
+	return timeBCD;
+}
+
+
+
+/* _BCDToTime
+ *
+ * Converts a BCD time to Time variable
+ * Returns Time readable by software
+ * NOT CHECKED YET
+ *
+ * Created 22.11.17 MLN
+ * Last modified 22.11.17 MLN
+ */
+Time _BCDToTime (uint8_t* inputTable){
+	Time returnTime;
+	
+	returnTime.seconds = 10 * (*(inputTable + 0) >> 4) + (*(inputTable + 0) & 0x0F);
+	
+	returnTime.minutes = 10 * (*(inputTable + 1) >> 4) + (*(inputTable + 1) & 0x0F);
+	
+	returnTime.hours = 10 * ((*(inputTable + 2) & 0x30) >> 4) + (*(inputTable + 2) & 0x0F);
+	
+	returnTime.day = *(inputTable + 3);
+	
+	returnTime.date	= 10 * (*(inputTable + 4) >> 4) + (*(inputTable + 4) & 0x0F);
+	// Since a bit in the month register indicates the century, we compute years before months
+	returnTime.year	= 100 * ((*(inputTable + 5) & 0x80) >> 7) * (*(inputTable + 6) >> 4) + (*(inputTable + 6) & 0x0F) + REFERENCE_YEAR;
+	
+	returnTime.month	= 10 * ((*(inputTable + 5) & 0x10) >> 4) + (*(inputTable + 5) & 0x0F);
+	
+	return returnTime;
 }

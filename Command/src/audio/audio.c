@@ -17,7 +17,11 @@
 
 #define AUDIOOUTPUTMASK 0x000003FF
 #define AUDIOMAXINPUT 0x3FF
-#define WAVDATA_LAST_INDEX 511
+#define WAVDATA_SIZE 512
+
+#define NO_LOAD 0x00
+#define LOAD_WAVDATA1 0x01
+#define LOAD_WAVDATA2 0x02
 
 
 
@@ -28,11 +32,14 @@
 uint16_t audioR = 0;
 uint16_t audioL = 0;
 bool loadNextSample = 0;
-uint8_t currentVolume = DEFAULTVOLUME;
+uint8_t loadNextSector = LOAD_WAVDATA1;
+uint8_t currentVolume = 0;
 
 uint8_t wavData1[512] = {0};
 uint8_t wavData2[512] = {0};
 
+uint8_t *wavDataPointer = wavData1;
+uint32_t wavDataIndex = 0;
 
 AudioInfo fileData;
 
@@ -95,8 +102,8 @@ void audio_setVolume (uint8_t volume){
  */
 uint8_t audio_playFile(uint8_t fileNumber){
 	static audio_firstCall = true;
-	static uint8_t *wavDataPointer = wavData1;
-	static uint32_t wavDataIndex = 0;
+// 	static uint8_t *wavDataPointer = wavData1;
+// 	static uint32_t wavDataIndex = 0;
 	volatile uint8_t fileVerif = 0x00;
 	
 	
@@ -128,6 +135,9 @@ uint8_t audio_playFile(uint8_t fileNumber){
 		else
 			return fileVerif;
 		
+		wavDataIndex = fileData.firstDataByteIndex;
+		// Volume setting, optimized to be as light as possible
+		audio_setVolume(DEFAULTVOLUME);
 		tc_start(&AVR32_TC, TC1_CHANNEL);
 	}
 	
@@ -140,45 +150,62 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	/* to the output stage													*/
 	/************************************************************************/
 	
-	// Volume setting, optimized to be as light as possible
-	audio_setVolume(currentVolume);
 	
 	
-	if (loadNextSample == true){
-		/* Update audioL and audioR values using pointer to array values
-		 * Audio values must be 10-bit.
-		 * Shifting through the array by incrementing wavDataIndex.
-		*/
-		audioL = *(wavDataPointer + wavDataIndex % WAVDATA_LAST_INDEX);
-		audioL <<= 2;
-		wavDataIndex++;
-		audioL |= *(wavDataPointer + (wavDataIndex % WAVDATA_LAST_INDEX) + 1) >> 6;
-		wavDataIndex++;
-		
-		
-		audioR = *(wavDataPointer + (wavDataIndex % WAVDATA_LAST_INDEX) + 2);
-		audioR <<= 2;
-		wavDataIndex++;
-		audioR |= *(wavDataPointer + (wavDataIndex % WAVDATA_LAST_INDEX) + 3) >> 6;
-		wavDataIndex++;
-		
-		// If pointer reaches the end of the current wavData array
-		if ( wavDataIndex % WAVDATA_LAST_INDEX == 0){
+	// Audio loading version 1 20.11.17
+// 	if (loadNextSample == true){
+// 		/* Update audioL and audioR values using pointer to array values
+// 		 * Audio values must be 10-bit.
+// 		 * Shifting through the array by incrementing wavDataIndex.
+// 		*/
+// 		audioL = *(wavDataPointer + wavDataIndex % WAVDATA_SIZE);
+// 		audioL <<= 2;
+// 		wavDataIndex++;
+// 		audioL |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 1) >> 6;
+// 		wavDataIndex++;
+// 		
+// 		
+// 		audioR = *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 2);
+// 		audioR <<= 2;
+// 		wavDataIndex++;
+// 		audioR |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 3) >> 6;
+// 		wavDataIndex++;
+// 		
+// 		// If pointer reaches the end of the current wavData array
+// 		if ( wavDataIndex % WAVDATA_SIZE <= 3){
+// 			
+// 			// Switching between arrays then
+// 			// loading next sector in previously used array
+// 			if (wavDataPointer == wavData1){
+// 				wavDataPointer = wavData2;
+// 				sdcard_getNextSector(wavData1);
+// 			}
+// 			else {
+// 				wavDataPointer = wavData1;
+// 				sdcard_getNextSector(wavData2);
+// 			}
+// 		}
+// 		
+// 		// Lowering audio update flag
+// 		loadNextSample = false;
+// 	}
+	
+	
+	// Audio loading version 2
+	switch(loadNextSector){
+		case NO_LOAD:
+			break;
 			
-			// Switching between arrays then
-			// loading next sector in previously used array
-			if (wavDataPointer == wavData1){
-				wavDataPointer = wavData2;
-				sdcard_getNextSector(wavData1);
-			}
-			else {
-				wavDataPointer = wavData1;
-				sdcard_getNextSector(wavData2);
-			}
-		}
-		
-		// Lowering audio update flag
-		loadNextSample = false;
+		case LOAD_WAVDATA1:
+			sdcard_getNextSectorFast(wavData1);
+			break;
+			
+		case LOAD_WAVDATA2:
+			sdcard_getNextSectorFast(wavData2);
+			break;
+			
+		default:
+			break;
 	}
 	
 	
@@ -328,7 +355,7 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
  * Returns program-wide error codes as defined in audio.h
  *
  * Created 17.11.17 MLN
- * Last modified 17.11.17 MLN
+ * Last modified 20.11.17 MLN
  */
 uint8_t _fileVerification(){
 	uint16_t headerIndex = 8;
@@ -437,9 +464,48 @@ uint8_t _fileVerification(){
  * Last modified 20.11.17 MLN
  */
 __attribute__((__interrupt__)) void tc1_irq( void ){
-	if (loadNextSample == false){
-		_setOutput(audioR, audioL);
-		loadNextSample = true;
+// 	// Audio loading version 1
+// 	if (loadNextSample == false){
+// 		_setOutput(audioR, audioL);
+// 		loadNextSample = true;
+// 	}
+
+	// Updating output first to have a fixed interval update, independent
+	// from the data fetching time
+	_setOutput(audioR, audioL);
+	// Audio loading version 2
+	/* Update audioL and audioR values using pointer to array values
+	 * Audio values must be 10-bit.
+	 * Shifting through the array by incrementing wavDataIndex.
+	 */
+	audioL = *(wavDataPointer + wavDataIndex % WAVDATA_SIZE);
+	audioL <<= 2;
+	wavDataIndex++;
+	audioL |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 1) >> 6;
+	wavDataIndex++;
+		
+		
+	audioR = *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 2);
+	audioR <<= 2;
+	wavDataIndex++;
+	audioR |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 3) >> 6;
+	wavDataIndex++;
+		
+	// If pointer reaches the end of the current wavData array
+	if ( wavDataIndex % WAVDATA_SIZE <= 3){
+			
+		// Switching between arrays then
+		// loading next sector in previously used array
+		if (wavDataPointer == wavData1){
+			wavDataPointer = wavData2;
+			loadNextSector = LOAD_WAVDATA1;
+			//sdcard_getNextSector(wavData1);
+		}
+		else {
+			wavDataPointer = wavData1;
+			loadNextSector = LOAD_WAVDATA2;
+			//sdcard_getNextSector(wavData2);
+		}
 	}
 }
 

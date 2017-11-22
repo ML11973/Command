@@ -23,6 +23,7 @@
 /************************************************************************/
 
 #define MAXALARMNUMBER 10
+#define REFERENCE_YEAR 2000
 
 typedef struct time {
 	uint8_t year		:8;		// 0-255 -> 2000-2255
@@ -37,6 +38,7 @@ typedef struct time {
 typedef struct alarm {
 	Time alarmTime;
 	bool alarmEnable;
+	uint8_t ringtoneIndex;
 } Alarm;
 
 
