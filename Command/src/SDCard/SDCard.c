@@ -145,7 +145,7 @@ uint32_t clustersFirstSector;
 uint8_t division;
 uint32_t sectorsEnd;
 
-bool endOfTransfer = false;
+volatile bool endOfTransfer = false;
 
 
 /************************************************************************/
@@ -156,6 +156,7 @@ static bool _initFat();
 static void _getFilesInfos();
 uint32_t _getFirstCluster(uint8_t fileId);
 static bool _readSector(void *ram, uint32_t sector);
+bool _readSectorFast(void *ram, uint32_t sector);
 
 void _pdcaInit(void);
 __attribute__((__interrupt__)) void pdcaISR(void);
@@ -255,23 +256,7 @@ bool sdcard_getNextSectorFast(uint8_t *d){
 	if (sector == sectorsEnd)
 	return false;
 	
-	pdca_load_channel( 0, d, 512);
-	pdca_load_channel( 1, d, 512);//dummy
-	
-	if(sd_mmc_spi_read_open_PDCA(sector)){
-		pdca_enable_interrupt_transfer_complete(0);
-		
-		spi_selectChip(SD_MMC_SPI, SD_MMC_SPI_NPCS);
-		spi_write(SD_MMC_SPI, 0xFF);
-		
-		pdca_enable(0);
-		pdca_enable(1);
-		endOfTransfer = false;
-		while(!endOfTransfer);
-	}else{
-		sd_mmc_spi_read_close_PDCA();
-		return false;
-	}
+	_readSectorFast(d,sector++);
 	
 	if(sector > clustersFirstSector + sectorPerCluster){
 		//FUNKY FANKY'S CODE
@@ -367,6 +352,27 @@ static bool _readSector(void *ram, uint32_t sector){
 	spi_unselectChip(SD_MMC_SPI, SD_MMC_SPI_NPCS);  // unselect SD_MMC_SPI
 
 	return true;   // Read done.
+}
+
+bool _readSectorFast(void *ram, uint32_t sector){
+	pdca_load_channel( 0, ram, 512);
+	pdca_load_channel( 1, dummyData, 512);
+	endOfTransfer = false;
+	
+	if(sd_mmc_spi_read_open_PDCA(sector)){
+		pdca_enable_interrupt_transfer_complete(0);
+		
+		spi_selectChip(SD_MMC_SPI, SD_MMC_SPI_NPCS);
+		spi_write(SD_MMC_SPI, 0xFF);
+		
+		pdca_enable(0);
+		pdca_enable(1);
+		while(!endOfTransfer);
+		return true;
+	}else{
+		sd_mmc_spi_read_close_PDCA();
+		return false;
+	}
 }
 
 /* _initFat
