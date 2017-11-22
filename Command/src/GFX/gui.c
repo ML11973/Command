@@ -235,6 +235,10 @@ void _alarmMenu(bool firstDraw){
  * Last modified 20.11.17 QVT
  */
 void _mainInput(){
+	if(switchState == 0)
+	 return;
+	needRepaint = true;
+	
 	if(switchState == 4){
 		if(selectedCommand == 0)
 			currentMenuId = MUSIC;
@@ -268,6 +272,10 @@ void _mainInput(){
  * Last modified 20.11.17 QVT
  */
 void _musicInput(){
+	if(switchState == 0)
+	return;
+	needRepaint = true;
+	
 	if(switchState == 1){
 		currentMenuId = MAIN;
 		menuChanged = true;
@@ -284,6 +292,10 @@ void _musicInput(){
  * Last modified 20.11.17 QVT
  */
 void _settingsInput(){
+	if(switchState == 0)
+	return;
+	needRepaint = true;
+	
 	if(switchState == 1){
 		currentMenuId = MAIN;
 		menuChanged = true;
@@ -300,6 +312,10 @@ void _settingsInput(){
  * Last modified 20.11.17 QVT
  */
 void _alarmInput(){
+	if(switchState == 0)
+	return;
+	needRepaint = true;
+	
 	if(switchState == 1){
 		currentMenuId = MAIN;
 		menuChanged = true;
@@ -330,5 +346,4 @@ __attribute__((__interrupt__)) void switchISR(void){
 		switchState = 4;
 	}
 	AVR32_GPIO.port[1].ifrc = 0xFF000000;
-	needRepaint = true;
 }
