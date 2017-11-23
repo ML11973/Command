@@ -79,7 +79,7 @@ void spi1_Init(void) {
 	gpio_enable_module(SPI1_GPIO_MAP, sizeof (SPI1_GPIO_MAP)/ sizeof(SPI1_GPIO_MAP[0]));
 	
 	// Initializing SPI as master
-	spi_initMaster(SD_MMC_SPI, &spiOptionsDA2);
+	spi_initMaster(SD_MMC_SPI, &spiOptionsSD);
 	
 	spi_selectionMode(SD_MMC_SPI, 0, 0, 0);
 	// Initializes volume control DAC
@@ -264,6 +264,7 @@ void dac_Init(void)
 	// Configuring PB0-15 for audio output
 	AVR32_GPIO.port[1].oders = 0x0000FFFF;
 	
+	gpio_set_gpio_pin(PIN_SHUTDOWN);
 	gpio_set_gpio_pin(DAC_CS_PIN);			// Chip select inactive = 1
 	gpio_set_gpio_pin(DAC_WR_PIN);			// Write active low
 	gpio_set_gpio_pin(DAC_LDAC_PIN);		// Transfer active low
