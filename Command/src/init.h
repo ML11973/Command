@@ -19,6 +19,7 @@
 #include <conf_cpu.h>
 #include "audio/audio.h"
 #include "SDCard/sdcard.h"
+#include "RTC/rtc.h"
 
 
 
@@ -31,5 +32,6 @@ void spi1_Init(void);
 void tc1_Init(void);
 void tc0_Init(void);
 void twi_Init(void);
+void usart_init(void);
 
 #endif /* INIT_H */

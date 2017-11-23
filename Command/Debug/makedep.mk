@@ -30,6 +30,8 @@ src\ASF\avr32\drivers\tc\tc.c
 
 src\ASF\avr32\drivers\twi\twi.c
 
+src\ASF\avr32\drivers\usart\usart.c
+
 src\ASF\avr32\utils\startup\startup_uc3.S
 
 src\ASF\avr32\utils\startup\trampoline_uc3.S

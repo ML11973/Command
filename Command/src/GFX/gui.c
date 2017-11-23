@@ -39,7 +39,7 @@ typedef enum menu_id{
 
 
 /************************************************************************/
-/* GUI FUNCTIONS PROTOTYPES                                             */
+/* FUNCTIONS PROTOTYPES					                                */
 /************************************************************************/
 
 void _mainMenu(bool firstDraw);

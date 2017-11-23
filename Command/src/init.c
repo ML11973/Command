@@ -25,6 +25,7 @@ void board_init(void) {
 	cpu_irq_enable();
 	
 	twi_Init();
+	usart_init();
 	spi1_Init();
 	//tc0_Init();
 	tc1_Init();
@@ -228,4 +229,32 @@ void twi_Init(void){
 	};
 	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
 	twi_master_init(&AVR32_TWI, &i2c_options);
+	
+	gpio_enable_pin_glitch_filter(PIN_INT1);
+	gpio_enable_pin_pull_up(PIN_INT1);
+	gpio_enable_pin_interrupt(PIN_INT1, GPIO_FALLING_EDGE);
+	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT0);
+}
+
+void usart_init(void){
+	const usart_options_t USART_OPTIONS =
+	{
+		.baudrate     = 250000,
+		.charlength   = 8,
+		.paritytype   = USART_NO_PARITY,
+		.stopbits     = USART_1_STOPBIT,
+		.channelmode  = USART_NORMAL_CHMODE
+	};
+	
+	const gpio_map_t USART_GPIO_MAP =
+	{
+		{USART1_TXD_PIN, USART1_TXD_FCT},
+		{USART1_RXD_PIN, USART1_RXD_FCT},
+		{USART1_CLK_PIN, USART1_CLK_FCT},
+		{USART1_RTS_PIN, USART1_RTS_FCT},
+		{USART1_CTS_PIN, USART1_CTS_FCT}
+	};
+	
+	usart_init_rs232(&AVR32_USART1, &USART_OPTIONS, (BOARD_OSC0_HZ / 2));
+	gpio_enable_module (USART_GPIO_MAP,sizeof(USART_GPIO_MAP)/sizeof(USART_GPIO_MAP[0]));
 }

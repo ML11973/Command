@@ -507,7 +507,7 @@ void _pdcaInit(void)
 {
 
 	// Ce cannal PDCA est utilisé pour la réception des données depuis le SPI.
-	pdca_channel_options_t pdca_options_SPI_RX ={ // pdca channel options
+	pdca_channel_options_t pdca_options_SPI_RX = { // pdca channel options
 		.addr = (uint8_t *)&data,					// adresse dans la Ram.
 		.size = 512,                                // transfer counter: here the size of the string
 		.r_addr = NULL,                             // next memory address after 1st transfer complete
@@ -517,8 +517,7 @@ void _pdcaInit(void)
 	};
 
 	// Ce canal est utilisé pour envoyer un dummy
-	pdca_channel_options_t pdca_options_SPI_TX ={ // pdca channel options
-
+	pdca_channel_options_t pdca_options_SPI_TX = { // pdca channel options
 		.addr = (uint8_t *)&dummyData,             // memory address. We take here the address of the string dummy_data.
 		.size = 512,                                // transfer counter: here the size of the string
 		.r_addr = NULL,                             // next memory address after 1st transfer complete

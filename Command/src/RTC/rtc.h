@@ -50,6 +50,7 @@ typedef struct alarm {
 extern Time currentTime;
 extern Alarm alarm[MAXALARMNUMBER];
 
+extern bool timeChanged;
 
 
 /************************************************************************/
@@ -125,5 +126,12 @@ void rtc_setNextMinuteInterrupt(void);
  */
 void rtc_setNextAlarm(Alarm alarm[]);
 
+
+void rtc_usart_sendTimeToDisplay(void);
+
+
+void rtc_setMinutesInterrupt();
+
+__attribute__((__interrupt__)) void rtc_rtcISR(void);
 
 #endif /* RTC_H */

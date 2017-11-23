@@ -106,4 +106,7 @@
 // From module: TWI - Two-Wire Interface
 #include <twi.h>
 
+// From module: USART - Universal Synchronous/Asynchronous Receiver/Transmitter
+#include <usart.h>
+
 #endif // ASF_H

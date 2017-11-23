@@ -83,17 +83,17 @@ Alarm alarm[MAXALARMNUMBER];
 	
 uint8_t sentData [BUFFER_SIZE] = {0};
 uint8_t buffer [BUFFER_SIZE] = {0};
-
-
-
-
-
+bool timeChanged = true;
 
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
 /************************************************************************/
 
+void _timeToBCD(Time timeInput, uint8_t* timeBCD);
+Time _BCDToTime (uint8_t* inputTable);
+
+void _usartWrite(uint8_t *content, uint8_t contentSize);
 
 /* rtc_read
  *
@@ -157,14 +157,13 @@ void rtc_write(uint8_t firstRegister, uint8_t dataNumber){
  * Converts currentTime to BCD and sends it to RTC.
  *
  * Created 15.11.17 MLN
- * Last modified 15.11.17 MLN
+ * Last modified 15.11.17 QVT
  */
 void rtc_setTime(void){
-	// Time to BCD conversion
-	
-	
 	twi_master_enable(RTC_TWI);
+	_timeToBCD(currentTime, sentData);
 	
+	rtc_write(RTC_SECONDS, 7);
 }
 
 
@@ -174,50 +173,13 @@ void rtc_setTime(void){
  * TO BE MODIFIED, test function
  *
  * Created 15.11.17 MLN
- * Last modified 22.11.17 MLN
+ * Last modified 22.11.17 QVT
  */
 void rtc_getTime(void){
-	volatile uint8_t status = 0;
-	char stringOutput[7];
-	
 	twi_master_enable(RTC_TWI);
-	sentData[0] = 0x10;
-	sentData[1] = 0x17;
-	sentData[2] = 0x19;
-	sentData[3] = 0x03;
-	rtc_write(RTC_SECONDS, 4);
-	rtc_read(RTC_SECONDS, 4);
+	rtc_read(RTC_SECONDS, 7);
 	
-	currentTime.seconds = buffer[0];
-	currentTime.minutes = buffer[1];
-	currentTime.hours	= buffer[2];
-	currentTime.day		= buffer[3];
-	
-	// KEEP THIS PART
-	// Converting fetched data to decimal
-	currentTime.seconds = 10 * (currentTime.seconds >> 4) + (currentTime.seconds & 0x0F);
-	
-	currentTime.minutes = 10 * (currentTime.minutes >> 4) + (currentTime.minutes & 0x0F);
-	
-	currentTime.hours	= 10 * ((currentTime.hours & 0x30) >> 4) + (currentTime.hours & 0x0F);
-	// We don't need to convert the day number
-	currentTime.date	= 10 * (currentTime.date >> 4) + (currentTime.date & 0x0F);
-	// Since a bit in the month register indicates the century, we compute years before months
-	currentTime.year	= 100 * ((currentTime.month & 0x80) >> 7) * (currentTime.year >> 4) + (currentTime.year & 0x0F) + REFERENCE_YEAR;
-	
-	currentTime.month	= 10 * ((currentTime.month & 0x10) >> 4) + (currentTime.month & 0x0F);
-	// END KEEP
-	
-	
-	stringOutput[0] = currentTime.hours / 10 + 48;
-	stringOutput[1] = currentTime.hours % 10 + 48;
-	stringOutput[2] = currentTime.minutes / 10 + 48;
-	stringOutput[3] = currentTime.minutes % 10 + 48;
-	stringOutput[4] = currentTime.seconds / 10 + 48;
-	stringOutput[5] = currentTime.seconds % 10 + 48;
-	stringOutput[6] = currentTime.day + 48;
-	
-	gfx_AddLineToTerminal(stringOutput, 7, (Color){WHITE}, 0);
+	currentTime = _BCDToTime(buffer);
 }
 
 
@@ -230,7 +192,6 @@ void rtc_getTime(void){
  * Last modified 15.11.17 MLN
  */
 void rtc_setNextMinuteInterrupt(void){
-	
 	
 }
 
@@ -245,22 +206,64 @@ void rtc_setNextMinuteInterrupt(void){
  */
 void rtc_setNextAlarm(Alarm alarm[]){
 	
-	
 }
 
+void rtc_setMinutesInterrupt(){
+	twi_master_enable(RTC_TWI);
+	sentData[0] = 0x80;
+	sentData[1] = 0x80;
+	sentData[2] = 0x80;
+	rtc_write(RTC_ALARM2_MINUTES,3);
+	
+	rtc_read(RTC_CONTROL,1);
+	sentData[0] = buffer[0] | (1<<A2IE) | (1<<INTCN);
+	rtc_write(RTC_CONTROL,1);
+}
 
+void rtc_usart_sendTimeToDisplay(void){
+	rtc_getTime();
+	#ifndef CUSTOM_DATA_SENT_TO_DISPLAY
+		uint8_t time[7];
+		_timeToBCD(currentTime, time);
+		uint8_t data[19] = {0xA5, 18, 0x80}; //start, length, useless data
+		data[3] = 0x00; //mode
+		data[4] = time[2];
+		data[5] = time[1];
+		data[6] = time[0];
+		
+		data[7]  = time[3];
+		data[8]  = time[4];
+		data[9]  = time[5];
+		data[10] = time[6];
+		
+		for(uint8_t i = 0; i < 18; i++){
+			data[18] ^= data[i];
+		}
+		
+		_usartWrite(data, sizeof(data) / sizeof(data[0]));
+		
+	#else
+	
+	#endif
+}
+
+__attribute__((__interrupt__)) void rtc_rtcISR(void){
+	timeChanged  = true;
+	
+	//FUNKY FANKY DEFINE
+	gpio_clear_pin_interrupt_flag(PIN_INT1);
+}
 
 /* _timeToBCD
  *
  * Converts a Time variable to BCD (format used by RTC).
- * Returns table acceptable by RTC.
  * NOT CHECKED YET
  *
  * Created 22.11.17 MLN
- * Last modified 22.11.17 MLN
+ * Last modified 22.11.17 QVT
  */
-uint8_t* _timeToBCD(Time timeInput){
-	uint8_t timeBCD[7] = {0};
+void _timeToBCD(Time timeInput, uint8_t* timeBCD){
+	//uint8_t timeBCD[7] = {0};
 	
 	timeBCD[0] = ((timeInput.seconds / 10) << 4) + (timeInput.seconds % 10);
 	timeBCD[1] = ((timeInput.minutes / 10) << 4) + (timeInput.minutes % 10);
@@ -270,7 +273,7 @@ uint8_t* _timeToBCD(Time timeInput){
 	timeBCD[5] = (((timeInput.year - REFERENCE_YEAR) / 100) << 7) + ((timeInput.month / 10) << 4) + (timeInput.month % 10);
 	timeBCD[6] = ((((timeInput.year - REFERENCE_YEAR) % 100) / 10) << 4) + (timeInput.year % 10);
 	
-	return timeBCD;
+	//return timeBCD;
 }
 
 
@@ -302,4 +305,13 @@ Time _BCDToTime (uint8_t* inputTable){
 	returnTime.month	= 10 * ((*(inputTable + 5) & 0x10) >> 4) + (*(inputTable + 5) & 0x0F);
 	
 	return returnTime;
+}
+
+void _usartWrite(uint8_t *content, uint8_t contentSize){
+	while(contentSize > 0){
+		if (usart_putchar(&AVR32_USART1,*content++) == USART_SUCCESS)
+			contentSize--;
+		else
+			break;
+	}
 }
