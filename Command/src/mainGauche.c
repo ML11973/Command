@@ -32,7 +32,7 @@ void mainGauche(void){
 	gfx_BeginNewTerminal((Vector2){20,220});
 	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
 	while(1){
-		audio_playFile(1);
+		audio_playFile(0);
 		//gfx_AddLineToTerminal("Vive le camarade Staline", 24, (Color){YELLOW}, 0);
 	}
 	

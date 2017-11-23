@@ -232,7 +232,7 @@ bool sdcard_getNextSector(uint8_t *d){
 	_readSector(d, sector++);
 	
 	//next sector and next cluster
-	if(sector > clustersFirstSector + sectorPerCluster){
+	if(sector >= clustersFirstSector + sectorPerCluster){
 		//FUNKY FANKY'S CODE
 		_readSector(&data, (cluster >> division) + FATSector);
 		if(isFAT32){
@@ -258,7 +258,7 @@ bool sdcard_getNextSectorFast(uint8_t *d){
 	
 	_readSectorFast(d,sector++);
 	
-	if(sector > clustersFirstSector + sectorPerCluster){
+	if(sector >= clustersFirstSector + sectorPerCluster){
 		//FUNKY FANKY'S CODE
 		_readSector(&data, (cluster >> division) + FATSector);
 		if(isFAT32){

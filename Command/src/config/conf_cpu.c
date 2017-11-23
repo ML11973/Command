@@ -24,7 +24,7 @@
 */
 void sysclk_init (void) {
   // PLL formula = PLL_OUT (OSC0 / DIV) * (MUL+1) => (16MHz / 1) * (7+1) = 128MHz
-  pm_switch_to_osc0(&AVR32_PM, BOARD_OSC0_HZ, OSC0_STARTUP_US);  // Switch main clock to Osc0.
+  pm_switch_to_osc0(&AVR32_PM, XTAL_OSC0, OSC0_STARTUP_US);  // Switch main clock to Osc0.
   pm_pll_setup(&AVR32_PM, PLL, MUL, DIV, OSC, LOCK_COUNT);
   /*
    This function will set a PLL option.

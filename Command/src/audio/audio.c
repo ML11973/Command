@@ -192,13 +192,15 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	switch(loadNextSector){
 			
 		case LOAD_WAVDATA1:
-			wavDataPointer = wavData2;
-			sdcard_getNextSectorFast(wavData1);
+			//wavDataPointer = wavData2;
+			while(!sdcard_getNextSectorFast(wavData1));
+			loadNextSector = NO_LOAD;
 			break;
 			
 		case LOAD_WAVDATA2:
-			wavDataPointer = wavData1;
-			sdcard_getNextSectorFast(wavData2);
+			//wavDataPointer = wavData1;
+			while(!sdcard_getNextSectorFast(wavData2));
+			loadNextSector = NO_LOAD;
 			break;
 			
 		case NO_LOAD:
@@ -282,7 +284,7 @@ void audio_freqStop (void){
  * Created 06.11.17 MLN
  * Last modified 08.11.17 MLN
  */
-void _setOutput (uint16_t inputA, uint16_t inputB){
+inline void _setOutput (uint16_t inputA, uint16_t inputB){
 	//
 	//// First we update DA0-9 parallel inputs
 	//
@@ -349,16 +351,10 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
 	
 	// First we update DA0-9 parallel inputs
 	
-	// Output is masked to only affect PB0-9 in case of input error
-	static uint16_t output;
-	output = inputA & AUDIOOUTPUTMASK;
 	
 	// Writing value to input
-	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
-	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
-	
-	// Computing next value
-	output = inputB & AUDIOOUTPUTMASK;
+	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & inputA);
+	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(inputA));
 	
 	
 	
@@ -373,8 +369,8 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
 	
 	
 	// Writing B value to input
-	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
-	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
+	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & inputB);
+	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(inputB));
 	
 	// Selecting channel B
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_A0_PIN & 0x1F);
@@ -513,11 +509,6 @@ uint8_t _fileVerification(){
  * Last modified 22.11.17 MLN
  */
 __attribute__((__interrupt__)) void tc1_irq( void ){
-	// Audio loading version 1
-// 	if (loadNextSample == false){
-// 		_setOutput(audioR, audioL);
-// 		loadNextSample = true;
-// 	}
 
 	// Updating output first to have a fixed interval update, independent
 	// from the data fetching time
@@ -526,45 +517,80 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 	
 	
 	_setOutput(audioR, audioL);
+	//
+	//// Audio loading version 2
+	///* Update audioL and audioR values using pointer to array values
+	 //* Audio values must be 10-bit.
+	 //* Shifting through the array by incrementing wavDataIndex.
+	 //*/
+	//
+	//audioL = *(wavDataPointer + wavDataIndex) + ((*(wavDataPointer + wavDataIndex + 1)) << 8);
+	//audioR = *(wavDataPointer + wavDataIndex + 2) + ((*(wavDataPointer + wavDataIndex + 3)) << 8);
+//
+	//wavDataIndex += 4;
+	//// Converting signed audio samples into unsigned ones with a DC component of 0x7FFF
+	//audioL += 0x7FFF;
+	//audioL >>= 6;
+	//audioR += 0x7FFF;
+	//audioR >>= 6;
+		//
+	//// If pointer reaches the end of the current wavData array
+	//if ( wavDataIndex > WAVDATA_SIZE - 4){
+		//fileData.audioSampleTables--;
+		//wavDataIndex -= (WAVDATA_SIZE - 4);
+		//// Switching between arrays then
+		//// loading next sector in previously used array
+		//if (wavDataPointer == wavData1){
+			//loadNextSector = LOAD_WAVDATA1;
+		//}
+		//else {
+			//loadNextSector = LOAD_WAVDATA2;
+		//}
+	//}
+	//else {
+		//loadNextSector = NO_LOAD;
+	//}
 	
-	// Audio loading version 2
-	/* Update audioL and audioR values using pointer to array values
-	 * Audio values must be 10-bit.
-	 * Shifting through the array by incrementing wavDataIndex.
-	 */
 	
-	audioL = *(wavDataPointer + wavDataIndex) + ((*(wavDataPointer + wavDataIndex + 1)) << 8);
-	audioR = *(wavDataPointer + wavDataIndex + 2) + ((*(wavDataPointer + wavDataIndex + 3)) << 8);
-	/*
-	audioL =  *(uint16_t*)(wavDataPointer + wavDataIndex);
-	audioL = (audioL << 8) + (audioL >> 8);
+	// Audio loading version 3
+	audioL = *(wavDataPointer + wavDataIndex);
+	audioL += *(wavDataPointer + wavDataIndex + 1) << 8;
 	
-	audioR =  *(uint16_t*)(wavDataPointer + wavDataIndex + 2);
-	audioR = (audioR << 8) + (audioR >> 8);
-	*/
-	wavDataIndex += 4;
+	wavDataIndex += 2;
+	if (wavDataIndex >= WAVDATA_SIZE){
+		wavDataIndex = 0;
+		if (wavDataPointer == wavData1) {
+			wavDataPointer = wavData2;
+			loadNextSector = LOAD_WAVDATA1;
+		}
+		else {
+			wavDataPointer = wavData1;
+			loadNextSector = LOAD_WAVDATA2;
+		}
+	}
+	
+	audioR = *(wavDataPointer + wavDataIndex);
+	audioR += *(wavDataPointer + wavDataIndex + 1) << 8;
+	
+	wavDataIndex += 2;
+	if (wavDataIndex >= WAVDATA_SIZE){
+		wavDataIndex = 0;
+		if (wavDataPointer == wavData1) {
+			wavDataPointer = wavData2;
+			loadNextSector = LOAD_WAVDATA1;
+		}
+		else {
+			wavDataPointer = wavData1;
+			loadNextSector = LOAD_WAVDATA2;
+		}
+	}
+	
 	// Converting signed audio samples into unsigned ones with a DC component of 0x7FFF
 	audioL += 0x7FFF;
 	audioL >>= 6;
 	audioR += 0x7FFF;
 	audioR >>= 6;
-		
-	// If pointer reaches the end of the current wavData array
-	if ( wavDataIndex > WAVDATA_SIZE - 4){
-		fileData.audioSampleTables--;
-		wavDataIndex -= (WAVDATA_SIZE - 4);
-		// Switching between arrays then
-		// loading next sector in previously used array
-		if (wavDataPointer == wavData1){
-			loadNextSector = LOAD_WAVDATA1;
-		}
-		else {
-			loadNextSector = LOAD_WAVDATA2;
-		}
-	}
-	else {
-		loadNextSector = NO_LOAD;
-	}
+	
 	// Clearing interrupt flag
 	AVR32_TC.channel[TC1_CHANNEL].SR;
 }
