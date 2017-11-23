@@ -351,34 +351,38 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
 	
 	// Output is masked to only affect PB0-9 in case of input error
 	static uint16_t output;
-	output = inputB & AUDIOOUTPUTMASK;
-	
-	// Selecting chip
-	AVR32_GPIO.port[1].ovrc = 1 << (DAC_CS_PIN & 0x1F);
-	
-	// Writing value to input
-	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
-	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
-	
-	// Writing data
-	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
-	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
-	
 	output = inputA & AUDIOOUTPUTMASK;
 	
 	// Writing value to input
 	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
 	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
 	
-	// Selecting channel A
+	// Computing next value
+	output = inputB & AUDIOOUTPUTMASK;
+	
+	
+	
+	// Selecting chip and channel A
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_CS_PIN & 0x1F);
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_A0_PIN & 0x1F);
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
+	
+	// Writing data
+	
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
+	
+	
+	// Writing B value to input
+	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
+	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
+	
+	// Selecting channel B
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_A0_PIN & 0x1F);
 	
 	// Writing data
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
 	
-	// Selecting channel B for next update
-	AVR32_GPIO.port[1].ovrc = 1 << (DAC_A0_PIN & 0x1F);
 	
 	// Transferring input from buffer to output
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_LDAC_PIN & 0x1F);
@@ -544,7 +548,6 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 	audioL >>= 6;
 	audioR += 0x7FFF;
 	audioR >>= 6;
-	
 		
 	// If pointer reaches the end of the current wavData array
 	if ( wavDataIndex > WAVDATA_SIZE - 4){

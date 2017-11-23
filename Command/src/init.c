@@ -138,7 +138,7 @@ void tc1_Init(void){
 	
 	// Initialize the timer/counter.
 	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);
-	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value.
+	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value. 181
 	tc_configure_interrupts(&AVR32_TC, TC1_CHANNEL, &TC1_INTERRUPT);
 	INTC_register_interrupt (&tc1_irq, AVR32_TC_IRQ1, AVR32_INTC_INT0);
 	//tc_start(&AVR32_TC, TC1_CHANNEL);
@@ -239,7 +239,7 @@ void dac_Init(void)
 	gpio_set_gpio_pin(DAC_CS_PIN);			// Chip select inactive = 1
 	gpio_set_gpio_pin(DAC_WR_PIN);			// Write active low
 	gpio_set_gpio_pin(DAC_LDAC_PIN);		// Transfer active low
-	gpio_clr_gpio_pin(DAC_PD_PIN);
+	gpio_set_gpio_pin(DAC_PD_PIN);
 	
 	// Deleting DAC contents
 	gpio_set_gpio_pin(DAC_CLR_PIN);

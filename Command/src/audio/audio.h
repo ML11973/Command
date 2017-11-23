@@ -22,7 +22,7 @@
 /************************************************************************/
 
 // Default volume
-#define DEFAULTVOLUME 0x40
+#define DEFAULTVOLUME 0x30
 
 // Default required .wav parameters
 #define AUDIO_SAMPLERATE	44100
