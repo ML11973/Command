@@ -28,8 +28,7 @@ void board_init(void) {
 	spi1_Init();
 	//tc0_Init();
 	tc1_Init();
-	// Configuring PB0-15 for audio output
-	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
+	dac_Init();
 }
 
 
@@ -109,7 +108,7 @@ void tc1_Init(void){
 		.bcpb     = TC_EVT_EFFECT_NOOP,// RB compare effect on TIOB.
 		.aswtrg   = TC_EVT_EFFECT_NOOP,// Software trigger effect on TIOA.
 		.aeevt    = TC_EVT_EFFECT_NOOP,// External event effect on TIOA.
-		.acpc     = TC_EVT_EFFECT_NOOP,// RC compare effect on TIOA: toggle.
+		.acpc     = TC_EVT_EFFECT_TOGGLE,// RC compare effect on TIOA: toggle.
 		.acpa     = TC_EVT_EFFECT_NOOP,// RA compare effect on TIOA
 		.wavsel   = TC_WAVEFORM_SEL_UPDOWN_MODE_RC_TRIGGER,// Up mode with automatic trigger
 		.enetrg   = false,// External event trigger enable.
@@ -129,12 +128,12 @@ void tc1_Init(void){
 		.etrgs = 0, .ldrbs = 0, .ldras = 0, .cpcs  = 1,
 		.cpbs  = 0, .cpas  = 0, .lovrs = 0, .covfs = 0
 	};
-	/*
+	
 	static const gpio_map_t T1_GPIO = {
 		{PIN_T1_IOA, FCT_T1_IOA}
 	};
 	
-	gpio_enable_module(T1_GPIO, 1);*/
+	gpio_enable_module(T1_GPIO, 1);
 	
 	
 	// Initialize the timer/counter.
@@ -228,4 +227,22 @@ void twi_Init(void){
 	};
 	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
 	twi_master_init(&AVR32_TWI, &i2c_options);
+}
+
+
+// Created 22.11.17 MLN
+void dac_Init(void)
+{
+	// Configuring PB0-15 for audio output
+	AVR32_GPIO.port[1].oders = 0x0000FFFF;
+	
+	gpio_set_gpio_pin(DAC_CS_PIN);			// Chip select inactive = 1
+	gpio_set_gpio_pin(DAC_WR_PIN);			// Write active low
+	gpio_set_gpio_pin(DAC_LDAC_PIN);		// Transfer active low
+	gpio_clr_gpio_pin(DAC_PD_PIN);
+	
+	// Deleting DAC contents
+	gpio_set_gpio_pin(DAC_CLR_PIN);
+	gpio_clr_gpio_pin(DAC_CLR_PIN);
+	gpio_set_gpio_pin(DAC_CLR_PIN);
 }

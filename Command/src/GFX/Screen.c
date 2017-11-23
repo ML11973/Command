@@ -98,7 +98,6 @@ static uint16_t _readRegister(uint8_t reg);
 static void _selectRegister(uint8_t address);
 
 static void _writeRAM(uint16_t data);
-static uint16_t _readRAM();
 
 static void _setStart(Vector2 position);
 static void _setLimits(Rectangle rect);

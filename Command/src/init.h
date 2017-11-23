@@ -31,5 +31,6 @@ void spi1_Init(void);
 void tc1_Init(void);
 void tc0_Init(void);
 void twi_Init(void);
+void dac_Init(void);
 
 #endif /* INIT_H */

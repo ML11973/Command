@@ -22,7 +22,7 @@
 /************************************************************************/
 
 // Default volume
-#define DEFAULTVOLUME 0x30
+#define DEFAULTVOLUME 0x40
 
 // Default required .wav parameters
 #define AUDIO_SAMPLERATE	44100
@@ -31,6 +31,7 @@
 #define AUDIO_BLOCKALIGN	AUDIO_CHANNELS * AUDIO_BPS / 8
 
 // Audio playback error codes
+#define AUDIO_PLAYING				0x09	// Audio is being played
 #define AUDIO_PLAY_FINISHED			0x01	// Reached end of file
 #define ERROR_NO_SD					0x02	// No SD Card detected
 #define ERROR_NO_FILE				0x03	// Selected file not found
@@ -47,6 +48,7 @@ typedef struct audioInfo {
 	uint16_t blockAlign;		// Number of bytes per sample per channel
 	uint16_t bitsPerSample;		// Number of bits per sample
 	uint32_t audioSampleBytes;	// Number of bytes to read
+	uint32_t audioSampleTables; // Number of wavData tables to read
 	
 	uint8_t firstDataByteIndex;	// Index of first data block in file
 }AudioInfo;

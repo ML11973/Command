@@ -70,7 +70,7 @@ src/mainCentre.d src/mainCentre.o src/mainCentre.o: ../src/mainCentre.c \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
  ../src/init.h ../src/config/conf_cpu.h ../src/audio/audio.h \
- ../src/SDCard/sdcard.h ../src/mainCentre.h ../src/SDCard/sdcard.h \
+ ../src/SDCard/sdcard.h ../src/SDCard/sdcard.h ../src/mainCentre.h \
  ../src/GFX/screen.h ../src/GFX/vector2.h ../src/GFX/rectangle.h \
  ../src/GFX/color.h ../src/GFX/gui.h ../src/GFX/gfx.h ../src/GFX/screen.h
 
@@ -234,9 +234,9 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/SDCard/sdcard.h:
 
-../src/mainCentre.h:
-
 ../src/SDCard/sdcard.h:
+
+../src/mainCentre.h:
 
 ../src/GFX/screen.h:
 
