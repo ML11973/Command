@@ -537,7 +537,7 @@ void _pdcaInit(void)
 __attribute__((__interrupt__)) void pdcaISR(void)
 {
 	// Disable all interrupts.
-	Disable_global_interrupt();
+	//Disable_global_interrupt();
 	// Disable interrupt channel.
 	pdca_disable_interrupt_transfer_complete(0);
 	sd_mmc_spi_read_close_PDCA();//unselects the SD/MMC memory.
@@ -545,6 +545,6 @@ __attribute__((__interrupt__)) void pdcaISR(void)
 	pdca_disable(1);
 	pdca_disable(0);
 	// Enable all interrupts.
-	Enable_global_interrupt();
+	//Enable_global_interrupt();
 	endOfTransfer = true;
 }

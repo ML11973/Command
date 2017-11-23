@@ -69,7 +69,11 @@ src/main.d src/main.o src/main.o: ../src/main.c ../src/asf.h \
  ../src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.h \
  ../src/ASF/avr32/drivers/spi/spi.h ../src/ASF/avr32/drivers/tc/tc.h \
  ../src/ASF/avr32/drivers/twi/twi.h ../src/config/conf_twi.h \
+<<<<<<< HEAD
  ../src/ASF/avr32/drivers/usart/usart.h ../src/mainCentre.h
+=======
+ ../src/mainGauche.h
+>>>>>>> master
 
 ../src/asf.h:
 
@@ -223,6 +227,10 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 
 ../src/config/conf_twi.h:
 
+<<<<<<< HEAD
 ../src/ASF/avr32/drivers/usart/usart.h:
 
 ../src/mainCentre.h:
+=======
+../src/mainGauche.h:
+>>>>>>> master

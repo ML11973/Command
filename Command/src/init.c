@@ -29,8 +29,7 @@ void board_init(void) {
 	spi1_Init();
 	//tc0_Init();
 	tc1_Init();
-	// Configuring PB0-15 for audio output
-	gpio_configure_group(1, 0x0000FFFF, GPIO_DIR_OUTPUT);
+	dac_Init();
 }
 
 
@@ -110,7 +109,7 @@ void tc1_Init(void){
 		.bcpb     = TC_EVT_EFFECT_NOOP,// RB compare effect on TIOB.
 		.aswtrg   = TC_EVT_EFFECT_NOOP,// Software trigger effect on TIOA.
 		.aeevt    = TC_EVT_EFFECT_NOOP,// External event effect on TIOA.
-		.acpc     = TC_EVT_EFFECT_NOOP,// RC compare effect on TIOA: toggle.
+		.acpc     = TC_EVT_EFFECT_TOGGLE,// RC compare effect on TIOA: toggle.
 		.acpa     = TC_EVT_EFFECT_NOOP,// RA compare effect on TIOA
 		.wavsel   = TC_WAVEFORM_SEL_UPDOWN_MODE_RC_TRIGGER,// Up mode with automatic trigger
 		.enetrg   = false,// External event trigger enable.
@@ -130,17 +129,17 @@ void tc1_Init(void){
 		.etrgs = 0, .ldrbs = 0, .ldras = 0, .cpcs  = 1,
 		.cpbs  = 0, .cpas  = 0, .lovrs = 0, .covfs = 0
 	};
-	/*
+	
 	static const gpio_map_t T1_GPIO = {
 		{PIN_T1_IOA, FCT_T1_IOA}
 	};
 	
-	gpio_enable_module(T1_GPIO, 1);*/
+	gpio_enable_module(T1_GPIO, 1);
 	
 	
 	// Initialize the timer/counter.
 	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);
-	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value.
+	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value. 181
 	tc_configure_interrupts(&AVR32_TC, TC1_CHANNEL, &TC1_INTERRUPT);
 	INTC_register_interrupt (&tc1_irq, AVR32_TC_IRQ1, AVR32_INTC_INT0);
 	//tc_start(&AVR32_TC, TC1_CHANNEL);
@@ -217,7 +216,7 @@ void twi_Init(void){
 	// Master mode
 	twi_options_t i2c_options =
 	{
-		.pba_hz = BOARD_OSC0_HZ,		// Vitesse du microcontrôleur 
+		.pba_hz = BOARD_OSC0_HZ,		// Vitesse du microcontrï¿½leur 
 		.speed = TWI_MASTER_SPEED,		// Vitesse de transmission 100-400KHz
 		.chip = (RTC_ADDRESS_WRITE >> 1)// Adresse du slave
 	};
@@ -257,4 +256,22 @@ void usart_init(void){
 	
 	usart_init_rs232(&AVR32_USART1, &USART_OPTIONS, (BOARD_OSC0_HZ / 2));
 	gpio_enable_module (USART_GPIO_MAP,sizeof(USART_GPIO_MAP)/sizeof(USART_GPIO_MAP[0]));
+}
+
+
+// Created 22.11.17 MLN
+void dac_Init(void)
+{
+	// Configuring PB0-15 for audio output
+	AVR32_GPIO.port[1].oders = 0x0000FFFF;
+	
+	gpio_set_gpio_pin(DAC_CS_PIN);			// Chip select inactive = 1
+	gpio_set_gpio_pin(DAC_WR_PIN);			// Write active low
+	gpio_set_gpio_pin(DAC_LDAC_PIN);		// Transfer active low
+	gpio_set_gpio_pin(DAC_PD_PIN);
+	
+	// Deleting DAC contents
+	gpio_set_gpio_pin(DAC_CLR_PIN);
+	gpio_clr_gpio_pin(DAC_CLR_PIN);
+	gpio_set_gpio_pin(DAC_CLR_PIN);
 }

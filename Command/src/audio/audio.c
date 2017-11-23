@@ -29,9 +29,6 @@
 /* VARIABLES                                                            */
 /************************************************************************/
 
-uint16_t audioR = 0;
-uint16_t audioL = 0;
-bool loadNextSample = 0;
 uint8_t loadNextSector = LOAD_WAVDATA1;
 uint8_t currentVolume = 0;
 
@@ -101,7 +98,7 @@ void audio_setVolume (uint8_t volume){
  * Last modified 20.11.17 MLN
  */
 uint8_t audio_playFile(uint8_t fileNumber){
-	static audio_firstCall = true;
+	static bool audio_firstCall = true;
 // 	static uint8_t *wavDataPointer = wavData1;
 // 	static uint32_t wavDataIndex = 0;
 	volatile uint8_t fileVerif = 0x00;
@@ -125,8 +122,8 @@ uint8_t audio_playFile(uint8_t fileNumber){
 			return ERROR_NO_FILE;
 		}
 		
-		sdcard_getNextSector(wavData1);
-		sdcard_getNextSector(wavData2);
+		sdcard_getNextSectorFast(wavData1);
+		sdcard_getNextSectorFast(wavData2);
 		
 		fileVerif = _fileVerification(wavData1);
 		if (fileVerif == true){
@@ -152,7 +149,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	
 	
 	
-	// Audio loading version 1 20.11.17
+// 	// Audio loading version 1 20.11.17
 // 	if (loadNextSample == true){
 // 		/* Update audioL and audioR values using pointer to array values
 // 		 * Audio values must be 10-bit.
@@ -178,11 +175,11 @@ uint8_t audio_playFile(uint8_t fileNumber){
 // 			// loading next sector in previously used array
 // 			if (wavDataPointer == wavData1){
 // 				wavDataPointer = wavData2;
-// 				sdcard_getNextSector(wavData1);
+// 				sdcard_getNextSectorFast(wavData1);
 // 			}
 // 			else {
 // 				wavDataPointer = wavData1;
-// 				sdcard_getNextSector(wavData2);
+// 				sdcard_getNextSectorFast(wavData2);
 // 			}
 // 		}
 // 		
@@ -193,18 +190,18 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	
 	// Audio loading version 2
 	switch(loadNextSector){
-		case NO_LOAD:
-			break;
 			
 		case LOAD_WAVDATA1:
+			wavDataPointer = wavData2;
 			sdcard_getNextSectorFast(wavData1);
 			break;
 			
 		case LOAD_WAVDATA2:
+			wavDataPointer = wavData1;
 			sdcard_getNextSectorFast(wavData2);
 			break;
 			
-		default:
+		case NO_LOAD:
 			break;
 	}
 	
@@ -215,14 +212,16 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	/* Stops audio playback by stopping the timer and returns a finish code	*/
 	/************************************************************************/
 	
-	if (wavDataIndex >= fileData.audioSampleBytes){
+	if (fileData.audioSampleTables <= 0){
 		tc_stop(&AVR32_TC, TC1_CHANNEL);
 		
 		audio_firstCall = true;
-		loadNextSample = true;
 		wavDataIndex = 0;
 		
 		return AUDIO_PLAY_FINISHED;
+	}
+	else {
+		return AUDIO_PLAYING;
 	}
 }
 
@@ -237,6 +236,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
  */
 void audio_pauseFile(void){
 	tc_stop(&AVR32_TC, TC1_CHANNEL);
+	loadNextSector = NO_LOAD;
 }
 
 
@@ -283,66 +283,113 @@ void audio_freqStop (void){
  * Last modified 08.11.17 MLN
  */
 void _setOutput (uint16_t inputA, uint16_t inputB){
+	//
+	//// First we update DA0-9 parallel inputs
+	//
+	//// Output is masked to only affect PB0-9 in case of input error
+	//uint32_t output = inputA & AUDIOOUTPUTMASK;
+	//// PB0-9 driven low
+	//gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
+	//// PB0-9 assigned output value
+	//gpio_set_group_high(PORTB, output);
+	//// B Output value is computed before DAC refresh
+	//output = inputB & AUDIOOUTPUTMASK;
+	//
+	//
+	//
+	//// Then we enable the DAC by setting active-low clear and power-down
+	//gpio_set_gpio_pin(DAC_PD_PIN);
+	//gpio_set_gpio_pin(DAC_CLR_PIN);
+	//
+	//
+	//
+	//// Then we load the data in DAC channel A
+	//
+	//// Selecting chip
+	//gpio_clr_gpio_pin(DAC_CS_PIN);
+	//gpio_clr_gpio_pin(DAC_WR_PIN);
+	//// Selecting channel A
+	//gpio_set_gpio_pin(DAC_A0_PIN);
+	//// Loading data in Channel A
+	//gpio_clr_gpio_pin(DAC_LDAC_PIN);
+	//// De-selecting chip
+	//gpio_set_gpio_pin(DAC_WR_PIN);
+	//gpio_set_gpio_pin(DAC_CS_PIN);
+	//
+	//
+	//
+	//// We update the parallel input
+	//
+	//// PB0-9 driven low
+	//gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
+	//// PB0-9 assigned output value
+	//gpio_set_group_high(PORTB, output);
+	//
+	//
+	//
+	//// We load input in channel B
+	//
+	//// Selecting channel B
+	//gpio_clr_gpio_pin(DAC_A0_PIN);
+	//// Selecting chip
+	//gpio_clr_gpio_pin(DAC_CS_PIN);
+	//gpio_clr_gpio_pin(DAC_WR_PIN);
+	//// Data is loaded in channel B
+	//// De-selecting chip
+	//gpio_set_gpio_pin(DAC_WR_PIN);
+	//gpio_set_gpio_pin(DAC_CS_PIN);
+	//
+	//
+	//
+	//// Final refresh
+	//gpio_set_gpio_pin(DAC_LDAC_PIN);
+	//
+	//
+	
 	
 	// First we update DA0-9 parallel inputs
 	
 	// Output is masked to only affect PB0-9 in case of input error
-	uint32_t output = inputA & AUDIOOUTPUTMASK;
-	// PB0-9 driven low
-	gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
-	// PB0-9 assigned output value
-	gpio_set_group_high(PORTB, output);
-	// B Output value is computed before DAC refresh
+	static uint16_t output;
+	output = inputA & AUDIOOUTPUTMASK;
+	
+	// Writing value to input
+	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
+	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
+	
+	// Computing next value
 	output = inputB & AUDIOOUTPUTMASK;
 	
 	
 	
-	// Then we enable the DAC by setting active-low clear and power-down
-	gpio_set_gpio_pin(DAC_PD_PIN);
-	gpio_set_gpio_pin(DAC_CLR_PIN);
+	// Selecting chip and channel A
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_CS_PIN & 0x1F);
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_A0_PIN & 0x1F);
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
+	
+	// Writing data
+	
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
 	
 	
-	
-	// Then we load the data in DAC channel A
-	
-	// Selecting chip
-	gpio_clr_gpio_pin(DAC_CS_PIN);
-	gpio_clr_gpio_pin(DAC_WR_PIN);
-	// Selecting channel A
-	gpio_set_gpio_pin(DAC_A0_PIN);
-	// Loading data in Channel A
-	gpio_clr_gpio_pin(DAC_LDAC_PIN);
-	// De-selecting chip
-	gpio_set_gpio_pin(DAC_WR_PIN);
-	gpio_set_gpio_pin(DAC_CS_PIN);
-	
-	
-	
-	// We update the parallel input
-	
-	// PB0-9 driven low
-	gpio_set_group_low(PORTB, AUDIOOUTPUTMASK);
-	// PB0-9 assigned output value
-	gpio_set_group_high(PORTB, output);
-	
-	
-	
-	// We load input in channel B
+	// Writing B value to input
+	AVR32_GPIO.port[1].ovrs = (AUDIOOUTPUTMASK & output);
+	AVR32_GPIO.port[1].ovrc = (AUDIOOUTPUTMASK & ~(output));
 	
 	// Selecting channel B
-	gpio_clr_gpio_pin(DAC_A0_PIN);
-	// Selecting chip
-	gpio_clr_gpio_pin(DAC_CS_PIN);
-	gpio_clr_gpio_pin(DAC_WR_PIN);
-	// Data is loaded in channel B
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_A0_PIN & 0x1F);
+	
+	// Writing data
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
+	
+	
+	// Transferring input from buffer to output
+	AVR32_GPIO.port[1].ovrc = 1 << (DAC_LDAC_PIN & 0x1F);
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_LDAC_PIN & 0x1F);
+	
 	// De-selecting chip
-	gpio_set_gpio_pin(DAC_WR_PIN);
-	gpio_set_gpio_pin(DAC_CS_PIN);
-	
-	
-	
-	// Final refresh
-	gpio_set_gpio_pin(DAC_LDAC_PIN);
+	AVR32_GPIO.port[1].ovrs = 1 << (DAC_CS_PIN & 0x1F);
 }
 
 
@@ -432,6 +479,8 @@ uint8_t _fileVerification(){
 		(wavData1[headerIndex + 0])
 	;
 	
+	fileData.audioSampleTables = fileData.audioSampleBytes / WAVDATA_SIZE;
+	
 	// Jumps to Data
 	headerIndex += 4;
 	fileData.firstDataByteIndex = headerIndex;
@@ -461,10 +510,10 @@ uint8_t _fileVerification(){
  * audio output if it has not changed since last interruption
  *
  * Created 09.11.17 MLN
- * Last modified 20.11.17 MLN
+ * Last modified 22.11.17 MLN
  */
 __attribute__((__interrupt__)) void tc1_irq( void ){
-// 	// Audio loading version 1
+	// Audio loading version 1
 // 	if (loadNextSample == false){
 // 		_setOutput(audioR, audioL);
 // 		loadNextSample = true;
@@ -472,41 +521,52 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 
 	// Updating output first to have a fixed interval update, independent
 	// from the data fetching time
+	static uint16_t audioR;
+	static uint16_t audioL;
+	
+	
 	_setOutput(audioR, audioL);
+	
 	// Audio loading version 2
 	/* Update audioL and audioR values using pointer to array values
 	 * Audio values must be 10-bit.
 	 * Shifting through the array by incrementing wavDataIndex.
 	 */
-	audioL = *(wavDataPointer + wavDataIndex % WAVDATA_SIZE);
-	audioL <<= 2;
-	wavDataIndex++;
-	audioL |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 1) >> 6;
-	wavDataIndex++;
-		
-		
-	audioR = *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 2);
-	audioR <<= 2;
-	wavDataIndex++;
-	audioR |= *(wavDataPointer + (wavDataIndex % WAVDATA_SIZE) + 3) >> 6;
-	wavDataIndex++;
+	
+	audioL = *(wavDataPointer + wavDataIndex) + ((*(wavDataPointer + wavDataIndex + 1)) << 8);
+	audioR = *(wavDataPointer + wavDataIndex + 2) + ((*(wavDataPointer + wavDataIndex + 3)) << 8);
+	/*
+	audioL =  *(uint16_t*)(wavDataPointer + wavDataIndex);
+	audioL = (audioL << 8) + (audioL >> 8);
+	
+	audioR =  *(uint16_t*)(wavDataPointer + wavDataIndex + 2);
+	audioR = (audioR << 8) + (audioR >> 8);
+	*/
+	wavDataIndex += 4;
+	// Converting signed audio samples into unsigned ones with a DC component of 0x7FFF
+	audioL += 0x7FFF;
+	audioL >>= 6;
+	audioR += 0x7FFF;
+	audioR >>= 6;
 		
 	// If pointer reaches the end of the current wavData array
-	if ( wavDataIndex % WAVDATA_SIZE <= 3){
-			
+	if ( wavDataIndex > WAVDATA_SIZE - 4){
+		fileData.audioSampleTables--;
+		wavDataIndex -= (WAVDATA_SIZE - 4);
 		// Switching between arrays then
 		// loading next sector in previously used array
 		if (wavDataPointer == wavData1){
-			wavDataPointer = wavData2;
 			loadNextSector = LOAD_WAVDATA1;
-			//sdcard_getNextSector(wavData1);
 		}
 		else {
-			wavDataPointer = wavData1;
 			loadNextSector = LOAD_WAVDATA2;
-			//sdcard_getNextSector(wavData2);
 		}
 	}
+	else {
+		loadNextSector = NO_LOAD;
+	}
+	// Clearing interrupt flag
+	AVR32_TC.channel[TC1_CHANNEL].SR;
 }
 
 
