@@ -231,7 +231,7 @@ void twi_Init(void){
 	gpio_enable_pin_glitch_filter(PIN_INT1);
 	gpio_enable_pin_pull_up(PIN_INT1);
 	gpio_enable_pin_interrupt(PIN_INT1, GPIO_FALLING_EDGE);
-	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT0);
+	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT2);
 }
 
 void usart_init(void){
