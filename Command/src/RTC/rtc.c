@@ -250,7 +250,6 @@ void rtc_usart_sendTimeToDisplay(void){
 __attribute__((__interrupt__)) void rtc_rtcISR(void){
 	timeChanged  = true;
 	
-	//FUNKY FANKY DEFINE
 	gpio_clear_pin_interrupt_flag(PIN_INT1);
 }
 
