@@ -5,7 +5,10 @@
  *  Author: MLN
  */ 
 
+#include <string.h>
+
 #include "audio.h"
+
 
 #ifndef BOARD_OSC0_HZ
 	#define BOARD_OSC0_HZ 64000000
@@ -107,7 +110,7 @@ uint32_t wavDataIndex = 0;
 
 AudioInfo fileData;
 
-
+bool isFilePlaying;
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
@@ -116,7 +119,26 @@ AudioInfo fileData;
 void _setOutput (uint16_t, uint16_t);
 uint8_t _fileVerification();
 
-
+uint8_t audio_setFileToPlay(uint8_t fileNumber){
+	if (sdcard_setFileToRead(fileNumber) == false){
+		return ERROR_NO_FILE;
+	}
+	
+	sdcard_getNextSectorFast(wavData1);
+	sdcard_getNextSectorFast(wavData2);
+	
+	uint8_t fileVerif = _fileVerification(wavData1);
+	if (fileVerif != FILE_VERIFICATION_SUCCEDED){
+		return fileVerif;
+	}
+	isFilePlaying = true;
+	
+	wavDataIndex = fileData.firstDataByteIndex;
+	
+	// Volume setting, optimized to be as light as possible
+	audio_setVolume(DEFAULTVOLUME);
+	tc_start(&AVR32_TC, TC1_CHANNEL);
+}
 
 /* audio_setVolume
  *
@@ -165,10 +187,14 @@ void audio_setVolume (uint8_t volume){
  * Last modified 20.11.17 MLN
  */
 uint8_t audio_playFile(uint8_t fileNumber){
-	static bool audio_firstCall = true;
+	
+	if(!isFilePlaying){
+		return 0;
+	}
+	//static bool audio_firstCall = true;
 // 	static uint8_t *wavDataPointer = wavData1;
 // 	static uint32_t wavDataIndex = 0;
-	volatile uint8_t fileVerif = 0x00;
+	//volatile uint8_t fileVerif = 0x00;
 	
 	
 	
@@ -179,7 +205,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	/* and completes its infos and starts the 44.1 kHz timer used for audio */
 	/* output timing.														*/
 	/************************************************************************/
-	if (audio_firstCall == true){
+	/*if (audio_firstCall == true){
 		// If no SD card, return specific error code
 		if (sdcard_mount() == false){
 			return ERROR_NO_SD;
@@ -203,7 +229,7 @@ uint8_t audio_playFile(uint8_t fileNumber){
 		// Volume setting, optimized to be as light as possible
 		audio_setVolume(DEFAULTVOLUME);
 		tc_start(&AVR32_TC, TC1_CHANNEL);
-	}
+	}*/
 	
 	
 	
@@ -287,7 +313,8 @@ uint8_t audio_playFile(uint8_t fileNumber){
 	if (fileData.audioSampleTables <= 1){
 		tc_stop(&AVR32_TC, TC1_CHANNEL);
 		fileData.audioSampleTables = fileData.audioSampleBytes / WAVDATA_SIZE;
-		audio_firstCall = true;
+		//audio_firstCall = true;
+		isFilePlaying = false;
 		wavDataIndex = 0;
 		
 		return AUDIO_PLAY_FINISHED;
@@ -309,6 +336,26 @@ uint8_t audio_playFile(uint8_t fileNumber){
 void audio_pauseFile(void){
 	tc_stop(&AVR32_TC, TC1_CHANNEL);
 	loadNextSector = NO_LOAD;
+}
+
+
+
+void audio_togglePausePlay(void){
+	if(isFilePlaying){
+		tc_stop(&AVR32_TC, TC1_CHANNEL);
+	}else{
+		tc_start(&AVR32_TC, TC1_CHANNEL);
+	}
+	isFilePlaying = ! isFilePlaying;
+}
+
+
+
+void audio_stop(void){
+	tc_stop(&AVR32_TC, TC1_CHANNEL);
+	memset(&fileData,0,sizeof(AudioInfo));
+	wavDataIndex = 0;
+	wavDataPointer = NULL;
 }
 
 
@@ -354,7 +401,7 @@ void audio_freqStop (void){
  * Created 06.11.17 MLN
  * Last modified 23.11.17 MLN
  */
-inline void _setOutput (uint16_t inputA, uint16_t inputB){
+void _setOutput (uint16_t inputA, uint16_t inputB){
 	/*
 	// First we update DA0-9 parallel inputs
 	

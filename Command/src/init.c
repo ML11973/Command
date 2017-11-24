@@ -109,7 +109,7 @@ void tc1_Init(void){
 		.bcpb     = TC_EVT_EFFECT_NOOP,// RB compare effect on TIOB.
 		.aswtrg   = TC_EVT_EFFECT_NOOP,// Software trigger effect on TIOA.
 		.aeevt    = TC_EVT_EFFECT_NOOP,// External event effect on TIOA.
-		.acpc     = TC_EVT_EFFECT_TOGGLE,// RC compare effect on TIOA: toggle.
+		.acpc     = TC_EVT_EFFECT_NOOP,// RC compare effect on TIOA: toggle.
 		.acpa     = TC_EVT_EFFECT_NOOP,// RA compare effect on TIOA
 		.wavsel   = TC_WAVEFORM_SEL_UPDOWN_MODE_RC_TRIGGER,// Up mode with automatic trigger
 		.enetrg   = false,// External event trigger enable.
@@ -129,14 +129,7 @@ void tc1_Init(void){
 		.etrgs = 0, .ldrbs = 0, .ldras = 0, .cpcs  = 1,
 		.cpbs  = 0, .cpas  = 0, .lovrs = 0, .covfs = 0
 	};
-	
-	static const gpio_map_t T1_GPIO = {
-		{PIN_T1_IOA, FCT_T1_IOA}
-	};
-	
-	gpio_enable_module(T1_GPIO, 1);
-	
-	
+
 	// Initialize the timer/counter.
 	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);
 	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value. 181
@@ -231,7 +224,7 @@ void twi_Init(void){
 	gpio_enable_pin_glitch_filter(PIN_INT1);
 	gpio_enable_pin_pull_up(PIN_INT1);
 	gpio_enable_pin_interrupt(PIN_INT1, GPIO_FALLING_EDGE);
-	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT2);
+	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT0);
 }
 
 void usart_init(void){

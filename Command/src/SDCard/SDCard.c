@@ -99,6 +99,7 @@ uint32_t rootSector;
 uint32_t dataSector;
 
 File files[100];
+uint8_t nbrOfFiles;
 
 //data is a global variable as we need it in multiple functions
 //this way we spare time creating it only once
@@ -233,7 +234,6 @@ bool sdcard_getNextSector(uint8_t *d){
 	
 	//next sector and next cluster
 	if(sector >= clustersFirstSector + sectorPerCluster){
-		//FUNKY FANKY'S CODE
 		_readSector(&data, (cluster >> division) + FATSector);
 		if(isFAT32){
 			cluster = data[0x01FF & (cluster * 4)]
@@ -245,7 +245,6 @@ bool sdcard_getNextSector(uint8_t *d){
 			cluster = data[0x01FF & (cluster * 2)]
 					+(data[0x01FF & (cluster * 2 + 1)] << 8);
 		}
-		//NORMAL
 		sector = (cluster - 2) * sectorPerCluster + dataSector;
 		clustersFirstSector = sector;
 	}
@@ -259,7 +258,6 @@ bool sdcard_getNextSectorFast(uint8_t *d){
 	_readSectorFast(d,sector++);
 	
 	if(sector >= clustersFirstSector + sectorPerCluster){
-		//FUNKY FANKY'S CODE
 		_readSectorFast(&data, (cluster >> division) + FATSector);
 		if(isFAT32){
 			cluster = data[0x01FF & (cluster * 4)]
@@ -271,7 +269,6 @@ bool sdcard_getNextSectorFast(uint8_t *d){
 			cluster = data[0x01FF & (cluster * 2)]
 			+(data[0x01FF & (cluster * 2 + 1)] << 8);
 		}
-		//NORMAL
 		sector = (cluster - 2) * sectorPerCluster + dataSector;
 		clustersFirstSector = sector;
 	}
@@ -453,6 +450,7 @@ static void _getFilesInfos(){
 	uint16_t entry = 0;
 	volatile uint32_t sector = rootSector;
 	uint32_t relativeEntry = 0;
+	nbrOfFiles = 0;
 	
 	while(entry < 512 && id < 100){
 		relativeEntry = (entry % 16) * 32;
@@ -501,6 +499,7 @@ static void _getFilesInfos(){
 		}
 		entry++;
 	}
+	nbrOfFiles = id;
 }
 
 void _pdcaInit(void)
