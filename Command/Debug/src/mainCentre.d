@@ -73,7 +73,8 @@ src/mainCentre.d src/mainCentre.o src/mainCentre.o: ../src/mainCentre.c \
  ../src/config/conf_cpu.h ../src/audio/audio.h ../src/SDCard/sdcard.h \
  ../src/SDCard/sdcard.h ../src/RTC/rtc.h ../src/GFX/gfx.h \
  ../src/GFX/vector2.h ../src/GFX/rectangle.h ../src/GFX/color.h \
- ../src/GFX/screen.h ../src/mainCentre.h
+ ../src/GFX/screen.h ../src/mainCentre.h ../src/GFX/screen.h \
+ ../src/GFX/gui.h
 
 ../src/asf.h:
 
@@ -252,3 +253,7 @@ c:\program\ files\ (x86)\atmel\studio\7.0\toolchain\avr32\avr32-gnu-toolchain\bi
 ../src/GFX/screen.h:
 
 ../src/mainCentre.h:
+
+../src/GFX/screen.h:
+
+../src/GFX/gui.h:

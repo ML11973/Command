@@ -204,18 +204,18 @@ void gfx_DrawTerminalButton(Vector2 position, char* shortcut, char *description,
 }
 
 void gfx_cmdLine(char *content, uint8_t contentSize, Color color, bool firstDraw){
-	static uint32_t counter = 0;
-	counter ++;
+	//static uint32_t counter = 0;
+	//counter ++;
 	
 	if(firstDraw){
-		counter = 0;
+		//counter = 0;
 		gfx_Label((Vector2){20,40}, content, contentSize, Small, color);
 	}
-	else if(counter == 128){
-		gfx_Label((Vector2){20 + contentSize * 10, 40}, "|", 2, Small, color);
-	}
-	else if (counter == 256){
-		screen_SetPixels(Rect((contentSize) * 10 + 20,40,(contentSize + 2) * 10 + 20,50),(Color){BLACK});
-			counter = 0;
-	}
+	//else if(counter == 128){
+		//gfx_Label((Vector2){20 + contentSize * 10, 40}, "|", 2, Small, color);
+	//}
+	//else if (counter == 256){
+		//screen_SetPixels(Rect((contentSize) * 10 + 20,40,(contentSize + 2) * 10 + 20,50),(Color){BLACK});
+			//counter = 0;
+	//}
 }

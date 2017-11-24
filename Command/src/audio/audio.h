@@ -33,6 +33,7 @@
 // Audio playback error codes
 #define AUDIO_PLAYING				0x09	// Audio is being played
 #define AUDIO_PLAY_FINISHED			0x01	// Reached end of file
+#define FILE_VERIFICATION_SUCCEDED	0x01	//
 #define ERROR_NO_SD					0x02	// No SD Card detected
 #define ERROR_NO_FILE				0x03	// Selected file not found
 #define ERROR_FORMAT				0x04	// File format is not .wav
@@ -61,6 +62,7 @@ typedef struct audioInfo {
 extern uint16_t audioL;
 extern uint16_t audioR;
 extern AudioInfo fileData;
+extern uint8_t currentVolume;
 
 
 
@@ -78,6 +80,17 @@ extern AudioInfo fileData;
  * Last modified 13.11.17 MLN
  */
 void audio_setVolume (uint8_t);
+
+
+
+/* audio_setFileToPlay
+ * 
+ * Verify the file  and initalise all the data we need to play it.
+ * 
+ * Created 24.11.17 QVT
+ * Last modified 24.11.17 QVT
+ */
+uint8_t audio_setFileToPlay(uint8_t fileNumber);
 
 
 
@@ -104,7 +117,9 @@ uint8_t audio_playFile(uint8_t);
  */
 void audio_pauseFile(void);
 
+void audio_togglePausePlay(void);
 
+void audio_stop(void);
 
 /* audio_freqStart
  *
