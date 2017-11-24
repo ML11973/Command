@@ -28,12 +28,37 @@ void mainGauche(void){
 	//gui_loadingScreen();
 	screen_SetPixels(Rect(0,0,320,240), (Color){RED});
 	
+	currentTime.hours = 15;
+	currentTime.minutes = 33;
+	currentTime.seconds = 59;
+	
+	rtc_setTime();
+	rtc_setMinutesInterrupt();
 	
 	gfx_BeginNewTerminal((Vector2){20,220});
-	//gfx_AddLineToTerminal("Heure : ", 8, (Color){WHITE}, 0);
+	gfx_AddLineToTerminal("Debout, les damnes de la terre", 30, (Color){YELLOW}, 0);
 	while(1){
-		audio_playFile(1);
-		//gfx_AddLineToTerminal("Vive le camarade Staline", 24, (Color){YELLOW}, 0);
+		audio_playFile(0);
+		if(timeChanged){
+			if (currentTime.minutes > 59){
+				currentTime.minutes = 0;
+				if (currentTime.hours > 23){
+					currentTime.hours = 0;
+				}
+				else {
+					currentTime.hours++;
+				}
+			}
+			else {
+				currentTime.minutes++;
+			}
+			rtc_usart_sendTimeToDisplay();
+			
+			//currentTime.seconds = 59;
+			//rtc_setTime();
+			
+			timeChanged = false;
+		}
 	}
 	
 }

@@ -137,9 +137,9 @@
 #define FCT_T0_IOA 0
 
 // Définition des ports
-#define PORTA 0
-#define PORTB 1
-#define PORTC 2
+#define PORTA port[0]
+#define PORTB port[1]
+#define PORTC port[2]
 
 
 #endif // CONF_BOARD_H

@@ -25,7 +25,7 @@ void board_init(void) {
 	cpu_irq_enable();
 	
 	twi_Init();
-	usart_init();
+	usart_Init();
 	spi1_Init();
 	//tc0_Init();
 	tc1_Init();
@@ -228,13 +228,23 @@ void twi_Init(void){
 	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
 	twi_master_init(&AVR32_TWI, &i2c_options);
 	
-	gpio_enable_pin_glitch_filter(PIN_INT1);
-	gpio_enable_pin_pull_up(PIN_INT1);
+	// RTC alarm interruption initialization
+	//gpio_enable_pin_glitch_filter(PIN_INT1);
+	//gpio_enable_pin_pull_up(PIN_INT1);
 	gpio_enable_pin_interrupt(PIN_INT1, GPIO_FALLING_EDGE);
 	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT2);
 }
 
-void usart_init(void){
+
+
+/* usart_Init()
+ *
+ * Initializes USART peripheral for RTC data transmission to display card.
+ *
+ * Created 22.11.17 QVT
+ * Last modified 22.11.17 QVT
+ */
+void usart_Init(void){
 	const usart_options_t USART_OPTIONS =
 	{
 		.baudrate     = 250000,
@@ -258,7 +268,14 @@ void usart_init(void){
 }
 
 
-// Created 22.11.17 MLN
+/* dac_Init()
+ *
+ * Initializes DAC module by assigning required pins as outputs
+ * and setting the pins required for its functioning.
+ *
+ * Created 22.11.17 MLN
+ * Last modified 22.11.17 MLN
+ */
 void dac_Init(void)
 {
 	// Configuring PB0-15 for audio output

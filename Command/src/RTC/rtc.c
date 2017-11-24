@@ -83,7 +83,9 @@ Alarm alarm[MAXALARMNUMBER];
 	
 uint8_t sentData [BUFFER_SIZE] = {0};
 uint8_t buffer [BUFFER_SIZE] = {0};
-bool timeChanged = true;
+
+bool timeChanged = false;
+bool alarmReached = false;
 
 
 /************************************************************************/
@@ -128,7 +130,7 @@ void rtc_read(uint8_t firstRegister, uint8_t dataNumber){
 
 /* rtc_write
  *
- * Writes registers from firstRegister to firstRegister + dataNumber.
+ * Writes registers from firstRegister to firstRegister + dataNumber (non-included).
  * Uses data from sentData file-restricted global array.
  *
  * Created 16.11.17 MLN
@@ -157,13 +159,14 @@ void rtc_write(uint8_t firstRegister, uint8_t dataNumber){
  * Converts currentTime to BCD and sends it to RTC.
  *
  * Created 15.11.17 MLN
- * Last modified 15.11.17 QVT
+ * Last modified 24.11.17 MLN
  */
 void rtc_setTime(void){
 	twi_master_enable(RTC_TWI);
 	_timeToBCD(currentTime, sentData);
 	
 	rtc_write(RTC_SECONDS, 7);
+	twi_master_disable(RTC_TWI);
 }
 
 
@@ -180,6 +183,7 @@ void rtc_getTime(void){
 	rtc_read(RTC_SECONDS, 7);
 	
 	currentTime = _BCDToTime(buffer);
+	twi_master_disable(RTC_TWI);
 }
 
 
@@ -208,18 +212,40 @@ void rtc_setNextAlarm(Alarm alarm[]){
 	
 }
 
+
+
+/* rtc_setMinutesInterrupt
+ *
+ * Sets an interruption to occur on RTC ever minute.
+ *
+ * Created 22.11.17 QVT
+ * Last modified 24.11.17 MLN
+ */
 void rtc_setMinutesInterrupt(){
 	twi_master_enable(RTC_TWI);
-	sentData[0] = 0x80;
-	sentData[1] = 0x80;
-	sentData[2] = 0x80;
+	sentData[0] = 0x80; // Setting A2M2
+	sentData[1] = 0x80; // Setting A2M3
+	sentData[2] = 0x80; // Setting A2M4
 	rtc_write(RTC_ALARM2_MINUTES,3);
 	
-	rtc_read(RTC_CONTROL,1);
+	rtc_read(RTC_CONTROL,2);
+	// Enabling interrupts on Alarm2
 	sentData[0] = buffer[0] | (1<<A2IE) | (1<<INTCN);
-	rtc_write(RTC_CONTROL,1);
+	// Clearing Alarm2 interrupt flag
+	sentData[1] = buffer[1] & ~(1<<A2F);
+	rtc_write(RTC_CONTROL,2);
+	twi_master_disable(RTC_TWI);
 }
 
+
+
+/* rtc_usart_sendTimeToDisplay
+ *
+ * Sends current time to display card via USART
+ *
+ * Created 22.11.17 QVT
+ * Last modified 22.11.17 QVT
+ */
 void rtc_usart_sendTimeToDisplay(void){
 	rtc_getTime();
 	#ifndef CUSTOM_DATA_SENT_TO_DISPLAY
@@ -247,16 +273,41 @@ void rtc_usart_sendTimeToDisplay(void){
 	#endif
 }
 
+
+
+/* rtc_rtcISR
+ *
+ * Interruption triggered when RTC drives PA28 down.
+ * RTC status register is read, flag status is extracted and
+ * converted to software flags to use in main.
+ *
+ * Created 24.11.17 MLN
+ * Last modified 24.11.17 MLN
+ */
 __attribute__((__interrupt__)) void rtc_rtcISR(void){
-	timeChanged  = true;
+	twi_master_enable(RTC_TWI);
 	
+	// Reading RTC interrupt flag
+	rtc_read(RTC_STATUS, 1);
+	
+	// Updating software alarm flags
+	timeChanged = buffer[0] & 0x02;
+	alarmReached = buffer[0] & 0x01;
+	
+	// Clearing RTC interrupt flags
+	sentData[0] = buffer[0] & ~((timeChanged<<A2F) + (alarmReached<<A1F));
+	 rtc_write(RTC_STATUS, 1);
+	
+	twi_master_disable(RTC_TWI);
 	gpio_clear_pin_interrupt_flag(PIN_INT1);
 }
+
+
 
 /* _timeToBCD
  *
  * Converts a Time variable to BCD (format used by RTC).
- * NOT CHECKED YET
+ * Input table must be at least 7 bytes long
  *
  * Created 22.11.17 MLN
  * Last modified 22.11.17 QVT
@@ -314,3 +365,6 @@ void _usartWrite(uint8_t *content, uint8_t contentSize){
 			break;
 	}
 }
+
+
+

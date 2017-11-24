@@ -35,7 +35,7 @@ typedef struct time {
 	uint8_t seconds		:7;		// 0-59
 } Time;
 
-typedef struct alarm {
+typedef struct alarmReached {
 	Time alarmTime;
 	bool alarmEnable;
 	uint8_t ringtoneIndex;
@@ -51,6 +51,8 @@ extern Time currentTime;
 extern Alarm alarm[MAXALARMNUMBER];
 
 extern bool timeChanged;
+extern bool alarmReached;
+
 
 
 /************************************************************************/
