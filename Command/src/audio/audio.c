@@ -138,7 +138,7 @@ void audio_setVolume (uint8_t volume){
 		 * Volume has to be in the middle nibbles of a 2-byte integer
 		 * as per AD5300BRMZ datasheet
 		 */
-		spi_write((volatile struct avr32_spi_t*)DAC1_SPI, currentVolume<<4);
+		spi_write((volatile struct avr32_spi_t*)DAC1_SPI, (currentVolume<<4) & 0x0FF0);
 	
 		// Deselecting DAC1
 		spi_unselectChip((volatile struct avr32_spi_t*)DAC1_SPI, DAC1_SPI_NPCS);
@@ -255,6 +255,8 @@ uint8_t audio_playFile(uint8_t fileNumber){
 // 	}
 	
 	
+	
+	
 	// Audio loading version 2
 	switch(loadNextSector){
 			
@@ -275,7 +277,6 @@ uint8_t audio_playFile(uint8_t fileNumber){
 		case NO_LOAD:
 			break;
 	}
-	
 	
 	
 	/************************************************************************/
@@ -395,28 +396,28 @@ inline void _setOutput (uint16_t inputA, uint16_t inputB){
 	
 	*/
 	
-	
-	// FUNKY FANKY'S CODE
-	
+	// Selecting chip
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_CS_PIN & 0x1F);
-	
+	// Writing parallel input (10-bit)
 	AVR32_GPIO.port[1].ovrs = (0x000003FF & inputB);
 	AVR32_GPIO.port[1].ovrc = (0x000003FF & ~(inputB));
-	
+	// Writing input registers B
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
-	
+	// Writing parallel input (10-bit)
 	AVR32_GPIO.port[1].ovrs = (0x000003FF & inputA);
 	AVR32_GPIO.port[1].ovrc = (0x000003FF & ~(inputA));
-	
+	// Selecting channel A
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_A0_PIN & 0x1F);
+	// Writing input register A
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_WR_PIN & 0x1F);
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_WR_PIN & 0x1F);
+	// Selecting channel B
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_A0_PIN & 0x1F);
-	
+	// Loading data from input to output registers
 	AVR32_GPIO.port[1].ovrc = 1 << (DAC_LDAC_PIN & 0x1F);
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_LDAC_PIN & 0x1F);
-	
+	// De-selecting chip
 	AVR32_GPIO.port[1].ovrs = 1 << (DAC_CS_PIN & 0x1F);
 	
 }
@@ -588,7 +589,7 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 	
 	// Audio loading version 3
 	audioL = *(wavDataPointer + wavDataIndex);
-	audioL += *(wavDataPointer + wavDataIndex + 1) << 8;
+	audioL += (*(wavDataPointer + wavDataIndex + 1)) << 8;
 	
 	wavDataIndex += 2;
 	if (wavDataIndex >= WAVDATA_SIZE){
@@ -605,7 +606,7 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 	}
 	
 	audioR = *(wavDataPointer + wavDataIndex);
-	audioR += *(wavDataPointer + wavDataIndex + 1) << 8;
+	audioR += (*(wavDataPointer + wavDataIndex + 1)) << 8;
 	
 	wavDataIndex += 2;
 	if (wavDataIndex >= WAVDATA_SIZE){
@@ -621,10 +622,10 @@ __attribute__((__interrupt__)) void tc1_irq( void ){
 		}
 	}
 	
-	// Converting signed audio samples into unsigned ones with a DC component of 0x7FFF
-	audioL += 0x7FFF;
+	// Converting signed audio samples into unsigned ones with a DC component of 0x8000
+	audioL += 0x8000;
 	audioL >>= 6;
-	audioR += 0x7FFF;
+	audioR += 0x8000;
 	audioR >>= 6;
 	
 	// Clearing interrupt flag
