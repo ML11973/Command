@@ -222,10 +222,11 @@ void twi_Init(void){
 	twi_master_init(&AVR32_TWI, &i2c_options);
 	
 	// RTC alarm interruption initialization
-	//gpio_enable_pin_glitch_filter(PIN_INT1);
-	//gpio_enable_pin_pull_up(PIN_INT1);
+	gpio_enable_pin_glitch_filter(PIN_INT1);
+	gpio_enable_pin_pull_up(PIN_INT1);
 	gpio_enable_pin_interrupt(PIN_INT1, GPIO_FALLING_EDGE);
 	INTC_register_interrupt(&rtc_rtcISR, AVR32_GPIO_IRQ3, AVR32_INTC_INT0);
+	twi_master_enable(&AVR32_TWI);
 }
 
 

@@ -28,36 +28,57 @@ void mainGauche(void){
 	//gui_loadingScreen();
 	screen_SetPixels(Rect(0,0,320,240), (Color){RED});
 	
-	currentTime.hours = 15;
-	currentTime.minutes = 33;
+	currentTime.day = 1;
+	currentTime.hours = 11;
+	currentTime.minutes = 19;
 	currentTime.seconds = 59;
 	
+	alarm[0].day = 1;
+	alarm[0].hours = 11;
+	alarm[0].minutes = 20;
+	alarm[0].ringtoneIndex = 1;
+	alarm[0].alarmEnable = true;
+	
+	alarm[1].day = 1;
+	alarm[1].hours = 11;
+	alarm[1].minutes = 21;
+	alarm[1].ringtoneIndex = 0;
+	alarm[1].alarmEnable = true;
+	
+	alarm[2].day = 2;
+	alarm[2].hours = 19;
+	alarm[2].minutes = 17;
+	alarm[2].alarmEnable = true;
+	
+	alarm[3].day = 2;
+	alarm[3].hours = 19;
+	alarm[3].minutes = 16;
+	alarm[3].alarmEnable = true;
+	
 	rtc_setTime();
+	
+	rtc_setNextAlarm();
+		
 	rtc_setMinutesInterrupt();
+	
+	rtc_usart_sendTimeToDisplay();
 	
 	gfx_BeginNewTerminal((Vector2){20,220});
 	gfx_AddLineToTerminal("Debout, les damnes de la terre", 30, (Color){YELLOW}, 0);
 	while(1){
-		audio_playFile(0);
+		//audio_playFile(0);
 		if(timeChanged){
-			if (currentTime.minutes > 59){
-				currentTime.minutes = 0;
-				if (currentTime.hours > 23){
-					currentTime.hours = 0;
-				}
-				else {
-					currentTime.hours++;
-				}
-			}
-			else {
-				currentTime.minutes++;
-			}
-			rtc_usart_sendTimeToDisplay();
-			
-			//currentTime.seconds = 59;
-			//rtc_setTime();
-			
 			timeChanged = false;
+			rtc_usart_sendTimeToDisplay();
+			currentTime.seconds = 59;
+			rtc_setTime();
+		}
+		if(alarmReached){
+			alarmReached = false;
+			rtc_setNextAlarm();
+			gfx_AddLineToTerminal("Debout, les damnes de la terre", 30, (Color){YELLOW}, 0);
+			currentTime.seconds = 59;
+			rtc_setTime();
 		}
 	}
 	

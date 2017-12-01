@@ -74,6 +74,9 @@
 // Le 7ème bit AxMx
 #define		BitE						7					// Enable Alarm
 
+// Day/Date bit
+#define		DY							6					// Use Day or Date representation
+
 /************************************************************************/
 /* VARIABLES                                                            */
 /************************************************************************/
@@ -83,6 +86,7 @@ Alarm alarm[MAXALARMNUMBER];
 	
 uint8_t sentData [BUFFER_SIZE] = {0};
 uint8_t buffer [BUFFER_SIZE] = {0};
+volatile uint8_t nextAlarmIndex = 0;
 
 bool timeChanged = false;
 bool alarmReached = false;
@@ -96,6 +100,8 @@ void _timeToBCD(Time timeInput, uint8_t* timeBCD);
 Time _BCDToTime (uint8_t* inputTable);
 
 void _usartWrite(uint8_t *content, uint8_t contentSize);
+void _alarmToBCD(Alarm alarmInput, uint8_t* alarmBCD);
+uint8_t _compareToCurrentTime (uint8_t firstAlarmIndex, uint8_t secondAlarmIndex);
 
 /* rtc_read
  *
@@ -162,54 +168,58 @@ void rtc_write(uint8_t firstRegister, uint8_t dataNumber){
  * Last modified 24.11.17 MLN
  */
 void rtc_setTime(void){
-	twi_master_enable(RTC_TWI);
 	_timeToBCD(currentTime, sentData);
 	
 	rtc_write(RTC_SECONDS, 7);
-	twi_master_disable(RTC_TWI);
 }
 
 
 
 /* rtc_getTime
  *
- * TO BE MODIFIED, test function
+ * Updates currentTime to the value in the RTC registers.
  *
  * Created 15.11.17 MLN
  * Last modified 22.11.17 QVT
  */
 void rtc_getTime(void){
-	twi_master_enable(RTC_TWI);
 	rtc_read(RTC_SECONDS, 7);
 	
 	currentTime = _BCDToTime(buffer);
-	twi_master_disable(RTC_TWI);
-}
-
-
-
-/* rtc_setNextMinuteInterrupt
- *
- * Description
- *
- * Created 15.11.17 MLN
- * Last modified 15.11.17 MLN
- */
-void rtc_setNextMinuteInterrupt(void){
-	
 }
 
 
 
 /* rtc_setNextAlarm
  *
- * Sets the next alarm chronologically in the Alarm2 register of the RTC
+ * Sets the next alarm chronologically in the Alarm2 register of the RTC.
  *
  * Created 15.11.17 MLN
- * Last modified 15.11.17 MLN
+ * Last modified 30.11.17 QVT-MLN
  */
-void rtc_setNextAlarm(Alarm alarm[]){
+void rtc_setNextAlarm(){
+	nextAlarmIndex = 255;
 	
+	for (uint8_t i = 0; i < MAXALARMNUMBER; i++){
+		if (nextAlarmIndex == 255){
+			if(alarm[i].alarmEnable){
+				nextAlarmIndex = i;
+			}
+		}
+		else if (alarm[i].alarmEnable){
+			nextAlarmIndex = _compareToCurrentTime(nextAlarmIndex, i);
+		}
+	}
+	
+	_alarmToBCD(alarm[nextAlarmIndex], sentData);
+	rtc_write(RTC_ALARM1_MINUTES, 3);
+	
+	// Clearing Alarm 1 interrupt flag
+	rtc_read(RTC_STATUS, 1);
+	sentData[0] = buffer[0] & ~(1<<A1F);
+	rtc_write(RTC_STATUS, 1);
+	
+	gpio_clear_pin_interrupt_flag(PIN_INT1);
 }
 
 
@@ -222,10 +232,9 @@ void rtc_setNextAlarm(Alarm alarm[]){
  * Last modified 24.11.17 MLN
  */
 void rtc_setMinutesInterrupt(){
-	twi_master_enable(RTC_TWI);
-	sentData[0] = 0x80; // Setting A2M2
-	sentData[1] = 0x80; // Setting A2M3
-	sentData[2] = 0x80; // Setting A2M4
+	sentData[0] = (1<<BitE); // Setting A2M2
+	sentData[1] = (1<<BitE); // Setting A2M3
+	sentData[2] = (1<<BitE); // Setting A2M4
 	rtc_write(RTC_ALARM2_MINUTES,3);
 	
 	rtc_read(RTC_CONTROL,2);
@@ -234,17 +243,16 @@ void rtc_setMinutesInterrupt(){
 	// Clearing Alarm2 interrupt flag
 	sentData[1] = buffer[1] & ~(1<<A2F);
 	rtc_write(RTC_CONTROL,2);
-	twi_master_disable(RTC_TWI);
 }
 
 
 
 /* rtc_usart_sendTimeToDisplay
  *
- * Sends current time to display card via USART
+ * Updates current time with RTC value and sends it to display card via USART.
  *
  * Created 22.11.17 QVT
- * Last modified 22.11.17 QVT
+ * Last modified 01.12.17 MLN
  */
 void rtc_usart_sendTimeToDisplay(void){
 	rtc_getTime();
@@ -285,20 +293,18 @@ void rtc_usart_sendTimeToDisplay(void){
  * Last modified 24.11.17 MLN
  */
 __attribute__((__interrupt__)) void rtc_rtcISR(void){
-	twi_master_enable(RTC_TWI);
 	
 	// Reading RTC interrupt flag
 	rtc_read(RTC_STATUS, 1);
 	
-	// Updating software alarm flags
-	timeChanged = buffer[0] & 0x02;
-	alarmReached = buffer[0] & 0x01;
+	// Updating software alarm flags with a mask
+	timeChanged = buffer[0] & (1<<A2F);
+	alarmReached = buffer[0] & (1<<A1F);
 	
 	// Clearing RTC interrupt flags
-	sentData[0] = buffer[0] & ~((timeChanged<<A2F) + (alarmReached<<A1F));
-	 rtc_write(RTC_STATUS, 1);
+	sentData[0] = buffer[0] & ~((timeChanged<<A2F) | (alarmReached<<A1F));
+	rtc_write(RTC_STATUS, 1);
 	
-	twi_master_disable(RTC_TWI);
 	gpio_clear_pin_interrupt_flag(PIN_INT1);
 }
 
@@ -328,11 +334,25 @@ void _timeToBCD(Time timeInput, uint8_t* timeBCD){
 
 
 
+/* _alarmToBCD
+ *
+ * Converts an alarm variable to BCD (format used by RTC).
+ *
+ * Created 30.11.17 MLN
+ * Last modified 30.11.17 MLN
+ */
+void _alarmToBCD(Alarm alarmInput, uint8_t* alarmBCD){
+	alarmBCD[0] = ((alarmInput.minutes	/ 10) << 4) + (alarmInput.minutes % 10);
+	alarmBCD[1] = ((alarmInput.hours	/ 10) << 4) + (alarmInput.hours   % 10);
+	alarmBCD[2] = alarmInput.day | (1<<DY);
+}
+
+
+
 /* _BCDToTime
  *
  * Converts a BCD time to Time variable
  * Returns Time readable by software
- * NOT CHECKED YET
  *
  * Created 22.11.17 MLN
  * Last modified 22.11.17 MLN
@@ -352,7 +372,7 @@ Time _BCDToTime (uint8_t* inputTable){
 	// Since a bit in the month register indicates the century, we compute years before months
 	returnTime.year	= 100 * ((*(inputTable + 5) & 0x80) >> 7) + 10 * (*(inputTable + 6) >> 4) + (*(inputTable + 6) & 0x0F);
 	
-	returnTime.month	= 10 * ((*(inputTable + 5) & 0x10) >> 4) + (*(inputTable + 5) & 0x0F);
+	returnTime.month = 10 * ((*(inputTable + 5) & 0x10) >> 4) + (*(inputTable + 5) & 0x0F);
 	
 	return returnTime;
 }
@@ -368,3 +388,39 @@ void _usartWrite(uint8_t *content, uint8_t contentSize){
 
 
 
+/* _compareToCurrentTime
+ *
+ * Compares alarm index arguments to current time.
+ * Returns index of the alarm closer in the future to current time.
+ *
+ * Created 30.11.17 MLN
+ * Last modified 30.11.17 MLN
+ */
+uint8_t _compareToCurrentTime (uint8_t firstAlarmIndex, uint8_t secondAlarmIndex){
+	uint16_t firstAlarmMinutes = 0;
+	uint16_t secondAlarmMinutes = 0;
+	uint16_t currentTimeMinutes = 0;
+	
+	firstAlarmMinutes = alarm[firstAlarmIndex].minutes + alarm[firstAlarmIndex].hours * 60 + (alarm[firstAlarmIndex].day - 1) * 60 * 24;
+	secondAlarmMinutes = alarm[secondAlarmIndex].minutes + alarm[secondAlarmIndex].hours * 60 + (alarm[secondAlarmIndex].day - 1) * 60 * 24;
+	currentTimeMinutes = currentTime.minutes + currentTime.hours * 60 + (currentTime.day - 1) * 60 * 24;
+	
+	// If firstAlarm is behind currentTime in the week, increment it to next week
+	if (currentTimeMinutes >= firstAlarmMinutes){
+		firstAlarmMinutes += 7 * 24 * 60;
+	}
+	
+	// If secondAlarm is behind currentTime in the week, increment it to next week
+	if (currentTimeMinutes >= secondAlarmMinutes){
+		secondAlarmMinutes += 7 * 24 * 60;
+	}
+	
+	
+	// If firstAlarm is further away from secondAlarm, return secondAlarmIndex
+	if (firstAlarmMinutes > secondAlarmMinutes){
+		return secondAlarmIndex;
+	}
+	else {
+		return firstAlarmIndex;
+	}
+}
