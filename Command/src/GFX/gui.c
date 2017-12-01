@@ -24,7 +24,7 @@
 /************************************************************************/
 
 #define NBR_OF_MENU 5
-
+#define NBR_OF_FIRST_LEVEL_MENU 3
 
 
 /************************************************************************/
@@ -63,6 +63,7 @@ void _settingsHourInput(void);
 void _playFile(uint8_t fileNbr);
 
 __attribute__((__interrupt__)) void switch_irq(void);
+__attribute__((__interrupt__)) void tc2_irq(void);
 
 
 
@@ -99,8 +100,9 @@ uint8_t currentMenuId = 0;
 static uint8_t switchState = 0;
 static uint8_t selectedCommand = 0;
 static bool commandChanged = true;
-static uint8_t compteur = 0;
 static uint8_t selectedOption = 1;
+
+static Time editedTime;
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
@@ -124,6 +126,42 @@ void gui_Init(void){
 	gpio_enable_pin_interrupt(PIN_SWITCH3, GPIO_RISING_EDGE);
 	
 	INTC_register_interrupt(&switch_irq, AVR32_GPIO_IRQ7, AVR32_INTC_INT0);
+	
+	// Options for waveform generation.
+	const tc_waveform_opt_t WAVEFORM_OPT2 = {
+		.channel  = TC2_CHANNEL,         // Canal selection.
+		.bswtrg   = TC_EVT_EFFECT_NOOP,// Software trigger effect on TIOB.
+		.beevt    = TC_EVT_EFFECT_NOOP,// External event effect on TIOB.
+		.bcpc     = TC_EVT_EFFECT_NOOP,// RC compare effect on TIOB.
+		.bcpb     = TC_EVT_EFFECT_NOOP,// RB compare effect on TIOB.
+		.aswtrg   = TC_EVT_EFFECT_NOOP,// Software trigger effect on TIOA.
+		.aeevt    = TC_EVT_EFFECT_NOOP,// External event effect on TIOA.
+		.acpc     = TC_EVT_EFFECT_NOOP,// RC compare effect on TIOA: toggle.
+		.acpa     = TC_EVT_EFFECT_NOOP,// RA compare effect on TIOA
+		.wavsel   = TC_WAVEFORM_SEL_UPDOWN_MODE_RC_TRIGGER,// Up mode with automatic trigger
+		.enetrg   = false,// External event trigger enable.
+		.eevt     = TC_EXT_EVENT_SEL_TIOB_INPUT,// External event selection.
+		.eevtedg  = TC_SEL_NO_EDGE,// External event edge selection.
+		.cpcdis   = false,     // Counter disable when RC compare.
+		.cpcstop  = false,     // Counter clock stopped with RC compare.
+
+		.burst    = TC_BURST_NOT_GATED,     // Burst signal selection.
+		.clki     = TC_CLOCK_RISING_EDGE,     // Clock inversion.
+		.tcclks   = TC_CLOCK_SOURCE_TC5          // Int. source clock 1 connected to PBA/16
+	};
+	// 32MHz clock input PBA/2, output checked by scope measure
+	
+	const tc_interrupt_t TC2_INTERRUPT =
+	{
+		.etrgs = 0, .ldrbs = 0, .ldras = 0, .cpcs  = 1,
+		.cpbs  = 0, .cpas  = 0, .lovrs = 0, .covfs = 0
+	};
+
+	// Initialize the timer/counter.
+	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT2);
+	tc_write_rc(&AVR32_TC, TC2_CHANNEL, 65000);  // ~7.5Hz
+	tc_configure_interrupts(&AVR32_TC, TC2_CHANNEL, &TC2_INTERRUPT);
+	INTC_register_interrupt (&tc2_irq, AVR32_TC_IRQ2, AVR32_INTC_INT3);
 }
 
 void gui_loadingScreen(void){
@@ -160,6 +198,7 @@ void _drawSettingsButton(void){
 	gfx_DrawTerminalButton((Vector2){160,4},"-","Minus",5,textColor);
 	gfx_DrawTerminalButton((Vector2){238,4},"v","OK",2,textColor);
 }
+
 /************************************************************************/
 /* MENU FUNCTIONS                                                       */
 /************************************************************************/
@@ -215,7 +254,6 @@ void _mainMenu(bool firstDraw){
 void _musicMenu(bool firstDraw){
 	static bool wasSDCardConnected;
 	if(firstDraw){
-		selectedOption = 1;
 		wasSDCardConnected = false;
 		if(sdcard_checkPresence()){
 			sdcard_mount();
@@ -256,10 +294,22 @@ void _settingsMenu(bool firstDraw){
 		
 		gfx_BeginNewTerminal((Vector2){20,220});
 		gfx_AddLineToTerminal("sudo settings -h", 16, textColor, firstDraw);
-		gfx_AddLineToTerminal("> textColor = Green", 20, textColor, firstDraw);
-		gfx_AddLineToTerminal("> Heure : 10h 30m", 18, textColor, firstDraw);
-		gfx_AddLineToTerminal("> Date : 09h 35m", 17, textColor, firstDraw);
 	}
+	
+	char timeStr[25] = {'T','i','m','e',' ','=',' ',
+		currentTime.hours/10 + 48, currentTime.hours % 10 + 48, 'h',
+		currentTime.minutes/10 + 48, currentTime.minutes % 10 + 48, 'm',
+		'\0'
+	};
+	
+	char dateStr[25] = "Date = ";
+	char colorStr[25] = "textColor = ";
+	
+	
+	gfx_BeginNewTerminal((Vector2){20,200});
+	gfx_AddOptionToTerminal(timeStr, 25, textColor, selectedOption & (1<<(0)), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("Date : 01/02/03", 15, textColor, selectedOption & (1<<(1)), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal("textColor = Green", 18, textColor, selectedOption & (1<<(2)), firstDraw, firstDraw);
 }
 
 void _alarmMenu(bool firstDraw){
@@ -297,6 +347,7 @@ void _musicPlayerMenu(bool firstDraw){
 
 void _settingsHourMenu(bool firstDraw){
 	if(firstDraw){
+		selectedOption = 0;
 		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
 		
 		_drawSettingsButton();
@@ -311,8 +362,8 @@ void _settingsHourMenu(bool firstDraw){
 		gfx_AddLineToTerminal("Minute = ",9,textColor, true);
 	}
 	
-	uint8_t h[2] = {currentTime.hours/10 + 48, currentTime.hours % 10 + 48};
-	uint8_t m[2] = {currentTime.minutes/10 + 48, currentTime.minutes % 10 + 48};
+	uint8_t h[2] = {editedTime.hours/10 + 48, editedTime.hours % 10 + 48};
+	uint8_t m[2] = {editedTime.minutes/10 + 48, editedTime.minutes % 10 + 48};
 		
 	screen_SetPixels(Rect(40 + 7*10, 200, 40 + 9*10, 220),(Color){BLACK});
 	gfx_Label((Vector2){40 + 7 * 10, 200},(char*)h, 2, Small, textColor);
@@ -336,7 +387,7 @@ void _settingsHourMenu(bool firstDraw){
  * Created 20.11.17 QVT
  * Last modified 20.11.17 QVT
  */
-void _mainInput(void){
+void _mainInput(void) {
 	if(switchState == 0)
 		return;
 	needRepaint = true;
@@ -350,14 +401,15 @@ void _mainInput(void){
 			currentMenuId = ALARM;
 			
 		menuChanged = true;
+		selectedOption = 1;
 	}
 	else if(switchState == 2){
-		selectedCommand = (selectedCommand == NBR_OF_MENU - 1)?(0):(selectedCommand+1);
+		selectedCommand = (selectedCommand == NBR_OF_FIRST_LEVEL_MENU - 1)?(0):(selectedCommand+1);
 		commandChanged = true;
 		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
 	}
 	else if(switchState == 3){
-		selectedCommand = (selectedCommand == 0)?(NBR_OF_MENU - 1):(selectedCommand-1);
+		selectedCommand = (selectedCommand == 0)?(NBR_OF_FIRST_LEVEL_MENU - 1):(selectedCommand-1);
 		commandChanged = true;
 		screen_SetPixels(Rect(0,40,320,50),(Color){BLACK});
 	}
@@ -411,8 +463,26 @@ void _settingsInput(void)	{
 		menuChanged = true;
 		commandChanged = true;
 	}
+	else if(switchState == 2){
+		(selectedOption &(1<<0))?(selectedOption = (1<<(3-1))):(selectedOption>>=1);
+	}
+	else if (switchState == 3){
+		(selectedOption &(1<<(3-1)))?(selectedOption = (1<<0)):(selectedOption<<=1);
+	}
 	else if(switchState == 4){
-		currentMenuId = SETTINGS_HOUR;
+		switch (selectedOption)
+		{
+		case 1:
+			editedTime = currentTime;
+			currentMenuId = SETTINGS_HOUR;
+			selectedOption = 1;
+			break;
+		case 2:
+			break;
+		case 4:
+			textColor.value = (textColor.value == GREEN)?( WHITE):(GREEN);
+			break;
+		}
 		menuChanged = true;
 	}
 	switchState = 0;
@@ -484,26 +554,34 @@ void _settingsHourInput(void){
 	}
 	else if(switchState == 2){
 		switch(selectedOption){
+			case 0:
+				editedTime.hours++;
+				if(editedTime.hours > 24)
+					editedTime.hours = 0;
+				break;
 			case 1:
-				currentTime.hours++;
+				editedTime.minutes++;
+				if(editedTime.minutes > 60)
+					editedTime.minutes = 0;
 				break;
-			case 2:
-				currentTime.minutes++;
-				break;
-			/*case 3:
+			/*case 2:
 				currentTime.seconds++;
 				break;*/
 		}
 	}
 	else if(switchState == 3){
 		switch(selectedOption){
+			case 0:
+				editedTime.hours--;
+				if(editedTime.hours > 24)
+				editedTime.hours = 24;
+				break;
 			case 1:
-				currentTime.hours--;
+				editedTime.minutes--;
+				if(editedTime.minutes > 60)
+					editedTime.minutes = 60;
 				break;
-			case 2:
-				currentTime.minutes--;
-				break;
-			/*case 3:
+			/*case 2:
 				currentTime.seconds--;
 				break;*/
 		}
@@ -512,9 +590,14 @@ void _settingsHourInput(void){
 		selectedOption++;
 		
 		//Hour, minutes /*and seconds*/ are set
-		if(selectedOption > 2){
+		if(selectedOption > 1){
 			currentMenuId = SETTINGS;
 			menuChanged = true;
+			
+			currentTime = editedTime;
+			
+			rtc_setTime();
+			rtc_usart_sendTimeToDisplay();
 		}
 	}
 	switchState = 0;
@@ -533,7 +616,12 @@ void _playFile(uint8_t fileNbr){
 	}
 }
 
+/************************************************************************/
+/* INTERRUPT                                                            */
+/************************************************************************/
+
 __attribute__((__interrupt__)) void switch_irq(void){
+	
 	if 	(gpio_get_pin_interrupt_flag(PIN_SWITCH0))	{
 		switchState = 1;
 	}
@@ -547,4 +635,21 @@ __attribute__((__interrupt__)) void switch_irq(void){
 		switchState = 4;
 	}
 	AVR32_GPIO.port[1].ifrc = 0xFF000000;
+	
+	tc_start(&AVR32_TC, TC2_CHANNEL);
+	gpio_disable_pin_interrupt(PIN_SWITCH0);
+	gpio_disable_pin_interrupt(PIN_SWITCH1);
+	gpio_disable_pin_interrupt(PIN_SWITCH2);
+	gpio_disable_pin_interrupt(PIN_SWITCH3);
+}
+
+
+__attribute__((__interrupt__)) void tc2_irq(void){
+	tc_stop(&AVR32_TC, TC2_CHANNEL);
+	gpio_enable_pin_interrupt(PIN_SWITCH0, GPIO_RISING_EDGE);
+	gpio_enable_pin_interrupt(PIN_SWITCH1, GPIO_RISING_EDGE);
+	gpio_enable_pin_interrupt(PIN_SWITCH2, GPIO_RISING_EDGE);
+	gpio_enable_pin_interrupt(PIN_SWITCH3, GPIO_RISING_EDGE);
+	
+	AVR32_TC.channel[TC2_CHANNEL].SR;
 }
