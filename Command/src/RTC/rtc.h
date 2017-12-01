@@ -35,8 +35,10 @@ typedef struct time {
 	uint8_t seconds		:7;		// 0-59
 } Time;
 
-typedef struct alarmReached {
-	Time alarmTime;
+typedef struct alarmstruct {
+	uint8_t day			:3;		// 1-7
+	uint8_t hours		:7;		// 0-23
+	uint8_t minutes		:7;		// 0-59
 	bool alarmEnable;
 	uint8_t ringtoneIndex;
 } Alarm;
@@ -48,6 +50,7 @@ typedef struct alarmReached {
 /************************************************************************/
 
 extern Time currentTime;
+extern volatile uint8_t nextAlarmIndex;
 extern Alarm alarm[MAXALARMNUMBER];
 
 extern bool timeChanged;
@@ -126,7 +129,7 @@ void rtc_setNextMinuteInterrupt(void);
  * Created 15.11.17 MLN
  * Last modified 15.11.17 MLN
  */
-void rtc_setNextAlarm(Alarm alarm[]);
+void rtc_setNextAlarm();
 
 
 void rtc_usart_sendTimeToDisplay(void);
