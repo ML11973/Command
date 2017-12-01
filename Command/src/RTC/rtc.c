@@ -314,14 +314,14 @@ __attribute__((__interrupt__)) void rtc_rtcISR(void){
  */
 void _timeToBCD(Time timeInput, uint8_t* timeBCD){
 	//uint8_t timeBCD[7] = {0};
+	timeBCD[5] = (((timeInput.year) / 100) << 7) + ((timeInput.month / 10) << 4) + (timeInput.month % 10);
+	timeBCD[6] = ((((timeInput.year) /10) % 10) << 4) + (timeInput.year % 10);
 	
 	timeBCD[0] = ((timeInput.seconds / 10) << 4) + (timeInput.seconds % 10);
 	timeBCD[1] = ((timeInput.minutes / 10) << 4) + (timeInput.minutes % 10);
 	timeBCD[2] = ((timeInput.hours	 / 10) << 4) + (timeInput.hours   % 10);
 	timeBCD[3] = timeInput.day;
 	timeBCD[4] = ((timeInput.date	 / 10) << 4) + (timeInput.date    % 10);
-	timeBCD[5] = (((timeInput.year - REFERENCE_YEAR) / 100) << 7) + ((timeInput.month / 10) << 4) + (timeInput.month % 10);
-	timeBCD[6] = ((((timeInput.year - REFERENCE_YEAR) % 100) / 10) << 4) + (timeInput.year % 10);
 	
 	//return timeBCD;
 }
@@ -350,7 +350,7 @@ Time _BCDToTime (uint8_t* inputTable){
 	
 	returnTime.date	= 10 * (*(inputTable + 4) >> 4) + (*(inputTable + 4) & 0x0F);
 	// Since a bit in the month register indicates the century, we compute years before months
-	returnTime.year	= 100 * ((*(inputTable + 5) & 0x80) >> 7) * (*(inputTable + 6) >> 4) + (*(inputTable + 6) & 0x0F) + REFERENCE_YEAR;
+	returnTime.year	= 100 * ((*(inputTable + 5) & 0x80) >> 7) + 10 * (*(inputTable + 6) >> 4) + (*(inputTable + 6) & 0x0F);
 	
 	returnTime.month	= 10 * ((*(inputTable + 5) & 0x10) >> 4) + (*(inputTable + 5) & 0x0F);
 	

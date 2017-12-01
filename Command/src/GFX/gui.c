@@ -23,7 +23,7 @@
 /* DEFINITIONS                                                          */
 /************************************************************************/
 
-#define NBR_OF_MENU 5
+#define NBR_OF_MENU 6
 #define NBR_OF_FIRST_LEVEL_MENU 3
 
 
@@ -37,7 +37,8 @@ typedef enum menu_id{
 	SETTINGS,
 	ALARM,
 	MUSIC_PLAYER,
-	SETTINGS_HOUR
+	SETTINGS_HOUR,
+	SETTINGS_DATE
 }MENU_ID;
 
 
@@ -52,6 +53,7 @@ void _settingsMenu(bool firstDraw);
 void _alarmMenu(bool firstDraw);
 void _musicPlayerMenu(bool firstDraw);
 void _settingsHourMenu(bool firstDraw);
+void _settingsDateMenu(bool firstDraw);
 
 void _mainInput(void);
 void _musicInput(void);
@@ -59,6 +61,7 @@ void _settingsInput(void);
 void _alarmInput(void);
 void _musicPlayerInput(void);
 void _settingsHourInput(void);
+void _settingsDateInput(void);
 
 void _playFile(uint8_t fileNbr);
 
@@ -77,7 +80,8 @@ guiMenu	menus[NBR_OF_MENU + 1]	= {
 	_settingsMenu,
 	_alarmMenu, 
 	_musicPlayerMenu,
-	_settingsHourMenu
+	_settingsHourMenu,
+	_settingsDateMenu
 };
 
 inputHandler input[NBR_OF_MENU + 1]	= {
@@ -86,7 +90,8 @@ inputHandler input[NBR_OF_MENU + 1]	= {
 	_settingsInput, 
 	_alarmInput, 
 	_musicPlayerInput,
-	_settingsHourInput
+	_settingsHourInput,
+	_settingsDateInput
 };
 
 inputBinding binding[NBR_OF_MENU + 1][2] = {{NULL},{_playFile}};	
@@ -103,6 +108,18 @@ static bool commandChanged = true;
 static uint8_t selectedOption = 1;
 
 static Time editedTime;
+
+static char days[7][9] = {
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday",
+};
+
+
 
 /************************************************************************/
 /* FUNCTIONS                                                            */
@@ -222,10 +239,21 @@ void _mainMenu(bool firstDraw){
 		gfx_AddLineToTerminal("status --complete", 17, textColor, firstDraw);
 	}
 	
+	char timeStr[25] = {'T','i','m','e',' ','=',' ',
+		currentTime.hours/10 + 48, currentTime.hours % 10 + 48, 'h', ' ',
+		currentTime.minutes/10 + 48, currentTime.minutes % 10 + 48, 'm',
+		'\0'
+	};
+	char dateStr[25] = {'D','a','t','e',' ','=',' ',
+		currentTime.date/10 + 48, currentTime.date % 10 + 48, '/',
+		currentTime.month/10 + 48, currentTime.month % 10 + 48, '/',
+		'2', currentTime.year/100 + 48, (currentTime.year/10)%10 + 48, currentTime.year % 10 + 48,
+		'\0'
+	};
 	gfx_BeginNewTerminal((Vector2){20,200});
-	gfx_AddOptionToTerminal("Vendredi",8,textColor,false,firstDraw,firstDraw);
-	gfx_AddOptionToTerminal("10/11/17", 8, textColor,false,firstDraw, firstDraw);
-	gfx_AddOptionToTerminal("15h 30m" ,  7, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal(days[currentTime.day],8,textColor,false,firstDraw,firstDraw);
+	gfx_AddOptionToTerminal(dateStr, 25, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal(timeStr , 25, textColor,false,firstDraw, firstDraw);
 	gfx_AddOptionToTerminal("Alarme 1 disabled" ,  26, textColor,false,firstDraw, firstDraw);
 	gfx_AddOptionToTerminal("Alarme 2 enabled" ,  25, textColor,false,firstDraw, firstDraw);
 	
@@ -297,18 +325,22 @@ void _settingsMenu(bool firstDraw){
 	}
 	
 	char timeStr[25] = {'T','i','m','e',' ','=',' ',
-		currentTime.hours/10 + 48, currentTime.hours % 10 + 48, 'h',
+		currentTime.hours/10 + 48, currentTime.hours % 10 + 48, 'h', ' ',
 		currentTime.minutes/10 + 48, currentTime.minutes % 10 + 48, 'm',
 		'\0'
 	};
-	
-	char dateStr[25] = "Date = ";
+	char dateStr[25] = {'D','a','t','e',' ','=',' ',
+		currentTime.date/10 + 48, currentTime.date % 10 + 48, '/',
+		currentTime.month/10 + 48, currentTime.month % 10 + 48, '/',
+		'2', currentTime.year/100 + 48, (currentTime.year/10)%10 + 48, currentTime.year % 10 + 48,
+		'\0'
+	};
 	char colorStr[25] = "textColor = ";
 	
 	
 	gfx_BeginNewTerminal((Vector2){20,200});
 	gfx_AddOptionToTerminal(timeStr, 25, textColor, selectedOption & (1<<(0)), firstDraw, firstDraw);
-	gfx_AddOptionToTerminal("Date : 01/02/03", 15, textColor, selectedOption & (1<<(1)), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal(dateStr, 25, textColor, selectedOption & (1<<(1)), firstDraw, firstDraw);
 	gfx_AddOptionToTerminal("textColor = Green", 18, textColor, selectedOption & (1<<(2)), firstDraw, firstDraw);
 }
 
@@ -347,7 +379,6 @@ void _musicPlayerMenu(bool firstDraw){
 
 void _settingsHourMenu(bool firstDraw){
 	if(firstDraw){
-		selectedOption = 0;
 		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
 		
 		_drawSettingsButton();
@@ -364,16 +395,81 @@ void _settingsHourMenu(bool firstDraw){
 	
 	uint8_t h[2] = {editedTime.hours/10 + 48, editedTime.hours % 10 + 48};
 	uint8_t m[2] = {editedTime.minutes/10 + 48, editedTime.minutes % 10 + 48};
+	
+	Color tColor, bgColor;
+	if(selectedOption & (1<<0)){
+		bgColor = textColor;
+		tColor = (Color){BLACK};
+	}
+	else{
+		tColor = textColor;
+		bgColor = (Color){BLACK};
+	}
+	
+	screen_SetPixels(Rect(40 + 7*10, 200, 40 + 9*10, 215),bgColor);
+	gfx_Label((Vector2){40 + 7 * 10, 200},(char*)h, 2, Small, tColor);
+	
+	screen_SetPixels(Rect(40 + 9*10, 180, 40 + 11*10, 195),tColor);
+	gfx_Label((Vector2){40 + 9 * 10, 180},(char*)m, 2, Small, bgColor);
+}
+
+void _settingsDateMenu(bool firstDraw){
+	if(firstDraw){
+		screen_SetPixels(Rect(0,0,320,240),(Color){BLACK});
 		
-	screen_SetPixels(Rect(40 + 7*10, 200, 40 + 9*10, 220),(Color){BLACK});
-	gfx_Label((Vector2){40 + 7 * 10, 200},(char*)h, 2, Small, textColor);
-	//gfx_Label((Vector2){40 + 7 * 10, 200},(char*)((currentTime.hours/10) + 48), 1, Small, textColor);
-	//gfx_Label((Vector2){40 + 8 * 10, 200},(char*)((currentTime.hours%10) + 48), 1, Small, textColor);
+		_drawSettingsButton();
 		
-	screen_SetPixels(Rect(40 + 9*10, 180, 40 + 11*10, 200),(Color){BLACK});
-	gfx_Label((Vector2){40 + 9 * 10, 180},(char*)m, 2, Small, textColor);
-	//gfx_Label((Vector2){40 + 9 * 10, 180},(char*)(currentTime.minutes/10 + 48), 1, Small, textColor);
-	//gfx_Label((Vector2){40 + 10 * 10, 180},(char*)(currentTime.minutes%10 + 48), 1, Small, textColor);
+		gfx_BeginNewTerminal((Vector2){20,220});
+		gfx_AddLineToTerminal("time -set -hours", 16, textColor, firstDraw);
+		
+		menuChanged = false;
+		
+		gfx_BeginNewTerminal((Vector2){40,200});
+		gfx_AddLineToTerminal("Year = 2",8,textColor, true);
+		gfx_AddLineToTerminal("Month = ",8,textColor, true);
+		gfx_AddLineToTerminal("Day = ",6,textColor, true);
+	}
+	
+	uint8_t y[3] = {editedTime.year/100 + 48,(editedTime.year/10)%10 + 48, editedTime.year % 10 + 48};
+	uint8_t m[2] = {editedTime.month/10 + 48, editedTime.month % 10 + 48};
+	uint8_t d[2] = {editedTime.date/10 + 48, editedTime.date % 10 + 48};
+	
+	Color tColor, bgColor;
+	if(selectedOption & (1<<0)){
+		bgColor = textColor;
+		tColor = (Color){BLACK};
+	}
+	else{
+		tColor = textColor;
+		bgColor = (Color){BLACK};
+	}
+	
+	screen_SetPixels(Rect(40 + 8*10, 200, 40 + (8+3)*10, 215),bgColor);
+	gfx_Label((Vector2){40 + 8 * 10, 200},(char*)y, 3, Small, tColor);
+	
+	if(selectedOption & (1<<1)){
+		bgColor = textColor;
+		tColor = (Color){BLACK};
+	}
+	else{
+		tColor = textColor;
+		bgColor = (Color){BLACK};
+	}
+	
+	screen_SetPixels(Rect(40 + 8*10, 180, 40 + (8+2)*10, 195),bgColor);
+	gfx_Label((Vector2){40 + 8 * 10, 180},(char*)m, 2, Small, tColor);
+		
+	if(selectedOption & (1<<2)){
+		bgColor = textColor;
+		tColor = (Color){BLACK};
+	}
+	else{
+		tColor = textColor;
+		bgColor = (Color){BLACK};
+	}
+		
+	screen_SetPixels(Rect(40 + 6*10, 160, 40 + (9+2)*10, 175),bgColor);
+	gfx_Label((Vector2){40 + 6 * 10, 160},(char*)d, 2, Small, tColor);
 }
 
 /************************************************************************/
@@ -478,6 +574,9 @@ void _settingsInput(void)	{
 			selectedOption = 1;
 			break;
 		case 2:
+			editedTime = currentTime;
+			currentMenuId = SETTINGS_DATE;
+			selectedOption = 1;
 			break;
 		case 4:
 			textColor.value = (textColor.value == GREEN)?( WHITE):(GREEN);
@@ -554,12 +653,12 @@ void _settingsHourInput(void){
 	}
 	else if(switchState == 2){
 		switch(selectedOption){
-			case 0:
+			case 1:
 				editedTime.hours++;
 				if(editedTime.hours > 24)
 					editedTime.hours = 0;
 				break;
-			case 1:
+			case 2:
 				editedTime.minutes++;
 				if(editedTime.minutes > 60)
 					editedTime.minutes = 0;
@@ -571,12 +670,12 @@ void _settingsHourInput(void){
 	}
 	else if(switchState == 3){
 		switch(selectedOption){
-			case 0:
+			case 1:
 				editedTime.hours--;
 				if(editedTime.hours > 24)
 				editedTime.hours = 24;
 				break;
-			case 1:
+			case 2:
 				editedTime.minutes--;
 				if(editedTime.minutes > 60)
 					editedTime.minutes = 60;
@@ -587,17 +686,83 @@ void _settingsHourInput(void){
 		}
 	}
 	else if(switchState == 4){
-		selectedOption++;
+		selectedOption<<=1;
 		
 		//Hour, minutes /*and seconds*/ are set
-		if(selectedOption > 1){
+		if(selectedOption > 2){
 			currentMenuId = SETTINGS;
 			menuChanged = true;
 			
-			currentTime = editedTime;
+			currentTime.hours = editedTime.hours;
+			currentTime.minutes = editedTime.minutes;
 			
 			rtc_setTime();
 			rtc_usart_sendTimeToDisplay();
+		}
+	}
+	switchState = 0;
+}
+
+void _settingsDateInput(void){
+	if(switchState == 0)
+		return;
+	needRepaint = true;
+	
+	if(switchState == 1){
+		currentMenuId = SETTINGS;
+		menuChanged = true;
+	}
+	else if(switchState == 2){
+		switch(selectedOption){
+			case 1:
+				editedTime.year++;
+				if(editedTime.year > 199)
+					editedTime.year = 0;
+				break;
+			case 2:
+				editedTime.month++;
+				if(editedTime.month > 12)
+					editedTime.month = 0;
+				break;
+			case 4:
+				editedTime.date++;
+				if(editedTime.date > 31)
+					editedTime.date = 0;
+				break;
+		}
+	}
+	else if(switchState == 3){
+		switch(selectedOption){
+			case 1:
+				editedTime.year--;
+				if(editedTime.year > 199)
+					editedTime.year = 199;
+				break;
+			case 2:
+				editedTime.month--;
+				if(editedTime.month > 12)
+					editedTime.month = 12;
+				break;
+			case 4:
+				editedTime.date--;
+				if(editedTime.date > 31)
+					editedTime.date = 31;
+				break;
+		}
+	}
+	else if(switchState == 4){
+		selectedOption<<=1;
+		
+		//Hour, minutes /*and seconds*/ are set
+		if(selectedOption > 4){
+			currentMenuId = SETTINGS;
+			menuChanged = true;
+			
+			currentTime.year = editedTime.year;
+			currentTime.month = editedTime.month;
+			currentTime.date = editedTime.date;
+			
+			rtc_setTime();
 		}
 	}
 	switchState = 0;
