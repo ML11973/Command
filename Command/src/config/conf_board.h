@@ -27,6 +27,7 @@
 #define BOARD_OSC0_HZ	64000000
 
 // Définition des interruptions des timers
+#define TC2_CHANNEL 2
 #define TC1_CHANNEL 1
 #define TC0_CHANNEL 0
 
