@@ -705,10 +705,6 @@ Discarded input sections
  .bss           0x00000000        0x0 src/RTC/rtc.o
  .text.rtc_setNextMinuteInterrupt
                 0x00000000        0x2 src/RTC/rtc.o
- .text.rtc_setNextAlarm
-                0x00000000        0x2 src/RTC/rtc.o
- .text.rtc_setMinutesInterrupt
-                0x00000000       0x58 src/RTC/rtc.o
  .text          0x00000000        0x0 src/SDCard/sdcard.o
  .data          0x00000000        0x0 src/SDCard/sdcard.o
  .bss           0x00000000        0x0 src/SDCard/sdcard.o
@@ -913,7 +909,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
 .plt
  *(.plt)
 
-.text           0x80002004     0x5260
+.text           0x80002004     0x52f8
  *(.text .stub .text.* .gnu.linkonce.t.*)
  .text.sd_mmc_spi_get_capacity
                 0x80002004      0x11c src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
@@ -1300,64 +1296,71 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                 0x80006418       0x40 src/init.o
                 0x80006418                board_init
  .text.mainCentre
-                0x80006458       0x74 src/mainCentre.o
+                0x80006458       0xb0 src/mainCentre.o
                 0x80006458                mainCentre
+ .text.rtc_setNextAlarm
+                0x80006508        0x2 src/RTC/rtc.o
+                0x80006508                rtc_setNextAlarm
  .text._timeToBCD
-                0x800064cc       0xf8 src/RTC/rtc.o
-                0x800064cc                _timeToBCD
+                0x8000650a       0xf8 src/RTC/rtc.o
+                0x8000650a                _timeToBCD
  .text._BCDToTime
-                0x800065c4       0xb0 src/RTC/rtc.o
-                0x800065c4                _BCDToTime
+                0x80006602       0xb0 src/RTC/rtc.o
+                0x80006602                _BCDToTime
+ *fill*         0x800066b2        0x2 d703d703
  .text._usartWrite
-                0x80006674       0x28 src/RTC/rtc.o
-                0x80006674                _usartWrite
+                0x800066b4       0x28 src/RTC/rtc.o
+                0x800066b4                _usartWrite
  .text.rtc_write
-                0x8000669c       0x30 src/RTC/rtc.o
-                0x8000669c                rtc_write
+                0x800066dc       0x30 src/RTC/rtc.o
+                0x800066dc                rtc_write
  .text.rtc_setTime
-                0x800066cc       0x48 src/RTC/rtc.o
-                0x800066cc                rtc_setTime
+                0x8000670c       0x48 src/RTC/rtc.o
+                0x8000670c                rtc_setTime
  .text.rtc_read
-                0x80006714       0x4c src/RTC/rtc.o
-                0x80006714                rtc_read
+                0x80006754       0x4c src/RTC/rtc.o
+                0x80006754                rtc_read
  .text.rtc_rtcISR
-                0x80006760       0x68 src/RTC/rtc.o
-                0x80006760                rtc_rtcISR
+                0x800067a0       0x68 src/RTC/rtc.o
+                0x800067a0                rtc_rtcISR
+ .text.rtc_setMinutesInterrupt
+                0x80006808       0x58 src/RTC/rtc.o
+                0x80006808                rtc_setMinutesInterrupt
  .text.rtc_getTime
-                0x800067c8       0x48 src/RTC/rtc.o
-                0x800067c8                rtc_getTime
+                0x80006860       0x48 src/RTC/rtc.o
+                0x80006860                rtc_getTime
  .text.rtc_usart_sendTimeToDisplay
-                0x80006810       0xbc src/RTC/rtc.o
-                0x80006810                rtc_usart_sendTimeToDisplay
+                0x800068a8       0xbc src/RTC/rtc.o
+                0x800068a8                rtc_usart_sendTimeToDisplay
  .text.sdcard_setFileToRead
-                0x800068cc       0x80 src/SDCard/sdcard.o
-                0x800068cc                sdcard_setFileToRead
- .text.pdcaISR  0x8000694c       0x34 src/SDCard/sdcard.o
-                0x8000694c                pdcaISR
+                0x80006964       0x80 src/SDCard/sdcard.o
+                0x80006964                sdcard_setFileToRead
+ .text.pdcaISR  0x800069e4       0x34 src/SDCard/sdcard.o
+                0x800069e4                pdcaISR
  .text._pdcaInit
-                0x80006980       0x74 src/SDCard/sdcard.o
-                0x80006980                _pdcaInit
+                0x80006a18       0x74 src/SDCard/sdcard.o
+                0x80006a18                _pdcaInit
  .text._readSectorFast
-                0x800069f4       0x8c src/SDCard/sdcard.o
-                0x800069f4                _readSectorFast
+                0x80006a8c       0x8c src/SDCard/sdcard.o
+                0x80006a8c                _readSectorFast
  .text.sdcard_getNextSectorFast
-                0x80006a80      0x114 src/SDCard/sdcard.o
-                0x80006a80                sdcard_getNextSectorFast
+                0x80006b18      0x114 src/SDCard/sdcard.o
+                0x80006b18                sdcard_getNextSectorFast
  .text._readSector
-                0x80006b94      0x124 src/SDCard/sdcard.o
+                0x80006c2c      0x124 src/SDCard/sdcard.o
  .text.sdcard_checkPresence
-                0x80006cb8        0xc src/SDCard/sdcard.o
-                0x80006cb8                sdcard_checkPresence
+                0x80006d50        0xc src/SDCard/sdcard.o
+                0x80006d50                sdcard_checkPresence
  .text.sdcard_mount
-                0x80006cc4      0x3b8 src/SDCard/sdcard.o
-                0x80006cc4                sdcard_mount
+                0x80006d5c      0x3b8 src/SDCard/sdcard.o
+                0x80006d5c                sdcard_mount
  .text.sysclk_init
-                0x8000707c       0x94 src/config/conf_cpu.o
-                0x8000707c                sysclk_init
- .text.main     0x80007110        0xc src/main.o
-                0x80007110                main
- .text          0x8000711c      0x148 c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../lib/gcc/avr32/4.4.7/../../../../avr32/lib/ucr2\libc.a(lib_a-memcpy.o)
-                0x8000711c                memcpy
+                0x80007114       0x94 src/config/conf_cpu.o
+                0x80007114                sysclk_init
+ .text.main     0x800071a8        0xc src/main.o
+                0x800071a8                main
+ .text          0x800071b4      0x148 c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain/bin/../lib/gcc/avr32/4.4.7/../../../../avr32/lib/ucr2\libc.a(lib_a-memcpy.o)
+                0x800071b4                memcpy
  *(.text.*personality*)
  *(.gnu.warning)
 
@@ -1924,7 +1927,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_pubnames
                 0x000024bb       0x1b src/main.o
 
-.debug_info     0x00000000    0x18271
+.debug_info     0x00000000    0x1828b
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x12d6 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
  .debug_info    0x000012d6     0x1c74 src/ASF/avr32/drivers/flashc/flashc.o
@@ -1948,11 +1951,11 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_info    0x0000ffcb      0x92f src/GFX/screen.o
  .debug_info    0x000108fa      0x10d src/GFX/vector2.o
  .debug_info    0x00010a07     0x359d src/init.o
- .debug_info    0x00013fa4      0x13f src/mainCentre.o
- .debug_info    0x000140e3     0x1fbb src/RTC/rtc.o
- .debug_info    0x0001609e     0x12fb src/SDCard/sdcard.o
- .debug_info    0x00017399      0xe2c src/config/conf_cpu.o
- .debug_info    0x000181c5       0xac src/main.o
+ .debug_info    0x00013fa4      0x159 src/mainCentre.o
+ .debug_info    0x000140fd     0x1fbb src/RTC/rtc.o
+ .debug_info    0x000160b8     0x12fb src/SDCard/sdcard.o
+ .debug_info    0x000173b3      0xe2c src/config/conf_cpu.o
+ .debug_info    0x000181df       0xac src/main.o
 
 .debug_abbrev   0x00000000     0x33e0
  *(.debug_abbrev)
@@ -1984,7 +1987,7 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_abbrev  0x00003285      0x10d src/config/conf_cpu.o
  .debug_abbrev  0x00003392       0x4e src/main.o
 
-.debug_line     0x00000000     0xe7ed
+.debug_line     0x00000000     0xe7f8
  *(.debug_line)
  .debug_line    0x00000000      0xadc src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
  .debug_line    0x00000adc      0xbc1 src/ASF/avr32/drivers/flashc/flashc.o
@@ -2008,13 +2011,13 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_line    0x00009721      0xae8 src/GFX/screen.o
  .debug_line    0x0000a209      0x941 src/GFX/vector2.o
  .debug_line    0x0000ab4a      0xa75 src/init.o
- .debug_line    0x0000b5bf      0x9f5 src/mainCentre.o
- .debug_line    0x0000bfb4      0xae7 src/RTC/rtc.o
- .debug_line    0x0000ca9b      0xada src/SDCard/sdcard.o
- .debug_line    0x0000d575      0x943 src/config/conf_cpu.o
- .debug_line    0x0000deb8      0x935 src/main.o
+ .debug_line    0x0000b5bf      0xa00 src/mainCentre.o
+ .debug_line    0x0000bfbf      0xae7 src/RTC/rtc.o
+ .debug_line    0x0000caa6      0xada src/SDCard/sdcard.o
+ .debug_line    0x0000d580      0x943 src/config/conf_cpu.o
+ .debug_line    0x0000dec3      0x935 src/main.o
 
-.debug_frame    0x00000000     0x2974
+.debug_frame    0x00000000     0x2978
  *(.debug_frame)
  .debug_frame   0x00000000      0x364 src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
  .debug_frame   0x00000364      0x6a4 src/ASF/avr32/drivers/flashc/flashc.o
@@ -2034,13 +2037,13 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
  .debug_frame   0x000023c8      0x140 src/GFX/screen.o
  .debug_frame   0x00002508       0x28 src/GFX/vector2.o
  .debug_frame   0x00002530       0xd4 src/init.o
- .debug_frame   0x00002604       0x3c src/mainCentre.o
- .debug_frame   0x00002640      0x188 src/RTC/rtc.o
- .debug_frame   0x000027c8      0x14c src/SDCard/sdcard.o
- .debug_frame   0x00002914       0x38 src/config/conf_cpu.o
- .debug_frame   0x0000294c       0x28 src/main.o
+ .debug_frame   0x00002604       0x40 src/mainCentre.o
+ .debug_frame   0x00002644      0x188 src/RTC/rtc.o
+ .debug_frame   0x000027cc      0x14c src/SDCard/sdcard.o
+ .debug_frame   0x00002918       0x38 src/config/conf_cpu.o
+ .debug_frame   0x00002950       0x28 src/main.o
 
-.debug_str      0x00000000     0x442a
+.debug_str      0x00000000     0x445e
  *(.debug_str)
  .debug_str     0x00000000      0x73a src/ASF/avr32/components/memory/sd_mmc/sd_mmc_spi/sd_mmc_spi.o
                                 0x7d3 (size before relaxing)
@@ -2080,15 +2083,15 @@ LOAD c:/program files (x86)/atmel/studio/7.0/toolchain/avr32/avr32-gnu-toolchain
                                 0x120 (size before relaxing)
  .debug_str     0x00003e9c       0xe9 src/init.o
                                 0xc83 (size before relaxing)
- .debug_str     0x00003f85       0x1f src/mainCentre.o
-                                0x14c (size before relaxing)
- .debug_str     0x00003fa4      0x192 src/RTC/rtc.o
+ .debug_str     0x00003f85       0x6c src/mainCentre.o
+                                0x163 (size before relaxing)
+ .debug_str     0x00003ff1      0x179 src/RTC/rtc.o
                                 0x835 (size before relaxing)
- .debug_str     0x00004136      0x2c1 src/SDCard/sdcard.o
+ .debug_str     0x0000416a      0x2c1 src/SDCard/sdcard.o
                                 0x674 (size before relaxing)
- .debug_str     0x000043f7       0x25 src/config/conf_cpu.o
+ .debug_str     0x0000442b       0x25 src/config/conf_cpu.o
                                 0x465 (size before relaxing)
- .debug_str     0x0000441c        0xe src/main.o
+ .debug_str     0x00004450        0xe src/main.o
                                  0xf1 (size before relaxing)
 
 .debug_loc      0x00000000     0x64d5

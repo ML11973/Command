@@ -21,7 +21,8 @@ void mainCentre(void){
 	//gui_loadingScreen();
 	
 	//cpu_delay_ms(500,BOARD_OSC0_HZ);
-	
+	rtc_setMinutesInterrupt();
+	rtc_usart_sendTimeToDisplay();
 	gui_Init();
 	
 	menus[currentMenuId](true);
@@ -33,5 +34,14 @@ void mainCentre(void){
 			needRepaint = false;
 		}
 		audio_playFile(0);
+		
+		if(timeChanged){
+			timeChanged = false;
+			rtc_usart_sendTimeToDisplay();
+		}
+		if(alarmReached){
+			alarmReached = false;
+			rtc_setNextAlarm();
+		}
 	}
 }
