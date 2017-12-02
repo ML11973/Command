@@ -698,6 +698,7 @@ void _settingsHourInput(void){
 			
 			rtc_setTime();
 			rtc_usart_sendTimeToDisplay();
+			selectedOption = 1;
 		}
 	}
 	switchState = 0;
@@ -753,7 +754,7 @@ void _settingsDateInput(void){
 	else if(switchState == 4){
 		selectedOption<<=1;
 		
-		//Hour, minutes /*and seconds*/ are set
+		//Year, month and day are set
 		if(selectedOption > 4){
 			currentMenuId = SETTINGS;
 			menuChanged = true;
@@ -763,6 +764,7 @@ void _settingsDateInput(void){
 			currentTime.date = editedTime.date;
 			
 			rtc_setTime();
+			selectedOption = 1;
 		}
 	}
 	switchState = 0;
