@@ -25,6 +25,7 @@
 
 #define NBR_OF_MENU 6
 #define NBR_OF_FIRST_LEVEL_MENU 3
+#define NBR_OF_COLORS 4 
 
 
 /************************************************************************/
@@ -117,6 +118,14 @@ static char days[7][9] = {
 	"Friday",
 	"Saturday",
 	"Sunday",
+};
+
+static uint8_t selectedColor = 0;
+static uint8_t colors[NBR_OF_COLORS][2][5] = {
+	{"Green",{GREEN>>8,GREEN&0xFF}},
+	{"White",{WHITE>>8,WHITE&0xFF}},
+	{"Blue",{BLUE>>8,BLUE&0xFF}},
+	{"Red",{RED>>8,RED&0xFF}}
 };
 
 
@@ -253,12 +262,10 @@ void _mainMenu(bool firstDraw){
 	gfx_BeginNewTerminal((Vector2){20,200});
 	gfx_AddOptionToTerminal(days[currentTime.day],8,textColor,false,firstDraw,firstDraw);
 	gfx_AddOptionToTerminal(dateStr, 25, textColor,false,firstDraw, firstDraw);
-	gfx_AddOptionToTerminal(timeStr , 25, textColor,false,firstDraw, firstDraw);
-	gfx_AddOptionToTerminal("Alarme 1 disabled" ,  26, textColor,false,firstDraw, firstDraw);
-	gfx_AddOptionToTerminal("Alarme 2 enabled" ,  25, textColor,false,firstDraw, firstDraw);
+	gfx_AddOptionToTerminal(timeStr , 25, textColor,false,timeChanged || firstDraw, firstDraw);
 	
 	if(selectedCommand == 0){
-		gfx_cmdLine("ls | grep .wave", 15, textColor,commandChanged);
+		gfx_cmdLine("ls | grep .wav", 15, textColor,commandChanged);
 		commandChanged = false;
 	}
 	else if(selectedCommand == 1){
@@ -335,13 +342,15 @@ void _settingsMenu(bool firstDraw){
 		'2', currentTime.year/100 + 48, (currentTime.year/10)%10 + 48, currentTime.year % 10 + 48,
 		'\0'
 	};
-	char colorStr[25] = "textColor = ";
-	
+	char colorStr[25] = {'t','e','x','t','C','o','l','o','r',' ','=',' '};
+	for(uint8_t i = 0; i < 5; i++){
+		colorStr[12 + i] = colors[selectedColor][0][i];
+	}
 	
 	gfx_BeginNewTerminal((Vector2){20,200});
 	gfx_AddOptionToTerminal(timeStr, 25, textColor, selectedOption & (1<<(0)), firstDraw, firstDraw);
 	gfx_AddOptionToTerminal(dateStr, 25, textColor, selectedOption & (1<<(1)), firstDraw, firstDraw);
-	gfx_AddOptionToTerminal("textColor = Green", 18, textColor, selectedOption & (1<<(2)), firstDraw, firstDraw);
+	gfx_AddOptionToTerminal(colorStr, 25, textColor, selectedOption & (1<<(2)), firstDraw, firstDraw);
 }
 
 void _alarmMenu(bool firstDraw){
@@ -579,7 +588,10 @@ void _settingsInput(void)	{
 			selectedOption = 1;
 			break;
 		case 4:
-			textColor.value = (textColor.value == GREEN)?( WHITE):(GREEN);
+			selectedColor++;
+			if(selectedColor > NBR_OF_COLORS - 1)
+				selectedColor = 0;
+			textColor.value = (colors[selectedColor][1][0] << 8) + colors[selectedColor][1][1];
 			break;
 		}
 		menuChanged = true;
@@ -655,12 +667,12 @@ void _settingsHourInput(void){
 		switch(selectedOption){
 			case 1:
 				editedTime.hours++;
-				if(editedTime.hours > 24)
+				if(editedTime.hours > 23)
 					editedTime.hours = 0;
 				break;
 			case 2:
 				editedTime.minutes++;
-				if(editedTime.minutes > 60)
+				if(editedTime.minutes > 59)
 					editedTime.minutes = 0;
 				break;
 			/*case 2:
@@ -672,13 +684,13 @@ void _settingsHourInput(void){
 		switch(selectedOption){
 			case 1:
 				editedTime.hours--;
-				if(editedTime.hours > 24)
-				editedTime.hours = 24;
+				if(editedTime.hours > 23)
+				editedTime.hours = 23;
 				break;
 			case 2:
 				editedTime.minutes--;
-				if(editedTime.minutes > 60)
-					editedTime.minutes = 60;
+				if(editedTime.minutes > 59)
+					editedTime.minutes = 59;
 				break;
 			/*case 2:
 				currentTime.seconds--;
@@ -762,7 +774,8 @@ void _settingsDateInput(void){
 			currentTime.year = editedTime.year;
 			currentTime.month = editedTime.month;
 			currentTime.date = editedTime.date;
-			
+			//currentTime.day = ((currentTime.year + REFERENCE_YEAR)* 365 + (currentTime.year + REFERENCE_YEAR - 1)/4 - (currentTime.year + REFERENCE_YEAR - 1)/100 + (currentTime.year + REFERENCE_YEAR - 1)/400 + 6)  % 7;
+			currentTime.day = rtc_getDay();
 			rtc_setTime();
 			selectedOption = 1;
 		}

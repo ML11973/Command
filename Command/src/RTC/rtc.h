@@ -139,4 +139,6 @@ void rtc_setMinutesInterrupt();
 
 __attribute__((__interrupt__)) void rtc_rtcISR(void);
 
+uint8_t rtc_getDay();
+
 #endif /* RTC_H */

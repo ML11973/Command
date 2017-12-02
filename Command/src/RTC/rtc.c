@@ -255,7 +255,7 @@ void rtc_setMinutesInterrupt(){
  * Last modified 01.12.17 MLN
  */
 void rtc_usart_sendTimeToDisplay(void){
-	rtc_getTime();
+	//rtc_getTime();
 	#ifndef CUSTOM_DATA_SENT_TO_DISPLAY
 		uint8_t time[7];
 		_timeToBCD(currentTime, time);
@@ -304,11 +304,22 @@ __attribute__((__interrupt__)) void rtc_rtcISR(void){
 	// Clearing RTC interrupt flags
 	sentData[0] = buffer[0] & ~((timeChanged<<A2F) | (alarmReached<<A1F));
 	rtc_write(RTC_STATUS, 1);
+
+	rtc_getTime();
 	
 	gpio_clear_pin_interrupt_flag(PIN_INT1);
 }
 
-
+uint8_t rtc_getDay(){
+	static uint8_t t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+	uint32_t y = currentTime.year + REFERENCE_YEAR;
+	uint32_t m = currentTime.month;	
+	uint32_t d = currentTime.date;	
+	
+	y -= m < 3;
+	
+	return (y + y/4 - y/100 + y/400 + t[m-1] + d + 6) % 7;
+}
 
 /* _timeToBCD
  *
