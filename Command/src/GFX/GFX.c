@@ -183,6 +183,7 @@ void gfx_AddOptionToTerminal(char *content, uint8_t contentSize, Color color, bo
 	}
 	
 	if(firstDraw){
+		screen_SetPixels(Rect(newLinePosition.x+10, newLinePosition.y, newLinePosition.x + contentSize * 10, newLinePosition.y + 20), (Color){BLACK});
 		newLinePosition.x += 20;
 		gfx_Label(newLinePosition, content, contentSize, Small, color);
 		newLinePosition.x -= 20;

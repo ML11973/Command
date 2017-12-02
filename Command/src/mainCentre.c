@@ -22,23 +22,27 @@ void mainCentre(void){
 	
 	//cpu_delay_ms(500,BOARD_OSC0_HZ);
 	rtc_setMinutesInterrupt();
+	rtc_getTime();
 	rtc_usart_sendTimeToDisplay();
 	gui_Init();
+	
+	timeChanged = true;
 	
 	menus[currentMenuId](true);
 	
 	while(1){
 		input[currentMenuId]();
-		if(needRepaint){
+		if(needRepaint || timeChanged){
 			menus[currentMenuId](menuChanged);
 			needRepaint = false;
+			if(timeChanged){
+				timeChanged = false;
+				rtc_usart_sendTimeToDisplay();
+			}
 		}
 		audio_playFile(0);
 		
-		if(timeChanged){
-			timeChanged = false;
-			rtc_usart_sendTimeToDisplay();
-		}
+		
 		if(alarmReached){
 			alarmReached = false;
 			rtc_setNextAlarm();
