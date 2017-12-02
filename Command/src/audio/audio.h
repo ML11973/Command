@@ -43,6 +43,10 @@
 #define ERROR_INCOMPATIBLE_FILE		0x08	// File parameters incompatible with basic 
 											// audio playback program. See line 28 above
 
+#define MAXMETADATACHARS			24
+
+
+
 typedef struct audioInfo {
 	uint8_t channelNumber;		// Number of audio channels (2 for stereo)
 	uint32_t sampleRate;		// Number of audio samples per second (44100)
@@ -52,6 +56,14 @@ typedef struct audioInfo {
 	uint32_t audioSampleTables; // Number of wavData tables to read
 	
 	uint8_t firstDataByteIndex;	// Index of first data block in file
+	
+	// Metadata section
+	uint8_t title[MAXMETADATACHARS];	// Default value: Unknown title
+	uint8_t artist[MAXMETADATACHARS];	// Default value: Unknown artist
+	uint8_t album[MAXMETADATACHARS];	// Default value: Unknown album
+	uint16_t creationYear;
+	uint16_t sDuration;
+	
 }AudioInfo;
 
 

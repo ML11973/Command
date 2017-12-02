@@ -365,6 +365,7 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
  */
 uint8_t _fileVerification(){
 	uint16_t headerIndex = 8;
+	uint16_t i = 0;
 	// Verifying file format ID in RIFF header
 	if (wavData1[headerIndex] != 'W' || wavData1[headerIndex + 1] != 'A' || wavData1[headerIndex + 2] != 'V' || wavData1[headerIndex + 3] != 'E'){
 		return ERROR_FORMAT;
@@ -421,6 +422,46 @@ uint8_t _fileVerification(){
 		(wavData1[headerIndex + 0])
 	;
 	
+	
+	// Finding metadata
+	headerIndex = 0;
+	while (wavData1[headerIndex] != 'I' && wavData1[headerIndex + 1] != 'N' && wavData1[headerIndex + 2] != 'F' && wavData1[headerIndex + 3] != 'O') {
+		headerIndex++;
+		if (headerIndex > SECTOR_SIZE){
+			headerIndex = 0;
+			break;
+			// no metadata return ERROR_NO_DATA_SUBCHUNK;
+		}
+	}
+	
+	if (headerIndex == 0){
+		fileData.title = "Unknown title";
+		fileData.artist = "Unknown artist";
+		fileData.album = "Unknown album";
+		fileData.creationYear = 0;
+	}
+	else {
+		// Finding Artist tag
+		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'A' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'T'){
+			i++;
+		}
+		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+			fileData.artist[headerIndex + i + j] = wavData1[headerIndex + i + j];
+		}
+		
+		
+		i = 0;
+		// Finding Title tag
+		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'N' && wavData1[headerIndex + i + 2] != 'A' && wavData1[headerIndex + i + 3] != 'M'){
+			i++;
+		}
+		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+			fileData.title[headerIndex + i + j] = wavData1[headerIndex + i + j];
+		}
+		
+	}
+	
+	
 	// Finding "data" chunk
 	while (wavData1[headerIndex] != 'd' && wavData1[headerIndex + 1] != 'a' && wavData1[headerIndex + 2] != 't' && wavData1[headerIndex + 3] != 'a') {
 		headerIndex++;
@@ -428,6 +469,7 @@ uint8_t _fileVerification(){
 			return ERROR_NO_DATA_SUBCHUNK;
 		}
 	}
+	
 	
 	// Jumps to Subchunk2Size
 	headerIndex += 4;
@@ -439,6 +481,7 @@ uint8_t _fileVerification(){
 	;
 	
 	fileData.audioSampleTables = fileData.audioSampleBytes / WAVDATA_SIZE;
+	
 	
 	// Jumps to Data
 	headerIndex += 4;
