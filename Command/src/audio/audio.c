@@ -435,9 +435,9 @@ uint8_t _fileVerification(){
 	}
 	
 	if (headerIndex == 0){
-		fileData.title = "Unknown title";
-		fileData.artist = "Unknown artist";
-		fileData.album = "Unknown album";
+		*fileData.title = "Unknown title";
+		*fileData.artist = "Unknown artist";
+		*fileData.album = "Unknown album";
 		fileData.creationYear = 0;
 	}
 	else {
@@ -445,8 +445,10 @@ uint8_t _fileVerification(){
 		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'A' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'T'){
 			i++;
 		}
+		i += 4;
+		// Applying found tag to fileData
 		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			fileData.artist[headerIndex + i + j] = wavData1[headerIndex + i + j];
+			fileData.artist[j] = wavData1[headerIndex + i + j];
 		}
 		
 		
@@ -455,10 +457,36 @@ uint8_t _fileVerification(){
 		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'N' && wavData1[headerIndex + i + 2] != 'A' && wavData1[headerIndex + i + 3] != 'M'){
 			i++;
 		}
+		i += 4;
+		// Applying found tag to fileData
 		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			fileData.title[headerIndex + i + j] = wavData1[headerIndex + i + j];
+			fileData.title[j] = wavData1[headerIndex + i + j];
 		}
 		
+		
+		i = 0;
+		// Finding Album tag
+		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'P' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
+			i++;
+		}
+		i += 4;
+		// Applying found tag to fileData
+		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+			fileData.album[j] = wavData1[headerIndex + i + j];
+		}
+		
+		
+		i = 0;
+		// Finding year tag
+		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'C' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
+			i++;
+		}
+		i += 4;
+		// Applying found tag to fileData
+		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+			// To be arranged in function of the file format (should be BCD)
+			fileData.creationYear[j] = wavData1[headerIndex + i + j];
+		}
 	}
 	
 	
