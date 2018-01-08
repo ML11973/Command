@@ -20,7 +20,7 @@
 #define DAC1_SPI AVR32_SPI1_ADDRESS
 #define DAC1_SPI_NPCS 2
 
-#define SCREEN_SPI AVR32_SPI0_ADDRESS
+#define SCREEN_SPI ((volatile avr32_spi_t*) &AVR32_SPI0)
 #define SCREEN_SPI_NPCS 0
 
 
