@@ -40,11 +40,12 @@ void mainCentre(void){
 				rtc_usart_sendTimeToDisplay();
 			}
 		}
-		audio_playFile(0);
+		audio_playFile();
 		
 		
 		if(alarmReached){
 			alarmReached = false;
+			audio_playFile(alarm[nextAlarmIndex].ringtoneIndex);
 			rtc_setNextAlarm();
 		}
 	}

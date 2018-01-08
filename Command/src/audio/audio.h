@@ -33,7 +33,7 @@
 // Audio playback error codes
 #define AUDIO_PLAYING				0x09	// Audio is being played
 #define AUDIO_PLAY_FINISHED			0x01	// Reached end of file
-#define FILE_VERIFICATION_SUCCEDED	0x01	//
+#define FILE_VERIFICATION_SUCCESS	0x01	//
 #define ERROR_NO_SD					0x02	// No SD Card detected
 #define ERROR_NO_FILE				0x03	// Selected file not found
 #define ERROR_FORMAT				0x04	// File format is not .wav
@@ -43,13 +43,13 @@
 #define ERROR_INCOMPATIBLE_FILE		0x08	// File parameters incompatible with basic 
 											// audio playback program. See line 28 above
 
-#define MAXMETADATACHARS			24
+#define MAXMETADATACHARS			30
 
 
 
 typedef struct audioInfo {
 	uint8_t channelNumber;		// Number of audio channels (2 for stereo)
-	uint32_t sampleRate;		// Number of audio samples per second (44100)
+	uint32_t sampleRate;		// Number of audio samples per second
 	uint16_t blockAlign;		// Number of bytes per sample per channel
 	uint16_t bitsPerSample;		// Number of bits per sample
 	uint32_t audioSampleBytes;	// Number of bytes to read
@@ -58,10 +58,10 @@ typedef struct audioInfo {
 	uint8_t firstDataByteIndex;	// Index of first data block in file
 	
 	// Metadata section
-	uint8_t title[MAXMETADATACHARS];	// Default value: Unknown title
-	uint8_t artist[MAXMETADATACHARS];	// Default value: Unknown artist
-	uint8_t album[MAXMETADATACHARS];	// Default value: Unknown album
-	uint16_t creationYear;
+	char title[MAXMETADATACHARS];	// Default value: Unknown title
+	char artist[MAXMETADATACHARS];	// Default value: Unknown artist
+	char album[MAXMETADATACHARS];	// Default value: Unknown album
+	char creationYear[4];			// Default value: 1917, stored in BCD format
 	uint16_t sDuration;
 	
 }AudioInfo;
@@ -97,7 +97,7 @@ void audio_setVolume (uint8_t);
 
 /* audio_setFileToPlay
  * 
- * Verify the file  and initalise all the data we need to play it.
+ * Verify the file  and initalize all the data we need to play it.
  * 
  * Created 24.11.17 QVT
  * Last modified 24.11.17 QVT
@@ -116,7 +116,7 @@ uint8_t audio_setFileToPlay(uint8_t fileNumber);
  * Created 17.11.17 MLN
  * Last modified 20.11.17 MLN
  */
-uint8_t audio_playFile(uint8_t);
+uint8_t audio_playFile();
 
 
 

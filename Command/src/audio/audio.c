@@ -26,6 +26,10 @@
 #define LOAD_WAVDATA1 0x01
 #define LOAD_WAVDATA2 0x02
 
+#define NO_METADATA 0x00
+#define ID3_METADATA 0x01
+#define LISTINFO_METADATA 0x02
+
 
 
 /************************************************************************/
@@ -123,6 +127,8 @@ uint8_t _fileVerification();
 
 
 uint8_t audio_setFileToPlay(uint8_t fileNumber){
+	uint16_t timerRC = 0;
+	
 	if (sdcard_setFileToRead(fileNumber) == false){
 		return ERROR_NO_FILE;
 	}
@@ -131,15 +137,17 @@ uint8_t audio_setFileToPlay(uint8_t fileNumber){
 	sdcard_getNextSectorFast(wavData2);
 	
 	uint8_t fileVerif = _fileVerification(wavData1);
-	if (fileVerif != FILE_VERIFICATION_SUCCEDED){
+	if (fileVerif != FILE_VERIFICATION_SUCCESS){
 		return fileVerif;
 	}
 	isFilePlaying = true;
 	
 	wavDataIndex = fileData.firstDataByteIndex;
+	timerRC = (BOARD_OSC0_HZ / 2) / (4 * fileData.sampleRate);
 	
 	// Volume setting, optimized to be as light as possible
 	audio_setVolume(DEFAULTVOLUME);
+	tc_write_rc(&AVR32_TC, TC1_CHANNEL, timerRC);
 	tc_start(&AVR32_TC, TC1_CHANNEL);
 }
 
@@ -189,9 +197,9 @@ void audio_setVolume (uint8_t volume){
  * timer 1 interruption.
  *
  * Created 17.11.17 MLN
- * Last modified 20.11.17 MLN
+ * Last modified 21.12.17 MLN
  */
-uint8_t audio_playFile(uint8_t fileNumber){
+uint8_t audio_playFile(){
 	
 	if(!isFilePlaying){
 		return 0;
@@ -361,11 +369,13 @@ void _setOutput (uint16_t inputA, uint16_t inputB){
  * Returns program-wide error codes as defined in audio.h
  *
  * Created 17.11.17 MLN
- * Last modified 20.11.17 MLN
+ * Last modified 20.12.17 MLN
  */
 uint8_t _fileVerification(){
 	uint16_t headerIndex = 8;
 	uint16_t i = 0;
+	uint32_t subchunkSize = 0;
+	uint8_t metadataFormat = NO_METADATA;
 	// Verifying file format ID in RIFF header
 	if (wavData1[headerIndex] != 'W' || wavData1[headerIndex + 1] != 'A' || wavData1[headerIndex + 2] != 'V' || wavData1[headerIndex + 3] != 'E'){
 		return ERROR_FORMAT;
@@ -423,70 +433,231 @@ uint8_t _fileVerification(){
 	;
 	
 	
-	// Finding metadata
+	// Finding LISTINFO metadata (if it exists)
 	headerIndex = 0;
+	metadataFormat = LISTINFO_METADATA;
 	while (wavData1[headerIndex] != 'I' && wavData1[headerIndex + 1] != 'N' && wavData1[headerIndex + 2] != 'F' && wavData1[headerIndex + 3] != 'O') {
 		headerIndex++;
+		// If INFO tag not found, then no LISTINFO metadata
 		if (headerIndex > SECTOR_SIZE){
 			headerIndex = 0;
+			metadataFormat = NO_METADATA;
 			break;
-			// no metadata return ERROR_NO_DATA_SUBCHUNK;
 		}
 	}
 	
-	if (headerIndex == 0){
-		*fileData.title = "Unknown title";
-		*fileData.artist = "Unknown artist";
-		*fileData.album = "Unknown album";
-		fileData.creationYear = 0;
+	// Finding ID3 metadata (if it exists)
+	headerIndex = 0;
+	if (metadataFormat == LISTINFO_METADATA){
+		metadataFormat = ID3_METADATA;
 	}
-	else {
-		// Finding Artist tag
-		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'A' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'T'){
-			i++;
+	
+	while (wavData1[headerIndex] != 'I' && wavData1[headerIndex + 1] != 'D' && wavData1[headerIndex + 2] != '3') {
+		headerIndex++;
+		// If ID3 tag not found, then no metadata
+		if (headerIndex > SECTOR_SIZE){
+			headerIndex = 0;
+			metadataFormat = NO_METADATA;
+			break;
 		}
-		i += 4;
-		// Applying found tag to fileData
-		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			fileData.artist[j] = wavData1[headerIndex + i + j];
-		}
+	}
+	
+	// Fetch metadata given different formats
+	switch (metadataFormat){
+		case NO_METADATA:
+			// Assigning default values
+			fileData.title[0] = headerIndex + 30;
+			fileData.title[1] = 'T';
+			fileData.artist[0] = 'U';
+			fileData.artist[1] = 'A';
+			fileData.album[0] = 'U';
+			fileData.album[1] = 'a';
+			fileData.creationYear[0] = '1';
+			fileData.creationYear[1] = '9';
+			fileData.creationYear[2] = '1';
+			fileData.creationYear[3] = '7';
+		break;
 		
 		
-		i = 0;
-		// Finding Title tag
-		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'N' && wavData1[headerIndex + i + 2] != 'A' && wavData1[headerIndex + i + 3] != 'M'){
-			i++;
-		}
-		i += 4;
-		// Applying found tag to fileData
-		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			fileData.title[j] = wavData1[headerIndex + i + j];
-		}
+		
+		case ID3_METADATA:
+			// Finding Artist tag
+			while (wavData1[headerIndex + i] != 'T' && wavData1[headerIndex + i + 1] != 'P' && wavData1[headerIndex + i + 2] != 'E' && wavData1[headerIndex + i + 3] != '1'){
+				i++;
+				if (i > SECTOR_SIZE - 2){
+					i = 0;
+					break;
+				}
+			}
+			//i += 4;
+			/*subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);*/
+			//i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.artist[j] = wavData1[headerIndex + i + j];
+			}
 		
 		
-		i = 0;
-		// Finding Album tag
-		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'P' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
-			i++;
-		}
-		i += 4;
-		// Applying found tag to fileData
-		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			fileData.album[j] = wavData1[headerIndex + i + j];
-		}
+			i = 0;
+			// Finding Title tag
+			while (wavData1[headerIndex + i] != 'T' && wavData1[headerIndex + i + 1] != 'I' && wavData1[headerIndex + i + 2] != 'T' && wavData1[headerIndex + i + 3] != '2'){
+				i++;
+				if (i > SECTOR_SIZE - 2){
+					i = 0;
+					break;
+				}
+			}
+			//i += 4;
+			/*subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);*/
+			//i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.title[j] = wavData1[headerIndex + i + j];
+			}
 		
 		
-		i = 0;
-		// Finding year tag
-		while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'C' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
-			i++;
-		}
-		i += 4;
-		// Applying found tag to fileData
-		for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
-			// To be arranged in function of the file format (should be BCD)
-			fileData.creationYear[j] = wavData1[headerIndex + i + j];
-		}
+			i = 0;
+			// Finding Album tag
+			while (wavData1[headerIndex + i] != 'T' && wavData1[headerIndex + i + 1] != 'A' && wavData1[headerIndex + i + 2] != 'L' && wavData1[headerIndex + i + 3] != 'B'){
+				i++;
+				if (i > SECTOR_SIZE - 2){
+					i = 0;
+					break;
+				}
+			}
+			//i += 4;
+			/*subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);*/
+			//i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.album[j] = wavData1[headerIndex + i + j];
+			}
+		
+		
+			i = 0;
+			// Finding year tag
+			while (wavData1[headerIndex + i] != 'T' && wavData1[headerIndex + i + 1] != 'D' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'L'){
+				i++;
+				if (i > SECTOR_SIZE - 2){
+					i = 0;
+					break;
+				}
+			}
+			//i += 4;
+			/*subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);*/
+			//i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < 4; j++){
+				fileData.creationYear[j] = wavData1[headerIndex + i + j];
+			}
+		break;
+		
+		
+		
+		case LISTINFO_METADATA:
+			// Finding Artist tag
+			while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'A' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'T'){
+				i++;
+				if (headerIndex > SECTOR_SIZE - 4){
+					headerIndex = 0;
+					break;
+				}
+			}
+			i += 4;
+			subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);
+			i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.artist[j] = wavData1[headerIndex + i + j];
+			}
+		
+		
+			i = 0;
+			// Finding Title tag
+			while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'N' && wavData1[headerIndex + i + 2] != 'A' && wavData1[headerIndex + i + 3] != 'M'){
+				i++;
+				if (headerIndex > SECTOR_SIZE - 4){
+					headerIndex = 0;
+					break;
+				}
+			}
+			i += 4;
+			subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);
+			i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.title[j] = wavData1[headerIndex + i + j];
+			}
+		
+		
+			i = 0;
+			// Finding Album tag
+			while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'P' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
+				i++;
+				if (headerIndex > SECTOR_SIZE - 4){
+					headerIndex = 0;
+					break;
+				}
+			}
+			i += 4;
+			subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);
+			i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < MAXMETADATACHARS; j++){
+				fileData.album[j] = wavData1[headerIndex + i + j];
+			}
+		
+		
+			i = 0;
+			// Finding year tag
+			while (wavData1[headerIndex + i] != 'I' && wavData1[headerIndex + i + 1] != 'C' && wavData1[headerIndex + i + 2] != 'R' && wavData1[headerIndex + i + 3] != 'D'){
+				i++;
+				if (headerIndex > SECTOR_SIZE - 4){
+					headerIndex = 0;
+					break;
+				}
+			}
+			i += 4;
+			/*subchunkSize =
+				(wavData1[headerIndex + i + 3] << 24) |
+				(wavData1[headerIndex + i + 2] << 16) |
+				(wavData1[headerIndex + i + 1] << 8) |
+				(wavData1[headerIndex + i + 0]);*/
+			i += 4;
+			// Applying found tag to fileData
+			for (uint8_t j = 0; j < 4; j++){
+				fileData.creationYear[j] = wavData1[headerIndex + i + j];
+			}
+		break;
+			
 	}
 	
 	
@@ -518,10 +689,13 @@ uint8_t _fileVerification(){
 	// Ending fetch AudioInfo routine
 	
 	
+	// Computing track duration
+	//fileData.sDuration = fileData.audioSampleBytes / (fileData.channelNumber * fileData.blockAlign) / fileData.sampleRate;
+	
 	// Verifying fileData parameters
 	if (
 		(fileData.channelNumber != AUDIO_CHANNELS) ||
-		(fileData.sampleRate != AUDIO_SAMPLERATE) ||
+		/*(fileData.sampleRate != AUDIO_SAMPLERATE) ||*/
 		(fileData.blockAlign != AUDIO_BLOCKALIGN) ||
 		(fileData.bitsPerSample != AUDIO_BPS)
 	) {

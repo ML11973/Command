@@ -380,6 +380,11 @@ void _musicPlayerMenu(bool firstDraw){
 			
 		gfx_BeginNewTerminal((Vector2){20,220});
 		gfx_AddLineToTerminal("play *.wav", 10, textColor, firstDraw);
+		gfx_AddLineToTerminal(fileData.title, MAXMETADATACHARS, textColor, firstDraw);
+		gfx_AddLineToTerminal(fileData.artist, MAXMETADATACHARS, textColor, firstDraw);
+		gfx_AddLineToTerminal(fileData.album, MAXMETADATACHARS, textColor, firstDraw);
+		gfx_AddLineToTerminal(fileData.creationYear, MAXMETADATACHARS, textColor, firstDraw);
+		gfx_AddLineToTerminal(fileData.sDuration, MAXMETADATACHARS, textColor, firstDraw);
 		
 		menuChanged = false;
 		audio_togglePausePlay();

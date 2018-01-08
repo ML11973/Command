@@ -132,7 +132,7 @@ void tc1_Init(void){
 
 	// Initialize the timer/counter.
 	tc_init_waveform(&AVR32_TC, &WAVEFORM_OPT1);
-	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value. 181
+	tc_write_rc(&AVR32_TC, TC1_CHANNEL, 181);  // Set RC value. 181 for 44.1 kHz sample rate
 	tc_configure_interrupts(&AVR32_TC, TC1_CHANNEL, &TC1_INTERRUPT);
 	INTC_register_interrupt (&tc1_irq, AVR32_TC_IRQ1, AVR32_INTC_INT0);
 }
